@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller de Canales ORM</title>
+    <!-- Cargar Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilo personalizado para los canvas para que no sean borrosos */
+        canvas {
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            background-color: #374151; /* bg-gray-700 */
+        }
+        /* Estilo para contenedores deshabilitados (Ahora solo se usa para opacidad visual) */
+        .disabled-container {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 font-sans flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-6xl">
+        
+        <h1 class="text-3xl font-bold text-center text-white mb-2">Taller de Canales ORM</h1>
+        <p class="text-center text-lg text-gray-400 mb-8">Crea tu textura ORM (Occlusion, Roughness, Metallic)</p>
+
+        <!-- Contenedor de Entradas de Canal -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            
+            <!-- Canal ROJO (Occlusion) -->
+            <div id="occlusionContainer" class="space-y-4 p-4 bg-gray-900/50 rounded-lg border border-gray-700 transition duration-150">
+                <h2 class="text-xl font-semibold text-red-400">Canal ROJO (R): Occlusion</h2>
+                <label for="occlusionLoader" class="block w-full cursor-pointer bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg text-center transition duration-200 text-sm">
+                    Cargar Mapa de Oclusión
+                </label>
+                <input type="file" id="occlusionLoader" class="hidden" accept="image/*">
+                
+                <p class="text-xs text-gray-500 text-center">O usa un valor sólido:</p>
+                <div id="red-status" class="text-center text-red-300 font-mono text-sm hidden"></div>
+                
+                <div id="redSliderContainer">
+                    <label for="redChannel" class="block mb-1 text-sm sr-only">Valor de Oclusión</label>
+                    <input id="redChannel" type="range" min="0" max="255" value="255" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #f87171;">
+                    <div class="text-center text-red-300 font-mono text-sm" id="redValueLabel">Valor: 255 (Blanco)</div>
+                </div>
+            </div>
+
+            <!-- Canal VERDE (Roughness) - AHORA CON SLIDER -->
+            <div id="roughnessContainer" class="space-y-4 p-4 bg-gray-900/50 rounded-lg border border-emerald-700 border-2 transition duration-150">
+                <h2 class="text-xl font-semibold text-emerald-400">Canal VERDE (G): Roughness</h2>
+                <label for="imageLoader" class="block w-full cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg text-center transition duration-200 text-sm">
+                    Cargar Mapa de Roughness
+                </label>
+                <input type="file" id="imageLoader" class="hidden" accept="image/*">
+                <!-- Se elimina el texto de escala de grises -->
+                <div id="green-status" class="text-center text-emerald-300 font-mono text-sm hidden"></div>
+                
+                <div id="greenSliderContainer">
+                    <p class="text-xs text-gray-500 text-center">O usa un valor sólido:</p>
+                    <label for="greenChannel" class="block mb-1 text-sm sr-only">Valor de Roughness</label>
+                    <input id="greenChannel" type="range" min="0" max="255" value="0" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #34d399;">
+                    <div class="text-center text-emerald-300 font-mono text-sm" id="greenValueLabel">Valor: 0 (Mate)</div>
+                </div>
+            </div>
+
+            <!-- Canal AZUL (Metallic) -->
+            <div id="metallicContainer" class="space-y-4 p-4 bg-gray-900/50 rounded-lg border border-gray-700 transition duration-150">
+                <h2 class="text-xl font-semibold text-blue-400">Canal AZUL (B): Metallic</h2>
+                <label for="metallicLoader" class="block w-full cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-center transition duration-200 text-sm">
+                    Cargar Mapa Metálico
+                </label>
+                <input type="file" id="metallicLoader" class="hidden" accept="image/*">
+                
+                <p class="text-xs text-gray-500 text-center">O usa un valor sólido:</p>
+                <div id="blue-status" class="text-center text-blue-300 font-mono text-sm hidden"></div>
+                
+                <div id="blueSliderContainer">
+                    <label for="blueChannel" class="block mb-1 text-sm sr-only">Valor Metálico</label>
+                    <input id="blueChannel" type="range" min="0" max="255" value="0" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #60a5fa;">
+                    <div class="text-center text-blue-300 font-mono text-sm" id="blueValueLabel">Valor: 0 (Negro)</div>
+                </div>
+            </div>
+        </div>
+        
+        <hr class="border-gray-700 mb-8">
+
+        <!-- Contenedor de Salida -->
+        <div id="outputContainer" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- Columna de Configuración de Salida -->
+            <div class="space-y-6">
+                <h2 class="text-xl font-semibold text-white">Configuración de Salida</h2>
+                <div>
+                    <label for="outputSize" class="block mb-2 text-sm font-medium text-gray-300">1. Definir Tamaño de Salida (Maestro)</label>
+                    <select id="outputSize" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option id="originalSizeOption" value="original" disabled>Original (Cargar una imagen primero)</option>
+                        <option value="4096">4096x4096</option>
+                        <option value="2048">2048x2048</option>
+                        <option value="1024" selected>1024x1024 (Defecto)</option>
+                        <option value="512">512x512</option>
+                        <option value="256">256x256</option>
+                        <option value="128">128x128</option>
+                        <option value="64">64x64</option>
+                    </select>
+                </div>
+                
+                <!-- BOTÓN DE DESCARGA: Habilitado siempre por valores sólidos -->
+                <button id="downloadButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition duration-200">
+                    2. Descargar Imagen ORM (.png)
+                </button>
+            </div>
+
+            <!-- Columna de Vista Previa de Salida -->
+            <div>
+                <h3 class="text-lg font-semibold mb-2 text-center">Salida (Tu ORM)</h3>
+                <canvas id="outputCanvas" class="w-full aspect-square rounded-lg border-2 border-gray-700"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Canvas ocultos para procesamiento -->
+    <canvas id="hiddenRedCanvas" class="hidden"></canvas>
+    <canvas id="hiddenGreenCanvas" class="hidden"></canvas>
+    <canvas id="hiddenBlueCanvas" class="hidden"></canvas>
+    <canvas id="processingCanvas" class="hidden"></canvas>
+
+    <script>
+        // --- Obtener Elementos del DOM ---
+        const imageLoader = document.getElementById('imageLoader'); // Green Input
+        const occlusionLoader = document.getElementById('occlusionLoader'); // Red Input
+        const metallicLoader = document.getElementById('metallicLoader'); // Blue Input
+
+        const redChannel = document.getElementById('redChannel');
+        const greenChannel = document.getElementById('greenChannel');
+        const blueChannel = document.getElementById('blueChannel');
+        
+        const redValueLabel = document.getElementById('redValueLabel');
+        const greenValueLabel = document.getElementById('greenValueLabel');
+        const blueValueLabel = document.getElementById('blueValueLabel');
+        
+        // Status Labels
+        const redStatus = document.getElementById('red-status');
+        const greenStatus = document.getElementById('green-status');
+        const blueStatus = document.getElementById('blue-status');
+        
+        const outputSize = document.getElementById('outputSize');
+        const originalSizeOption = document.getElementById('originalSizeOption');
+        
+        const outputCanvas = document.getElementById('outputCanvas');
+        const outputCtx = outputCanvas.getContext('2d');
+
+        // Contenedores de Sliders para control de estado visual
+        const redSliderContainer = document.getElementById('redSliderContainer');
+        const greenSliderContainer = document.getElementById('greenSliderContainer');
+        const blueSliderContainer = document.getElementById('blueSliderContainer');
+
+
+        // Contextos de canvas ocultos
+        const hiddenRedCtx = document.getElementById('hiddenRedCanvas').getContext('2d');
+        const hiddenGreenCtx = document.getElementById('hiddenGreenCanvas').getContext('2d');
+        const hiddenBlueCtx = document.getElementById('hiddenBlueCanvas').getContext('2d');
+        const processingCanvas = document.getElementById('processingCanvas');
+        const processingCtx = processingCanvas.getContext('2d');
+        
+        const downloadButton = document.getElementById('downloadButton');
+
+        // Almacenamiento de imágenes y estado
+        const images = {
+            r: new Image(),
+            g: new Image(),
+            b: new Image()
+        };
+        const loadState = { r: false, g: false, b: false };
+        let originalImageSize = { w: 0, h: 0 };
+
+
+        // --- Lógica de Manejo de Carga Genérica (Para input[type=file] y drag-and-drop) ---
+        function handleImageLoad(imageObj, stateKey, hiddenCtx, statusElement, sliderInput, sliderContainer, width, height, source = 'Botón') {
+            loadState[stateKey] = true;
+            
+            // Si es la primera imagen cargada en la aplicación, actualizamos el tamaño original.
+            if (originalImageSize.w === 0) {
+                originalImageSize.w = width;
+                originalImageSize.h = height;
+
+                // Habilitar la opción 'Original'
+                originalSizeOption.text = `Original (${originalImageSize.w}x${originalImageSize.h}px)`;
+                originalSizeOption.disabled = false;
+            }
+
+            // Actualizar estado visual
+            if (statusElement) {
+                statusElement.textContent = `Cargado (${source}): ${width}x${height}px`;
+                statusElement.classList.remove('hidden');
+            }
+            
+            // Desactivar el slider para este canal
+            if (sliderInput) {
+                sliderInput.disabled = true;
+                sliderContainer.classList.add('opacity-50');
+            }
+
+            // Dibujamos la imagen original en el canvas, para tener los datos fuente originales
+            hiddenCtx.drawImage(imageObj, 0, 0, width, height);
+            
+            processImage();
+        }
+
+        function createChannelLoadHandler(imageObj, stateKey, hiddenCtx, statusElement, sliderInput, sliderContainer) {
+            return function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const url = URL.createObjectURL(file);
+                imageObj.src = url;
+                imageObj.onload = () => {
+                    handleImageLoad(imageObj, stateKey, hiddenCtx, statusElement, sliderInput, sliderContainer, imageObj.width, imageObj.height, 'Botón');
+                };
+            };
+        }
+        
+        // Asignar manejadores a los 3 canales (Input File)
+        occlusionLoader.addEventListener('change', createChannelLoadHandler(images.r, 'r', hiddenRedCtx, redStatus, redChannel, redSliderContainer));
+        imageLoader.addEventListener('change', createChannelLoadHandler(images.g, 'g', hiddenGreenCtx, greenStatus, greenChannel, greenSliderContainer));
+        metallicLoader.addEventListener('change', createChannelLoadHandler(images.b, 'b', hiddenBlueCtx, blueStatus, blueChannel, blueSliderContainer));
+
+
+        // --- Lógica de Drag and Drop ---
+
+        function setupDragAndDrop(containerId, imageObj, stateKey, hiddenCtx, statusElement, sliderInput, sliderContainer) {
+            const container = document.getElementById(containerId);
+            const originalBorderClass = container.classList.contains('border-emerald-700') ? 'border-emerald-700' : 'border-gray-700';
+
+            // 1. Prevenir comportamiento por defecto y añadir feedback visual
+            container.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                container.classList.add('border-dashed', 'border-4', 'border-blue-400');
+                container.classList.remove(originalBorderClass);
+            });
+
+            container.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                container.classList.remove('border-dashed', 'border-4', 'border-blue-400');
+                container.classList.add(originalBorderClass);
+            });
+            
+            // 2. Manejar el evento drop
+            container.addEventListener('drop', (e) => {
+                e.preventDefault();
+                container.classList.remove('border-dashed', 'border-4', 'border-blue-400');
+                container.classList.add(originalBorderClass);
+                
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const url = URL.createObjectURL(file);
+                    
+                    imageObj.src = url;
+                    imageObj.onload = () => {
+                        handleImageLoad(imageObj, stateKey, hiddenCtx, statusElement, sliderInput, sliderContainer, imageObj.width, imageObj.height, 'Arrastre');
+                    };
+                } else {
+                    // Mostrar un mensaje de error si el archivo no es una imagen
+                    if (statusElement) {
+                         statusElement.textContent = `Error: Archivo no válido.`;
+                         statusElement.classList.remove('hidden');
+                         setTimeout(() => statusElement.classList.add('hidden'), 3000);
+                    }
+                }
+            });
+        }
+        
+        // Asignar manejadores Drag and Drop a los 3 contenedores
+        setupDragAndDrop('occlusionContainer', images.r, 'r', hiddenRedCtx, redStatus, redChannel, redSliderContainer);
+        setupDragAndDrop('roughnessContainer', images.g, 'g', hiddenGreenCtx, greenStatus, greenChannel, greenSliderContainer);
+        setupDragAndDrop('metallicContainer', images.b, 'b', hiddenBlueCtx, blueStatus, blueChannel, blueSliderContainer);
+
+
+        // --- Lógica de Sliders ---
+        redChannel.addEventListener('input', () => {
+            redValueLabel.textContent = `Valor: ${redChannel.value} (${redChannel.value > 128 ? 'Blanco' : 'Negro'})`;
+            processImage();
+        });
+        
+        greenChannel.addEventListener('input', () => {
+            greenValueLabel.textContent = `Valor: ${greenChannel.value} (${greenChannel.value > 128 ? 'Brillante' : 'Mate'})`;
+            processImage();
+        });
+
+        blueChannel.addEventListener('input', () => {
+            blueValueLabel.textContent = `Valor: ${blueChannel.value} (${blueChannel.value > 128 ? 'Blanco' : 'Negro'})`;
+            processImage();
+        });
+
+        // --- Lógica de Tamaño de Salida (Maestro) ---
+        outputSize.addEventListener('input', processImage);
+
+
+        // 4. Función principal de procesamiento
+        function processImage() {
+            // Obtener el tamaño de salida deseado (Este es el tamaño MAESTRO de la textura ORM)
+            let targetWidth, targetHeight;
+            const sizeValue = outputSize.value;
+            
+            if (sizeValue === 'original' && originalImageSize.w > 0) {
+                targetWidth = originalImageSize.w;
+                targetHeight = originalImageSize.h;
+            } else if (sizeValue === 'original' && originalImageSize.w === 0) {
+                 // Si 'Original' está seleccionado pero no hay imagen cargada, usamos el valor por defecto
+                targetWidth = 1024;
+                targetHeight = 1024;
+            } else {
+                targetWidth = parseInt(sizeValue);
+                targetHeight = parseInt(sizeValue);
+            }
+
+            // --- A. Ajustar y Redibujar Imágenes de Entrada al Tamaño Maestro ---
+            
+            // Ajustar el canvas de procesamiento y los canvas ocultos al tamaño MAESTRO
+            processingCanvas.width = targetWidth;
+            processingCanvas.height = targetHeight;
+            hiddenRedCtx.canvas.width = targetWidth;
+            hiddenRedCtx.canvas.height = targetHeight;
+            hiddenGreenCtx.canvas.width = targetWidth;
+            hiddenGreenCtx.canvas.height = targetHeight;
+            hiddenBlueCtx.canvas.width = targetWidth;
+            hiddenBlueCtx.canvas.height = targetHeight;
+            
+            // Borrar y redibujar los canvas ocultos (escalando las imágenes al target size)
+            hiddenRedCtx.imageSmoothingEnabled = false;
+            hiddenGreenCtx.imageSmoothingEnabled = false;
+            hiddenBlueCtx.imageSmoothingEnabled = false;
+
+            // Solo redibujar si hay una imagen cargada.
+            if (loadState.r) hiddenRedCtx.drawImage(images.r, 0, 0, targetWidth, targetHeight);
+            if (loadState.g) hiddenGreenCtx.drawImage(images.g, 0, 0, targetWidth, targetHeight);
+            if (loadState.b) hiddenBlueCtx.drawImage(images.b, 0, 0, targetWidth, targetHeight);
+
+
+            // --- B. Obtener datos finales para el empaquetado ---
+            
+            // Obtener datos de píxeles (si loadState es false, el canvas escalado estará vacío/negro)
+            const redData = hiddenRedCtx.getImageData(0, 0, targetWidth, targetHeight);
+            const greenData = hiddenGreenCtx.getImageData(0, 0, targetWidth, targetHeight);
+            const blueData = hiddenBlueCtx.getImageData(0, 0, targetWidth, targetHeight);
+            
+            const redPixels = redData.data;
+            const greenPixels = greenData.data;
+            const bluePixels = blueData.data;
+
+            // Obtener valores de slider como fallback (para canales sin imagen cargada)
+            const redValue = parseInt(redChannel.value);
+            const greenValue = parseInt(greenChannel.value);
+            const blueValue = parseInt(blueChannel.value);
+
+            // Crear datos de imagen para la salida ORM
+            const outputImageData = processingCtx.createImageData(targetWidth, targetHeight);
+            const outputPixels = outputImageData.data;
+
+            const totalPixels = targetWidth * targetHeight;
+
+            // Iterar y empaquetar canales (4 bytes por píxel: R, G, B, A)
+            for (let i = 0; i < totalPixels * 4; i += 4) {
+                // R (Occlusion): Si hay imagen, usa el canal R. Si no, usa el valor del slider.
+                const r = loadState.r ? redPixels[i + 0] : redValue; 
+
+                // G (Roughness): Si hay imagen, usa el canal R. Si no, usa el valor del slider.
+                const g = loadState.g ? greenPixels[i + 0] : greenValue; 
+
+                // B (Metallic): Si hay imagen, usa el canal R. Si no, usa el valor del slider.
+                const b = loadState.b ? bluePixels[i + 0] : blueValue;
+
+
+                outputPixels[i + 0] = r;   // Canal Rojo (Occlusion)
+                outputPixels[i + 1] = g;   // Canal Verde (Roughness)
+                outputPixels[i + 2] = b;   // Canal Azul (Metallic)
+                outputPixels[i + 3] = 255; // Canal Alfa (Opacidad total)
+            }
+            
+            // Poner los datos combinados en el canvas de procesamiento
+            processingCtx.putImageData(outputImageData, 0, 0);
+
+            // --- C. Dibujar resultado final en el canvas de salida visible ---
+
+            outputCanvas.width = targetWidth;
+            outputCanvas.height = targetHeight;
+            outputCtx.imageSmoothingEnabled = false;
+
+            outputCtx.drawImage(
+                processingCanvas, 
+                0, 0, targetWidth, targetHeight, 
+                0, 0, targetWidth, targetHeight  
+            );
+        }
+
+        // 6. Lógica de Descarga
+        downloadButton.addEventListener('click', () => {
+            const dataURL = outputCanvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `ORM_Texture_${outputCanvas.width}x${outputCanvas.height}.png`;
+            link.href = dataURL;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // Inicializar el canvas al cargar
+        processImage();
+
+    </script>
+</body>
+</html>
