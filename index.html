@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -39,8 +39,13 @@
                 </label>
                 <input type="file" id="occlusionLoader" class="hidden" accept="image/*">
                 
-                <p class="text-xs text-gray-500 text-center">O usa un valor sólido:</p>
-                <div id="red-status" class="text-center text-red-300 font-mono text-sm hidden"></div>
+                <!-- Área de Estado y Botón de Borrado -->
+                <div id="redStatusArea" class="hidden flex items-center justify-between p-1 bg-red-900/30 rounded">
+                    <div id="red-status" class="text-red-300 font-mono text-xs truncate"></div>
+                    <button id="redClearButton" data-channel="r" class="text-red-300 hover:text-white bg-red-700/50 hover:bg-red-700 w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm transition duration-150 ml-2" title="Eliminar textura">X</button>
+                </div>
+
+                <p id="redSolidLabel" class="text-xs text-gray-500 text-center">O usa un valor sólido:</p>
                 
                 <div id="redSliderContainer">
                     <label for="redChannel" class="block mb-1 text-sm sr-only">Valor de Oclusión</label>
@@ -49,18 +54,23 @@
                 </div>
             </div>
 
-            <!-- Canal VERDE (Roughness) - AHORA CON SLIDER -->
+            <!-- Canal VERDE (Roughness) -->
             <div id="roughnessContainer" class="space-y-4 p-4 bg-gray-900/50 rounded-lg border border-emerald-700 border-2 transition duration-150">
                 <h2 class="text-xl font-semibold text-emerald-400">Canal VERDE (G): Roughness</h2>
                 <label for="imageLoader" class="block w-full cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg text-center transition duration-200 text-sm">
                     Cargar Mapa de Roughness
                 </label>
                 <input type="file" id="imageLoader" class="hidden" accept="image/*">
-                <!-- Se elimina el texto de escala de grises -->
-                <div id="green-status" class="text-center text-emerald-300 font-mono text-sm hidden"></div>
                 
+                <!-- Área de Estado y Botón de Borrado -->
+                <div id="greenStatusArea" class="hidden flex items-center justify-between p-1 bg-emerald-900/30 rounded">
+                    <div id="green-status" class="text-emerald-300 font-mono text-xs truncate"></div>
+                    <button id="greenClearButton" data-channel="g" class="text-emerald-300 hover:text-white bg-emerald-700/50 hover:bg-emerald-700 w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm transition duration-150 ml-2" title="Eliminar textura">X</button>
+                </div>
+                
+                <p id="greenSolidLabel" class="text-xs text-gray-500 text-center">O usa un valor sólido:</p>
+
                 <div id="greenSliderContainer">
-                    <p class="text-xs text-gray-500 text-center">O usa un valor sólido:</p>
                     <label for="greenChannel" class="block mb-1 text-sm sr-only">Valor de Roughness</label>
                     <input id="greenChannel" type="range" min="0" max="255" value="0" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #34d399;">
                     <div class="text-center text-emerald-300 font-mono text-sm" id="greenValueLabel">Valor: 0 (Mate)</div>
@@ -75,8 +85,13 @@
                 </label>
                 <input type="file" id="metallicLoader" class="hidden" accept="image/*">
                 
-                <p class="text-xs text-gray-500 text-center">O usa un valor sólido:</p>
-                <div id="blue-status" class="text-center text-blue-300 font-mono text-sm hidden"></div>
+                <!-- Área de Estado y Botón de Borrado -->
+                <div id="blueStatusArea" class="hidden flex items-center justify-between p-1 bg-blue-900/30 rounded">
+                    <div id="blue-status" class="text-blue-300 font-mono text-xs truncate"></div>
+                    <button id="blueClearButton" data-channel="b" class="text-blue-300 hover:text-white bg-blue-700/50 hover:bg-blue-700 w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm transition duration-150 ml-2" title="Eliminar textura">X</button>
+                </div>
+                
+                <p id="blueSolidLabel" class="text-xs text-gray-500 text-center">O usa un valor sólido:</p>
                 
                 <div id="blueSliderContainer">
                     <label for="blueChannel" class="block mb-1 text-sm sr-only">Valor Metálico</label>
@@ -130,6 +145,18 @@
     <canvas id="processingCanvas" class="hidden"></canvas>
 
     <script>
+        // --- UTILIDAD: Función de Debounce ---
+        // Limita la frecuencia con la que se puede ejecutar una función (útil para eventos como 'input' en sliders)
+        function debounce(func, delay) {
+            let timeoutId;
+            return function(...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    func.apply(this, args);
+                }, delay);
+            };
+        }
+
         // --- Obtener Elementos del DOM ---
         const imageLoader = document.getElementById('imageLoader'); // Green Input
         const occlusionLoader = document.getElementById('occlusionLoader'); // Red Input
@@ -143,10 +170,22 @@
         const greenValueLabel = document.getElementById('greenValueLabel');
         const blueValueLabel = document.getElementById('blueValueLabel');
         
-        // Status Labels
+        // Status Labels y Botones de Limpieza
         const redStatus = document.getElementById('red-status');
         const greenStatus = document.getElementById('green-status');
         const blueStatus = document.getElementById('blue-status');
+
+        const redStatusArea = document.getElementById('redStatusArea');
+        const greenStatusArea = document.getElementById('greenStatusArea');
+        const blueStatusArea = document.getElementById('blueStatusArea');
+        
+        const redClearButton = document.getElementById('redClearButton');
+        const greenClearButton = document.getElementById('greenClearButton');
+        const blueClearButton = document.getElementById('blueClearButton');
+
+        const redSolidLabel = document.getElementById('redSolidLabel');
+        const greenSolidLabel = document.getElementById('greenSolidLabel');
+        const blueSolidLabel = document.getElementById('blueSolidLabel');
         
         const outputSize = document.getElementById('outputSize');
         const originalSizeOption = document.getElementById('originalSizeOption');
@@ -169,19 +208,20 @@
         
         const downloadButton = document.getElementById('downloadButton');
 
-        // Almacenamiento de imágenes y estado
+        // Almacenamiento de imágenes, estado y nombre de archivo
         const images = {
             r: new Image(),
             g: new Image(),
             b: new Image()
         };
         const loadState = { r: false, g: false, b: false };
+        const filenames = { r: '', g: '', b: '' }; // Nuevo para guardar el nombre del archivo
+
         let originalImageSize = { w: 0, h: 0 };
 
 
         // --- Lógica de Manejo de Carga Genérica (Para input[type=file] y drag-and-drop) ---
-        function handleImageLoad(imageObj, stateKey, hiddenCtx, statusElement, sliderInput, sliderContainer, width, height, source = 'Botón') {
-            loadState[stateKey] = true;
+        function handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer, width, height, filename) {
             
             // Si es la primera imagen cargada en la aplicación, actualizamos el tamaño original.
             if (originalImageSize.w === 0) {
@@ -193,12 +233,25 @@
                 originalSizeOption.disabled = false;
             }
 
+            loadState[stateKey] = true;
+            filenames[stateKey] = filename; // Guardar nombre del archivo
+            
+            // Determinar el label "O usa un valor sólido:"
+            const solidLabelId = stateKey + 'SolidLabel';
+            const solidLabel = document.getElementById(solidLabelId);
+            
             // Actualizar estado visual
             if (statusElement) {
-                statusElement.textContent = `Cargado (${source}): ${width}x${height}px`;
-                statusElement.classList.remove('hidden');
+                // Truncar nombre del archivo para que no desborde (máx 25 caracteres)
+                const displayFilename = filename.length > 25 ? filename.substring(0, 22) + '...' : filename;
+                statusElement.textContent = `Cargado: ${displayFilename}`;
+                statusArea.classList.remove('hidden'); // Mostrar área de estado 
             }
             
+            if (solidLabel) {
+                solidLabel.classList.add('hidden'); // Ocultar "O usa un valor sólido:"
+            }
+
             // Desactivar el slider para este canal
             if (sliderInput) {
                 sliderInput.disabled = true;
@@ -208,10 +261,10 @@
             // Dibujamos la imagen original en el canvas, para tener los datos fuente originales
             hiddenCtx.drawImage(imageObj, 0, 0, width, height);
             
-            processImage();
+            processImage(); // Ejecución inmediata al cargar una imagen
         }
 
-        function createChannelLoadHandler(imageObj, stateKey, hiddenCtx, statusElement, sliderInput, sliderContainer) {
+        function createChannelLoadHandler(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer) {
             return function(event) {
                 const file = event.target.files[0];
                 if (!file) return;
@@ -219,20 +272,19 @@
                 const url = URL.createObjectURL(file);
                 imageObj.src = url;
                 imageObj.onload = () => {
-                    handleImageLoad(imageObj, stateKey, hiddenCtx, statusElement, sliderInput, sliderContainer, imageObj.width, imageObj.height, 'Botón');
+                    handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer, imageObj.width, imageObj.height, file.name); // Pasar statusArea
                 };
             };
         }
         
         // Asignar manejadores a los 3 canales (Input File)
-        occlusionLoader.addEventListener('change', createChannelLoadHandler(images.r, 'r', hiddenRedCtx, redStatus, redChannel, redSliderContainer));
-        imageLoader.addEventListener('change', createChannelLoadHandler(images.g, 'g', hiddenGreenCtx, greenStatus, greenChannel, greenSliderContainer));
-        metallicLoader.addEventListener('change', createChannelLoadHandler(images.b, 'b', hiddenBlueCtx, blueStatus, blueChannel, blueSliderContainer));
+        occlusionLoader.addEventListener('change', createChannelLoadHandler(images.r, 'r', hiddenRedCtx, redStatusArea, redStatus, redChannel, redSliderContainer));
+        imageLoader.addEventListener('change', createChannelLoadHandler(images.g, 'g', hiddenGreenCtx, greenStatusArea, greenStatus, greenChannel, greenSliderContainer));
+        metallicLoader.addEventListener('change', createChannelLoadHandler(images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueSliderContainer));
 
 
-        // --- Lógica de Drag and Drop ---
-
-        function setupDragAndDrop(containerId, imageObj, stateKey, hiddenCtx, statusElement, sliderInput, sliderContainer) {
+        // --- Lógica de Drag and Drop (ACTUALIZADO para pasar file.name y statusArea) ---
+        function setupDragAndDrop(containerId, imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer) {
             const container = document.getElementById(containerId);
             const originalBorderClass = container.classList.contains('border-emerald-700') ? 'border-emerald-700' : 'border-gray-700';
 
@@ -261,43 +313,93 @@
                     
                     imageObj.src = url;
                     imageObj.onload = () => {
-                        handleImageLoad(imageObj, stateKey, hiddenCtx, statusElement, sliderInput, sliderContainer, imageObj.width, imageObj.height, 'Arrastre');
+                        handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer, imageObj.width, imageObj.height, file.name); // Pasar statusArea
                     };
                 } else {
                     // Mostrar un mensaje de error si el archivo no es una imagen
                     if (statusElement) {
+                         // Mostrar error temporalmente
                          statusElement.textContent = `Error: Archivo no válido.`;
-                         statusElement.classList.remove('hidden');
-                         setTimeout(() => statusElement.classList.add('hidden'), 3000);
+                         statusArea.classList.remove('hidden'); 
+                         setTimeout(() => statusArea.classList.add('hidden'), 3000); 
                     }
                 }
             });
         }
         
         // Asignar manejadores Drag and Drop a los 3 contenedores
-        setupDragAndDrop('occlusionContainer', images.r, 'r', hiddenRedCtx, redStatus, redChannel, redSliderContainer);
-        setupDragAndDrop('roughnessContainer', images.g, 'g', hiddenGreenCtx, greenStatus, greenChannel, greenSliderContainer);
-        setupDragAndDrop('metallicContainer', images.b, 'b', hiddenBlueCtx, blueStatus, blueChannel, blueSliderContainer);
+        setupDragAndDrop('occlusionContainer', images.r, 'r', hiddenRedCtx, redStatusArea, redStatus, redChannel, redSliderContainer);
+        setupDragAndDrop('roughnessContainer', images.g, 'g', hiddenGreenCtx, greenStatusArea, greenStatus, greenChannel, greenSliderContainer);
+        setupDragAndDrop('metallicContainer', images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueSliderContainer);
 
+        // --- Lógica para Eliminar Textura (NUEVO) ---
+        
+        function clearChannel(stateKey) {
+            
+            const dataMap = {
+                r: { ctx: hiddenRedCtx, statusArea: redStatusArea, slider: redChannel, sliderContainer: redSliderContainer, solidLabel: redSolidLabel },
+                g: { ctx: hiddenGreenCtx, statusArea: greenStatusArea, slider: greenChannel, sliderContainer: greenSliderContainer, solidLabel: greenSolidLabel },
+                b: { ctx: hiddenBlueCtx, statusArea: blueStatusArea, slider: blueChannel, sliderContainer: blueSliderContainer, solidLabel: blueSolidLabel }
+            };
 
-        // --- Lógica de Sliders ---
+            const { ctx, statusArea, slider, sliderContainer, solidLabel } = dataMap[stateKey];
+
+            // 1. Resetear estado
+            loadState[stateKey] = false;
+            filenames[stateKey] = '';
+
+            // 2. Limpiar el canvas oculto (para que no afecte el procesamiento)
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            // 3. Ocultar status y mostrar label sólido
+            statusArea.classList.add('hidden');
+            solidLabel.classList.remove('hidden');
+
+            // 4. Re-habilitar slider
+            slider.disabled = false;
+            sliderContainer.classList.remove('opacity-50');
+
+            // 5. Verificar si se debe resetear el tamaño original
+            const anyImageLoaded = loadState.r || loadState.g || loadState.b;
+            if (!anyImageLoaded) {
+                 originalImageSize = { w: 0, h: 0 };
+                 originalSizeOption.text = `Original (Cargar una imagen primero)`;
+                 originalSizeOption.disabled = true;
+                 outputSize.value = "1024"; // Resetear al tamaño por defecto
+            }
+
+            // 6. Reprocesar la imagen
+            processImage(); // Ejecución inmediata al borrar una imagen
+        }
+        
+        // Asignar manejadores a los botones de limpieza
+        redClearButton.addEventListener('click', () => clearChannel('r'));
+        greenClearButton.addEventListener('click', () => clearChannel('g'));
+        blueClearButton.addEventListener('click', () => clearChannel('b'));
+
+        // --- Debounce y Lógica de Sliders/Tamaño (FIX para el rendimiento) ---
+        
+        // Crear una versión debounced de processImage con un retardo de 50ms
+        const debouncedProcessImage = debounce(processImage, 50);
+
+        // Los sliders y el selector de tamaño usan la versión debounced
         redChannel.addEventListener('input', () => {
             redValueLabel.textContent = `Valor: ${redChannel.value} (${redChannel.value > 128 ? 'Blanco' : 'Negro'})`;
-            processImage();
+            debouncedProcessImage();
         });
         
         greenChannel.addEventListener('input', () => {
             greenValueLabel.textContent = `Valor: ${greenChannel.value} (${greenChannel.value > 128 ? 'Brillante' : 'Mate'})`;
-            processImage();
+            debouncedProcessImage();
         });
 
         blueChannel.addEventListener('input', () => {
             blueValueLabel.textContent = `Valor: ${blueChannel.value} (${blueChannel.value > 128 ? 'Blanco' : 'Negro'})`;
-            processImage();
+            debouncedProcessImage();
         });
 
-        // --- Lógica de Tamaño de Salida (Maestro) ---
-        outputSize.addEventListener('input', processImage);
+        // El cambio de tamaño también se debounces, aunque los cambios de tamaño son más lentos.
+        outputSize.addEventListener('input', debouncedProcessImage);
 
 
         // 4. Función principal de procesamiento
@@ -336,6 +438,7 @@
             hiddenBlueCtx.imageSmoothingEnabled = false;
 
             // Solo redibujar si hay una imagen cargada.
+            // Si no está cargada, el canvas se mantendrá transparente (negro con alpha 0)
             if (loadState.r) hiddenRedCtx.drawImage(images.r, 0, 0, targetWidth, targetHeight);
             if (loadState.g) hiddenGreenCtx.drawImage(images.g, 0, 0, targetWidth, targetHeight);
             if (loadState.b) hiddenBlueCtx.drawImage(images.b, 0, 0, targetWidth, targetHeight);
@@ -366,6 +469,7 @@
             // Iterar y empaquetar canales (4 bytes por píxel: R, G, B, A)
             for (let i = 0; i < totalPixels * 4; i += 4) {
                 // R (Occlusion): Si hay imagen, usa el canal R. Si no, usa el valor del slider.
+                // Se usa el canal Rojo (R) de la imagen de entrada, asumiendo que es escala de grises.
                 const r = loadState.r ? redPixels[i + 0] : redValue; 
 
                 // G (Roughness): Si hay imagen, usa el canal R. Si no, usa el valor del slider.
