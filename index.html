@@ -20,17 +20,6 @@
             pointer-events: none;
         }
 
-        /* Force a small font size for monospace text in splitter thumbnails */
-        .splitter-mono-text {
-            font-size: 0.7rem; /* Roughly text-xs */
-        }
-
-        /* Style for the main container to use available height without scrolling */
-        .main-container {
-            max-height: calc(100vh - 32px); /* 100vh minus vertical padding of 4rem (p-4 in body) */
-            overflow-y: hidden; /* Prevent scrolling in the main container */
-        }
-        
         /* Allow scrolling only in the left column if necessary */
         .left-column {
             overflow-y: auto;
@@ -183,20 +172,20 @@
                         <p id="splitterMessage" class="text-sm text-gray-400 mb-4">2. Drag and drop the desired thumbnail to the packing channel (Red, Green, or Blue).</p>
                         
                         <div id="splitterResults" class="grid grid-cols-3 gap-2">
-                            <!-- RED (Occlusion) -->
+                            <!-- RED -->
                             <div id="splitRedContainer" class="p-1 border border-red-500 rounded-lg text-center cursor-grab bg-gray-900/50 hover:bg-gray-700 transition duration-150 shadow-md opacity-50 pointer-events-none" draggable="true" data-channel-name="occlusion">
                                 <canvas id="splitRedCanvas" class="w-full aspect-square rounded mb-1 border border-gray-600"></canvas>
-                                <span class="text-red-300 font-mono splitter-mono-text">Red (Occlusion)</span>
+                                <span class="text-red-300 text-sm font-bold">Red</span>
                             </div>
-                            <!-- GREEN (Roughness) -->
+                            <!-- GREEN -->
                             <div id="splitGreenContainer" class="p-1 border border-emerald-500 rounded-lg text-center cursor-grab bg-gray-900/50 hover:bg-gray-700 transition duration-150 shadow-md opacity-50 pointer-events-none" draggable="true" data-channel-name="roughness">
                                 <canvas id="splitGreenCanvas" class="w-full aspect-square rounded mb-1 border border-gray-600"></canvas>
-                                <span class="text-emerald-300 font-mono splitter-mono-text">Green (Roughness)</span>
+                                <span class="text-emerald-300 text-sm font-bold">Green</span>
                             </div>
-                            <!-- BLUE (Metallic) -->
+                            <!-- BLUE -->
                             <div id="splitBlueContainer" class="p-1 border border-blue-500 rounded-lg text-center cursor-grab bg-gray-900/50 hover:bg-gray-700 transition duration-150 shadow-md opacity-50 pointer-events-none" draggable="true" data-channel-name="metallic">
                                 <canvas id="splitBlueCanvas" class="w-full aspect-square rounded mb-1 border border-gray-600"></canvas>
-                                <span class="text-blue-300 font-mono splitter-mono-text">Blue (Metallic)</span>
+                                <span class="text-blue-300 text-sm font-bold">Blue</span>
                             </div>
                         </div>
                     </div>
