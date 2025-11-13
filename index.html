@@ -36,6 +36,17 @@
             overflow-y: auto;
             max-height: 100%;
         }
+        /* Custom style for number inputs in the channel controls */
+        .channel-input-number {
+            width: 5rem;
+            text-align: center;
+            background-color: #374151; /* bg-gray-700 */
+            border: 1px solid #4b5563; /* border-gray-600 */
+            padding: 0.25rem;
+            border-radius: 0.375rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200 font-sans flex items-center justify-center h-screen p-4">
@@ -78,7 +89,12 @@
                         
                         <div id="redSliderContainer">
                             <input id="redChannel" type="range" min="0" max="255" value="255" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #f87171;">
-                            <div class="text-center text-red-300 font-mono text-xs" id="redValueLabel">255 (White)</div>
+                            
+                            <!-- UPDATED: Input field for direct value typing -->
+                            <div class="flex justify-center items-center gap-2 mt-1">
+                                <input id="redValueInput" type="number" min="0" max="255" value="255" class="channel-input-number text-red-300 focus:ring-red-500 focus:border-red-500"/>
+                                <div class="text-red-300 font-mono text-xs" id="redValueLabelText">(White)</div>
+                            </div>
                         </div>
                     </div>
 
@@ -101,7 +117,12 @@
 
                         <div id="greenSliderContainer">
                             <input id="greenChannel" type="range" min="0" max="255" value="255" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #34d399;">
-                            <div class="text-center text-emerald-300 font-mono text-xs" id="greenValueLabel">0 (Matte)</div>
+                            
+                            <!-- UPDATED: Input field for direct value typing -->
+                            <div class="flex justify-center items-center gap-2 mt-1">
+                                <input id="greenValueInput" type="number" min="0" max="255" value="255" class="channel-input-number text-emerald-300 focus:ring-emerald-500 focus:border-emerald-500"/>
+                                <div class="text-emerald-300 font-mono text-xs" id="greenValueLabelText">(Matte)</div>
+                            </div>
                         </div>
                     </div>
 
@@ -124,7 +145,12 @@
                         
                         <div id="blueSliderContainer">
                             <input id="blueChannel" type="range" min="0" max="255" value="0" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #60a5fa;">
-                            <div class="text-center text-blue-300 font-mono text-xs" id="blueValueLabel">0 (Black)</div>
+                            
+                            <!-- UPDATED: Input field for direct value typing -->
+                            <div class="flex justify-center items-center gap-2 mt-1">
+                                <input id="blueValueInput" type="number" min="0" max="255" value="0" class="channel-input-number text-blue-300 focus:ring-blue-500 focus:border-blue-500"/>
+                                <div class="text-blue-300 font-mono text-xs" id="blueValueLabelText">(Black)</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -257,9 +283,15 @@
         const greenChannel = document.getElementById('greenChannel');
         const blueChannel = document.getElementById('blueChannel');
         
-        const redValueLabel = document.getElementById('redValueLabel');
-        const greenValueLabel = document.getElementById('greenValueLabel');
-        const blueValueLabel = document.getElementById('blueValueLabel');
+        // NEW: Number inputs for direct typing
+        const redValueInput = document.getElementById('redValueInput');
+        const greenValueInput = document.getElementById('greenValueInput');
+        const blueValueInput = document.getElementById('blueValueInput');
+
+        // NEW: Text labels (formerly the full value label)
+        const redValueLabelText = document.getElementById('redValueLabelText');
+        const greenValueLabelText = document.getElementById('greenValueLabelText');
+        const blueValueLabelText = document.getElementById('blueValueLabelText');
         
         // Status Labels and Clear Buttons
         const redStatus = document.getElementById('red-status');
@@ -333,7 +365,7 @@
 
 
         // --- Generic Load Handler Logic (For input[type=file] and drag-and-drop) ---
-        function handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer, width, height, filename) {
+        function handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, width, height, filename) {
             
             // If it's the first image loaded in the app, update original size.
             if (!loadState.r && !loadState.g && !loadState.b) {
@@ -367,9 +399,10 @@
                 solidLabel.classList.add('hidden'); // Hide "Or use a solid value:"
             }
 
-            // Disable slider for this channel
+            // Disable slider and number input for this channel
             if (sliderInput) {
                 sliderInput.disabled = true;
+                numberInput.disabled = true; // DISABLE NEW INPUT
                 sliderContainer.classList.add('opacity-50');
             }
 
@@ -381,7 +414,7 @@
             processImage(); // Immediate execution upon image load
         }
 
-        function createChannelLoadHandler(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer) {
+        function createChannelLoadHandler(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer) {
             return function(event) {
                 const file = event.target.files[0];
                 if (!file) return;
@@ -389,19 +422,19 @@
                 const url = URL.createObjectURL(file);
                 imageObj.src = url;
                 imageObj.onload = () => {
-                    handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer, imageObj.width, imageObj.height, file.name); 
+                    handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, imageObj.width, imageObj.height, file.name); 
                 };
             };
         }
         
-        // Assign handlers to the 3 channels (File Input)
-        occlusionLoader.addEventListener('change', createChannelLoadHandler(images.r, 'r', hiddenRedCtx, redStatusArea, redStatus, redChannel, redSliderContainer));
-        imageLoader.addEventListener('change', createChannelLoadHandler(images.g, 'g', hiddenGreenCtx, greenStatusArea, greenStatus, greenChannel, greenSliderContainer));
-        metallicLoader.addEventListener('change', createChannelLoadHandler(images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueSliderContainer));
+        // Assign handlers to the 3 channels (File Input) - Now passing number inputs too
+        occlusionLoader.addEventListener('change', createChannelLoadHandler(images.r, 'r', hiddenRedCtx, redStatusArea, redStatus, redChannel, redValueInput, redSliderContainer));
+        imageLoader.addEventListener('change', createChannelLoadHandler(images.g, 'g', hiddenGreenCtx, greenStatusArea, greenStatus, greenChannel, greenValueInput, greenSliderContainer));
+        metallicLoader.addEventListener('change', createChannelLoadHandler(images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueValueInput, blueSliderContainer));
 
 
         // --- Drag and Drop Logic for Packing Channels (FIXED) ---
-        function setupPackerDragAndDrop(containerId, imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer) {
+        function setupPackerDragAndDrop(containerId, imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer) {
             const container = document.getElementById(containerId);
             const originalBorderColorClass = container.dataset.originalBorderColor; 
             const channelColor = container.dataset.channelColor; 
@@ -462,7 +495,7 @@
 
                         imageObj.src = url;
                         imageObj.onload = () => {
-                            handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer, w, h, filename);
+                            handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, w, h, filename);
                         };
                         return; // Exit if a split channel was handled
                     }
@@ -475,7 +508,7 @@
                     
                     imageObj.src = url;
                     imageObj.onload = () => {
-                        handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer, imageObj.width, imageObj.height, file.name); 
+                        handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, imageObj.width, imageObj.height, file.name); 
                     };
                 } else if (!isSplitChannelDrop) { 
                     if (statusElement) {
@@ -487,10 +520,10 @@
             });
         }
         
-        // Assign Drag and Drop handlers to the 3 Packing Containers
-        setupPackerDragAndDrop('occlusionContainer', images.r, 'r', hiddenRedCtx, redStatusArea, redStatus, redChannel, redSliderContainer);
-        setupPackerDragAndDrop('roughnessContainer', images.g, 'g', hiddenGreenCtx, greenStatusArea, greenStatus, greenChannel, greenSliderContainer);
-        setupPackerDragAndDrop('metallicContainer', images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueSliderContainer);
+        // Assign Drag and Drop handlers to the 3 Packing Containers - Now passing number inputs too
+        setupPackerDragAndDrop('occlusionContainer', images.r, 'r', hiddenRedCtx, redStatusArea, redStatus, redChannel, redValueInput, redSliderContainer);
+        setupPackerDragAndDrop('roughnessContainer', images.g, 'g', hiddenGreenCtx, greenStatusArea, greenStatus, greenChannel, greenValueInput, greenSliderContainer);
+        setupPackerDragAndDrop('metallicContainer', images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueValueInput, blueSliderContainer);
 
         // --- Drag Start Logic for Split Results ---
         [splitRedContainer, splitGreenContainer, splitBlueContainer].forEach(container => {
@@ -523,12 +556,12 @@
         function clearChannel(stateKey) {
             
             const dataMap = {
-                r: { ctx: hiddenRedCtx, statusArea: redStatusArea, slider: redChannel, sliderContainer: redSliderContainer, solidLabel: redSolidLabel },
-                g: { ctx: hiddenGreenCtx, statusArea: greenStatusArea, slider: greenChannel, sliderContainer: greenSliderContainer, solidLabel: greenSolidLabel },
-                b: { ctx: hiddenBlueCtx, statusArea: blueStatusArea, slider: blueChannel, sliderContainer: blueSliderContainer, solidLabel: blueSolidLabel }
+                r: { ctx: hiddenRedCtx, statusArea: redStatusArea, slider: redChannel, numberInput: redValueInput, sliderContainer: redSliderContainer, solidLabel: redSolidLabel },
+                g: { ctx: hiddenGreenCtx, statusArea: greenStatusArea, slider: greenChannel, numberInput: greenValueInput, sliderContainer: greenSliderContainer, solidLabel: greenSolidLabel },
+                b: { ctx: hiddenBlueCtx, statusArea: blueStatusArea, slider: blueChannel, numberInput: blueValueInput, sliderContainer: blueSliderContainer, solidLabel: blueSolidLabel }
             };
 
-            const { ctx, statusArea, slider, sliderContainer, solidLabel } = dataMap[stateKey];
+            const { ctx, statusArea, slider, numberInput, sliderContainer, solidLabel } = dataMap[stateKey];
 
             // 1. Reset state
             loadState[stateKey] = false;
@@ -543,8 +576,9 @@
             statusArea.classList.add('hidden');
             solidLabel.classList.remove('hidden');
 
-            // 4. Re-enable slider
+            // 4. Re-enable slider and number input
             slider.disabled = false;
+            numberInput.disabled = false; // RE-ENABLE NEW INPUT
             sliderContainer.classList.remove('opacity-50');
 
             // 5. Check if original size should be reset
@@ -565,24 +599,55 @@
         greenClearButton.addEventListener('click', () => clearChannel('g'));
         blueClearButton.addEventListener('click', () => clearChannel('b'));
 
-        // --- Debounce and Slider/Size Logic ---
+        // --- Value Synchronization and Debounce Logic ---
         
         const debouncedProcessImage = debounce(processImage, 50);
 
-        redChannel.addEventListener('input', () => {
-            redValueLabel.textContent = `${redChannel.value} (${redChannel.value > 128 ? 'White' : 'Black'})`;
-            debouncedProcessImage();
-        });
-        
-        greenChannel.addEventListener('input', () => {
-            greenValueLabel.textContent = `${greenChannel.value} (${greenChannel.value > 128 ? 'Shiny' : 'Matte'})`;
-            debouncedProcessImage();
-        });
+        // Utility to clamp and get value
+        function clamp(value) {
+            return Math.min(255, Math.max(0, parseInt(value) || 0));
+        }
 
-        blueChannel.addEventListener('input', () => {
-            blueValueLabel.textContent = `${blueChannel.value} (${blueChannel.value > 128 ? 'White' : 'Black'})`;
+        // --- Channel Update Functions ---
+        
+        // R (Occlusion)
+        function updateRedValues(value) {
+            const val = clamp(value);
+            redChannel.value = val;
+            redValueInput.value = val;
+            redValueLabelText.textContent = `(${val > 128 ? 'White' : 'Black'})`;
             debouncedProcessImage();
-        });
+        }
+
+        // G (Roughness)
+        function updateGreenValues(value) {
+            const val = clamp(value);
+            greenChannel.value = val;
+            greenValueInput.value = val;
+            // Roughness Logic: 255 (High) is Matte/Rough. 0 (Low) is Smooth/Shiny.
+            greenValueLabelText.textContent = `(${val > 128 ? 'Matte' : 'Shiny'})`; 
+            debouncedProcessImage();
+        }
+
+        // B (Metallic)
+        function updateBlueValues(value) {
+            const val = clamp(value);
+            blueChannel.value = val;
+            blueValueInput.value = val;
+            blueValueLabelText.textContent = `(${val > 128 ? 'Metallic' : 'Dielectric'})`;
+            debouncedProcessImage();
+        }
+
+        // --- Event Listeners for Sliders (Range) ---
+        redChannel.addEventListener('input', () => updateRedValues(redChannel.value));
+        greenChannel.addEventListener('input', () => updateGreenValues(greenChannel.value));
+        blueChannel.addEventListener('input', () => updateBlueValues(blueChannel.value));
+
+        // --- Event Listeners for Number Inputs ---
+        redValueInput.addEventListener('input', () => updateRedValues(redValueInput.value));
+        greenValueInput.addEventListener('input', () => updateGreenValues(greenValueInput.value));
+        blueValueInput.addEventListener('input', () => updateBlueValues(blueValueInput.value));
+
 
         outputSize.addEventListener('input', debouncedProcessImage);
 
@@ -832,7 +897,7 @@
             
             // --- B. Get final data for packing ---
             
-            // Get slider values as fallback (for channels without loaded image)
+            // Get current value from the number input or slider (they are synchronized)
             const redValue = parseInt(redChannel.value);
             const greenValue = parseInt(greenChannel.value);
             const blueValue = parseInt(blueChannel.value);
@@ -845,13 +910,13 @@
 
             // Iterate and pack channels (4 bytes per pixel: R, G, B, A)
             for (let i = 0; i < totalPixels * 4; i += 4) {
-                // R (Occlusion): If image is loaded (canvas > 1x1), use R channel. If not, use slider value.
+                // R (Occlusion): If image is loaded (canvas > 1x1), use R channel. If not, use solid value.
                 const r = loadState.r ? redPixels[i + 0] : redValue; 
 
-                // G (Roughness): If image is loaded, use R channel. If not, use slider value.
+                // G (Roughness): If image is loaded, use R channel. If not, use solid value.
                 const g = loadState.g ? greenPixels[i + 0] : greenValue; 
 
-                // B (Metallic): If image is loaded, use B channel. If not, use slider value.
+                // B (Metallic): If image is loaded, use B channel. If not, use solid value.
                 const b = loadState.b ? bluePixels[i + 2] : blueValue; 
 
                 outputPixels[i + 0] = r;   // Red Channel (Occlusion)
@@ -893,10 +958,18 @@
             document.body.removeChild(link);
         });
 
-        // Initialize canvas on load
-        processImage();
+        // Initialize channel values and canvas on load
+        function initializeApp() {
+            // Set initial values and labels for consistency
+            updateRedValues(redChannel.value);
+            updateGreenValues(greenChannel.value);
+            updateBlueValues(blueChannel.value);
+            
+            processImage();
+        }
+        
+        initializeApp();
 
     </script>
 </body>
 </html>
-
