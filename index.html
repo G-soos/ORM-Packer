@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -103,8 +103,54 @@
         
         <hr class="border-gray-700 mb-8">
 
+        <!-- Contenedor Desplegable para Separador ORM (Splitter) -->
+        <div id="splitterMainContainer" class="bg-gray-700 p-4 rounded-lg mb-8 transition duration-150 border border-gray-700">
+            <button id="splitterToggle" class="w-full text-left py-2 text-lg font-semibold text-white flex justify-between items-center focus:outline-none">
+                Desglosar Textura ORM Combinada (Splitter)
+                <svg id="toggleIcon" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            
+            <div id="splitterContent" class="hidden mt-4 pt-4 border-t border-gray-600">
+                <!-- Zona de Carga y Estado del ORM a Desglosar -->
+                <div id="splitterLoadArea" class="space-y-3 mb-6 p-4 bg-gray-900 rounded-lg border border-purple-500/50 transition duration-150">
+                    <label for="ormSplitterLoader" id="splitterLabel" class="block w-full cursor-pointer bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-center transition duration-200 text-sm">
+                        1. Cargar/Arrastrar Textura ORM (RGB)
+                    </label>
+                    <input type="file" id="ormSplitterLoader" class="hidden" accept="image/*">
+                    
+                    <!-- Área de Estado y Botón de Borrado del Splitter -->
+                    <div id="splitterStatusArea" class="hidden flex items-center justify-between p-1 bg-purple-900/30 rounded">
+                        <div id="splitter-status" class="text-purple-300 font-mono text-xs truncate"></div>
+                        <button id="splitterClearButton" class="text-purple-300 hover:text-white bg-purple-700/50 hover:bg-purple-700 w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm transition duration-150 ml-2" title="Eliminar textura ORM cargada">X</button>
+                    </div>
+                </div>
+
+                <p id="splitterMessage" class="text-sm text-gray-400 mb-4">2. Arrastra y suelta la miniatura deseada al canal de arriba (Rojo, Verde o Azul).</p>
+                
+                <div id="splitterResults" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <!-- ROJO (Occlusion) -->
+                    <div id="splitRedContainer" class="p-2 border border-red-500 rounded-lg text-center cursor-grab bg-gray-900/50 hover:bg-gray-700 transition duration-150 shadow-md opacity-50 pointer-events-none" draggable="true" data-channel-name="occlusion">
+                        <canvas id="splitRedCanvas" class="w-full aspect-square rounded mb-1 border border-gray-600"></canvas>
+                        <span class="text-red-300 text-xs font-mono">Rojo (Occlusion)</span>
+                    </div>
+                    <!-- VERDE (Roughness) -->
+                    <div id="splitGreenContainer" class="p-2 border border-emerald-500 rounded-lg text-center cursor-grab bg-gray-900/50 hover:bg-gray-700 transition duration-150 shadow-md opacity-50 pointer-events-none" draggable="true" data-channel-name="roughness">
+                        <canvas id="splitGreenCanvas" class="w-full aspect-square rounded mb-1 border border-gray-600"></canvas>
+                        <span class="text-emerald-300 text-xs font-mono">Verde (Roughness)</span>
+                    </div>
+                    <!-- AZUL (Metallic) -->
+                    <div id="splitBlueContainer" class="p-2 border border-blue-500 rounded-lg text-center cursor-grab bg-gray-900/50 hover:bg-gray-700 transition duration-150 shadow-md opacity-50 pointer-events-none" draggable="true" data-channel-name="metallic">
+                        <canvas id="splitBlueCanvas" class="w-full aspect-square rounded mb-1 border border-gray-600"></canvas>
+                        <span class="text-blue-300 text-xs font-mono">Azul (Metallic)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Fin del Contenedor Desplegable -->
+
+
         <!-- Contenedor de Salida -->
-        <div id="outputContainer" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div id="outputContainer" class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
             
             <!-- Columna de Configuración de Salida -->
             <div class="space-y-6">
@@ -143,10 +189,10 @@
     <canvas id="hiddenGreenCanvas" class="hidden"></canvas>
     <canvas id="hiddenBlueCanvas" class="hidden"></canvas>
     <canvas id="processingCanvas" class="hidden"></canvas>
+    <canvas id="hiddenSplitCanvas" class="hidden"></canvas> <!-- Canvas oculto dedicado para la separación -->
 
     <script>
         // --- UTILIDAD: Función de Debounce ---
-        // Limita la frecuencia con la que se puede ejecutar una función (útil para eventos como 'input' en sliders)
         function debounce(func, delay) {
             let timeoutId;
             return function(...args) {
@@ -158,9 +204,9 @@
         }
 
         // --- Obtener Elementos del DOM ---
-        const imageLoader = document.getElementById('imageLoader'); // Green Input
-        const occlusionLoader = document.getElementById('occlusionLoader'); // Red Input
-        const metallicLoader = document.getElementById('metallicLoader'); // Blue Input
+        const imageLoader = document.getElementById('imageLoader'); 
+        const occlusionLoader = document.getElementById('occlusionLoader'); 
+        const metallicLoader = document.getElementById('metallicLoader'); 
 
         const redChannel = document.getElementById('redChannel');
         const greenChannel = document.getElementById('greenChannel');
@@ -208,14 +254,37 @@
         
         const downloadButton = document.getElementById('downloadButton');
 
+        // NEW: Splitter elements
+        const splitterToggle = document.getElementById('splitterToggle');
+        const splitterContent = document.getElementById('splitterContent');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const ormSplitterLoader = document.getElementById('ormSplitterLoader');
+        const hiddenSplitCanvas = document.getElementById('hiddenSplitCanvas');
+        const hiddenSplitCtx = hiddenSplitCanvas.getContext('2d');
+        const splitRedCanvas = document.getElementById('splitRedCanvas');
+        const splitGreenCanvas = document.getElementById('splitGreenCanvas');
+        const splitBlueCanvas = document.getElementById('splitBlueCanvas');
+        const splitRedCtx = splitRedCanvas.getContext('2d');
+        const splitGreenCtx = splitGreenCanvas.getContext('2d');
+        const splitBlueCtx = splitBlueCanvas.getContext('2d');
+        const splitRedContainer = document.getElementById('splitRedContainer');
+        const splitGreenContainer = document.getElementById('splitGreenContainer');
+        const splitBlueContainer = document.getElementById('splitBlueContainer');
+        const splitterLoadArea = document.getElementById('splitterLoadArea'); // Para Drag & Drop
+        const splitterStatusArea = document.getElementById('splitterStatusArea');
+        const splitterStatus = document.getElementById('splitter-status');
+        const splitterClearButton = document.getElementById('splitterClearButton');
+        const splitterLabel = document.getElementById('splitterLabel');
+
         // Almacenamiento de imágenes, estado y nombre de archivo
         const images = {
             r: new Image(),
             g: new Image(),
             b: new Image()
         };
-        const loadState = { r: false, g: false, b: false };
-        const filenames = { r: '', g: '', b: '' }; // Nuevo para guardar el nombre del archivo
+        const loadState = { r: false, g: false, b: false, splitter: false }; // Añadir estado del splitter
+        const filenames = { r: '', g: '', b: '', splitter: '' }; // Añadir nombre del splitter
+        const splitterImg = new Image(); // Imagen fuente del splitter
 
         let originalImageSize = { w: 0, h: 0 };
 
@@ -224,17 +293,20 @@
         function handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer, width, height, filename) {
             
             // Si es la primera imagen cargada en la aplicación, actualizamos el tamaño original.
-            if (originalImageSize.w === 0) {
+            if (!loadState.r && !loadState.g && !loadState.b) {
                 originalImageSize.w = width;
                 originalImageSize.h = height;
-
-                // Habilitar la opción 'Original'
-                originalSizeOption.text = `Original (${originalImageSize.w}x${originalImageSize.h}px)`;
-                originalSizeOption.disabled = false;
+            } else if (width > originalImageSize.w) { // Elegir el tamaño más grande si se carga una imagen mayor.
+                originalImageSize.w = width;
+                originalImageSize.h = height;
             }
-
+            
+            // Actualizar la opción 'Original'
+            originalSizeOption.text = `Original (${originalImageSize.w}x${originalImageSize.h}px)`;
+            originalSizeOption.disabled = false;
+            
             loadState[stateKey] = true;
-            filenames[stateKey] = filename; // Guardar nombre del archivo
+            filenames[stateKey] = filename; 
             
             // Determinar el label "O usa un valor sólido:"
             const solidLabelId = stateKey + 'SolidLabel';
@@ -258,7 +330,9 @@
                 sliderContainer.classList.add('opacity-50');
             }
 
-            // Dibujamos la imagen original en el canvas, para tener los datos fuente originales
+            // Redibujar el canvas oculto para la imagen original (escala 1:1)
+            hiddenCtx.canvas.width = width;
+            hiddenCtx.canvas.height = height;
             hiddenCtx.drawImage(imageObj, 0, 0, width, height);
             
             processImage(); // Ejecución inmediata al cargar una imagen
@@ -272,7 +346,7 @@
                 const url = URL.createObjectURL(file);
                 imageObj.src = url;
                 imageObj.onload = () => {
-                    handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer, imageObj.width, imageObj.height, file.name); // Pasar statusArea
+                    handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer, imageObj.width, imageObj.height, file.name); 
                 };
             };
         }
@@ -283,16 +357,21 @@
         metallicLoader.addEventListener('change', createChannelLoadHandler(images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueSliderContainer));
 
 
-        // --- Lógica de Drag and Drop (ACTUALIZADO para pasar file.name y statusArea) ---
-        function setupDragAndDrop(containerId, imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer) {
+        // --- Lógica de Drag and Drop para Canales de Empaquetado ---
+        function setupPackerDragAndDrop(containerId, imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer) {
             const container = document.getElementById(containerId);
             const originalBorderClass = container.classList.contains('border-emerald-700') ? 'border-emerald-700' : 'border-gray-700';
-
+            
             // 1. Prevenir comportamiento por defecto y añadir feedback visual
             container.addEventListener('dragover', (e) => {
                 e.preventDefault();
-                container.classList.add('border-dashed', 'border-4', 'border-blue-400');
-                container.classList.remove(originalBorderClass);
+                const isSplitChannel = e.dataTransfer.types.includes('application/x-split-channel');
+                
+                if (e.dataTransfer.files.length > 0 || isSplitChannel) {
+                    container.classList.add('border-dashed', 'border-4', 'border-blue-400');
+                    container.classList.remove(originalBorderClass);
+                    e.dataTransfer.dropEffect = 'copy';
+                }
             });
 
             container.addEventListener('dragleave', (e) => {
@@ -307,18 +386,39 @@
                 container.classList.remove('border-dashed', 'border-4', 'border-blue-400');
                 container.classList.add(originalBorderClass);
                 
+                // --- A. Handle Split Channel Drop ---
+                const splitChannelId = e.dataTransfer.getData('text/plain');
+                const isSplitChannelDrop = e.dataTransfer.types.includes('application/x-split-channel');
+
+                if (isSplitChannelDrop && splitChannelId) {
+                    const splitContainer = document.getElementById(splitChannelId);
+                    const sourceCanvas = splitContainer ? splitContainer.querySelector('canvas') : null;
+                    
+                    if (sourceCanvas && sourceCanvas.dataset.fullDataUrl) {
+                        const url = sourceCanvas.dataset.fullDataUrl;
+                        const w = parseInt(sourceCanvas.dataset.originalWidth);
+                        const h = parseInt(sourceCanvas.dataset.originalHeight);
+                        const filename = `SPLIT_${splitContainer.dataset.channelName.toUpperCase()}_${w}.png`; // Crear un nombre único
+
+                        imageObj.src = url;
+                        imageObj.onload = () => {
+                            handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer, w, h, filename);
+                        };
+                        return; // Salir si un canal separado fue manejado
+                    }
+                }
+
+                // --- B. Handle External File Drop (Original Logic) ---
                 const file = e.dataTransfer.files[0];
                 if (file && file.type.startsWith('image/')) {
                     const url = URL.createObjectURL(file);
                     
                     imageObj.src = url;
                     imageObj.onload = () => {
-                        handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer, imageObj.width, imageObj.height, file.name); // Pasar statusArea
+                        handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, sliderContainer, imageObj.width, imageObj.height, file.name); 
                     };
-                } else {
-                    // Mostrar un mensaje de error si el archivo no es una imagen
+                } else if (!isSplitChannelDrop) { 
                     if (statusElement) {
-                         // Mostrar error temporalmente
                          statusElement.textContent = `Error: Archivo no válido.`;
                          statusArea.classList.remove('hidden'); 
                          setTimeout(() => statusArea.classList.add('hidden'), 3000); 
@@ -328,12 +428,38 @@
         }
         
         // Asignar manejadores Drag and Drop a los 3 contenedores
-        setupDragAndDrop('occlusionContainer', images.r, 'r', hiddenRedCtx, redStatusArea, redStatus, redChannel, redSliderContainer);
-        setupDragAndDrop('roughnessContainer', images.g, 'g', hiddenGreenCtx, greenStatusArea, greenStatus, greenChannel, greenSliderContainer);
-        setupDragAndDrop('metallicContainer', images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueSliderContainer);
+        setupPackerDragAndDrop('occlusionContainer', images.r, 'r', hiddenRedCtx, redStatusArea, redStatus, redChannel, redSliderContainer);
+        setupPackerDragAndDrop('roughnessContainer', images.g, 'g', hiddenGreenCtx, greenStatusArea, greenStatus, greenChannel, greenSliderContainer);
+        setupPackerDragAndDrop('metallicContainer', images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueSliderContainer);
 
-        // --- Lógica para Eliminar Textura (NUEVO) ---
-        
+        // --- Lógica de Drag Start para Split Results ---
+        [splitRedContainer, splitGreenContainer, splitBlueContainer].forEach(container => {
+            container.addEventListener('dragstart', (e) => {
+                const canvas = container.querySelector('canvas');
+                if (!canvas.dataset.fullDataUrl) {
+                    e.preventDefault();
+                    return;
+                }
+                e.dataTransfer.setData('text/plain', container.id);
+                e.dataTransfer.setData('application/x-split-channel', 'true');
+                e.dataTransfer.effectAllowed = 'copy';
+                
+                // Imagen fantasma
+                if (canvas.width > 0) {
+                    e.dataTransfer.setDragImage(canvas, canvas.width / 2, canvas.height / 2);
+                }
+            });
+
+            container.addEventListener('dragend', (e) => {
+                const canvas = container.querySelector('canvas');
+                if (!canvas.dataset.fullDataUrl) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+
+        // --- Lógica para Eliminar Textura (Borrado de Canales) ---
         function clearChannel(stateKey) {
             
             const dataMap = {
@@ -348,8 +474,10 @@
             loadState[stateKey] = false;
             filenames[stateKey] = '';
 
-            // 2. Limpiar el canvas oculto (para que no afecte el procesamiento)
+            // 2. Limpiar el canvas oculto 
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.canvas.width = 1; 
+            ctx.canvas.height = 1;
 
             // 3. Ocultar status y mostrar label sólido
             statusArea.classList.add('hidden');
@@ -369,20 +497,18 @@
             }
 
             // 6. Reprocesar la imagen
-            processImage(); // Ejecución inmediata al borrar una imagen
+            processImage(); 
         }
         
-        // Asignar manejadores a los botones de limpieza
+        // Asignar manejadores a los botones de limpieza de canales de empaquetado
         redClearButton.addEventListener('click', () => clearChannel('r'));
         greenClearButton.addEventListener('click', () => clearChannel('g'));
         blueClearButton.addEventListener('click', () => clearChannel('b'));
 
-        // --- Debounce y Lógica de Sliders/Tamaño (FIX para el rendimiento) ---
+        // --- Debounce y Lógica de Sliders/Tamaño ---
         
-        // Crear una versión debounced de processImage con un retardo de 50ms
         const debouncedProcessImage = debounce(processImage, 50);
 
-        // Los sliders y el selector de tamaño usan la versión debounced
         redChannel.addEventListener('input', () => {
             redValueLabel.textContent = `Valor: ${redChannel.value} (${redChannel.value > 128 ? 'Blanco' : 'Negro'})`;
             debouncedProcessImage();
@@ -398,11 +524,205 @@
             debouncedProcessImage();
         });
 
-        // El cambio de tamaño también se debounces, aunque los cambios de tamaño son más lentos.
         outputSize.addEventListener('input', debouncedProcessImage);
 
 
-        // 4. Función principal de procesamiento
+        // --- Lógica del Splitter ---
+
+        // Toggle (Desplegable)
+        splitterToggle.addEventListener('click', () => {
+            const isHidden = splitterContent.classList.toggle('hidden');
+            toggleIcon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+        });
+
+        // ----------------------------------------------------
+        // Lógica de Carga y Drag&Drop para el ORM Splitter (Nuevo)
+        // ----------------------------------------------------
+
+        // A. Carga por Input File
+        ormSplitterLoader.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const url = URL.createObjectURL(file);
+            splitterImg.src = url;
+            splitterImg.onload = () => {
+                handleSplitterLoad(splitterImg, file.name);
+                URL.revokeObjectURL(url); 
+            };
+        });
+        
+        // B. Carga por Drag & Drop
+        splitterLoadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                splitterLoadArea.classList.add('border-dashed', 'border-4', 'border-blue-400');
+                e.dataTransfer.dropEffect = 'copy';
+            }
+        });
+
+        splitterLoadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            splitterLoadArea.classList.remove('border-dashed', 'border-4', 'border-blue-400');
+        });
+
+        splitterLoadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            splitterLoadArea.classList.remove('border-dashed', 'border-4', 'border-blue-400');
+            
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const url = URL.createObjectURL(file);
+                splitterImg.src = url;
+                splitterImg.onload = () => {
+                    handleSplitterLoad(splitterImg, file.name);
+                    URL.revokeObjectURL(url); 
+                };
+            }
+        });
+
+        // C. Función Manejadora de Carga de Splitter
+        function handleSplitterLoad(img, filename) {
+            loadState.splitter = true;
+            filenames.splitter = filename;
+
+            // Actualizar interfaz
+            const displayFilename = filename.length > 25 ? filename.substring(0, 22) + '...' : filename;
+            splitterStatus.textContent = `Cargado: ${displayFilename}`;
+            splitterStatusArea.classList.remove('hidden');
+            splitterLabel.classList.add('hidden'); // Ocultar el botón de carga
+
+            // Habilitar miniaturas arrastrables
+            [splitRedContainer, splitGreenContainer, splitBlueContainer].forEach(container => {
+                container.classList.remove('opacity-50', 'pointer-events-none');
+            });
+            
+            // Ejecutar la separación
+            splitOrmImage(img);
+        }
+
+        // D. Función de Borrado del Splitter
+        splitterClearButton.addEventListener('click', clearSplitter);
+
+        function clearSplitter() {
+            loadState.splitter = false;
+            filenames.splitter = '';
+
+            // Limpiar canvas oculto y previews
+            hiddenSplitCtx.clearRect(0, 0, hiddenSplitCanvas.width, hiddenSplitCanvas.height);
+            hiddenSplitCanvas.width = 1;
+            hiddenSplitCanvas.height = 1;
+            
+            [splitRedCtx, splitGreenCtx, splitBlueCtx].forEach(ctx => {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            });
+            
+            [splitRedCanvas, splitGreenCanvas, splitBlueCanvas].forEach(canvas => {
+                delete canvas.dataset.fullDataUrl;
+            });
+
+            // Resetear interfaz
+            splitterStatusArea.classList.add('hidden');
+            splitterLabel.classList.remove('hidden');
+            
+            // Deshabilitar miniaturas arrastrables
+            [splitRedContainer, splitGreenContainer, splitBlueContainer].forEach(container => {
+                container.classList.add('opacity-50', 'pointer-events-none');
+            });
+        }
+
+
+        // E. Función de Desglosar (Split)
+        function splitOrmImage(img) {
+            const w = img.width;
+            const h = img.height;
+            
+            // 1. Dibujar la imagen de origen
+            hiddenSplitCanvas.width = w;
+            hiddenSplitCanvas.height = h;
+            hiddenSplitCtx.drawImage(img, 0, 0);
+            
+            const imageData = hiddenSplitCtx.getImageData(0, 0, w, h);
+            const data = imageData.data;
+            const length = data.length;
+
+            // 2. Crear datos de imagen para los 3 canales
+            const redImageData = hiddenSplitCtx.createImageData(w, h);
+            const greenImageData = hiddenSplitCtx.createImageData(w, h);
+            const blueImageData = hiddenSplitCtx.createImageData(w, h);
+
+            const redData = redImageData.data;
+            const greenData = greenImageData.data;
+            const blueData = blueImageData.data;
+
+            // 3. Iterar y separar los canales
+            for (let i = 0; i < length; i += 4) {
+                // R (Occlusion)
+                redData[i + 0] = data[i + 0]; 
+                redData[i + 1] = data[i + 0]; // Grayscale
+                redData[i + 2] = data[i + 0]; // Grayscale
+                redData[i + 3] = 255;
+
+                // G (Roughness)
+                greenData[i + 0] = data[i + 1]; // Grayscale
+                greenData[i + 1] = data[i + 1]; 
+                greenData[i + 2] = data[i + 1]; // Grayscale
+                greenData[i + 3] = 255;
+
+                // B (Metallic)
+                blueData[i + 0] = data[i + 2]; // Grayscale
+                blueData[i + 1] = data[i + 2]; // Grayscale
+                blueData[i + 2] = data[i + 2]; 
+                blueData[i + 3] = 255;
+            }
+
+            // 4. Dibujar vistas previas y generar DataURLs de alta resolución
+            const previewSize = 96;
+
+            [splitRedCanvas, splitGreenCanvas, splitBlueCanvas].forEach(canvas => {
+                canvas.width = previewSize; 
+                canvas.height = previewSize;
+            });
+
+            function drawSplitPreview(sourceImageData, previewCtx) {
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = w;
+                tempCanvas.height = h;
+                tempCtx.putImageData(sourceImageData, 0, 0);
+                
+                previewCtx.imageSmoothingEnabled = false;
+                previewCtx.drawImage(tempCanvas, 0, 0, w, h, 0, 0, previewCtx.canvas.width, previewCtx.canvas.height);
+            }
+            
+            // Dibujar las miniaturas
+            drawSplitPreview(redImageData, splitRedCtx);
+            drawSplitPreview(greenImageData, splitGreenCtx);
+            drawSplitPreview(blueImageData, splitBlueCtx);
+            
+            // 5. Almacenar DataURL de alta resolución y tamaño original para el Drag-and-Drop
+            function getFullResDataUrl(imageData, w, h) {
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = w;
+                tempCanvas.height = h;
+                tempCtx.putImageData(imageData, 0, 0);
+                return tempCanvas.toDataURL('image/png');
+            }
+            
+            splitRedCanvas.dataset.fullDataUrl = getFullResDataUrl(redImageData, w, h);
+            splitGreenCanvas.dataset.fullDataUrl = getFullResDataUrl(greenImageData, w, h);
+            splitBlueCanvas.dataset.fullDataUrl = getFullResDataUrl(blueImageData, w, h);
+
+            [splitRedCanvas, splitGreenCanvas, splitBlueCanvas].forEach(canvas => {
+                canvas.dataset.originalWidth = w;
+                canvas.dataset.originalHeight = h;
+            });
+        }
+
+
+        // 6. Función principal de procesamiento (sin cambios)
         function processImage() {
             // Obtener el tamaño de salida deseado (Este es el tamaño MAESTRO de la textura ORM)
             let targetWidth, targetHeight;
@@ -422,39 +742,29 @@
 
             // --- A. Ajustar y Redibujar Imágenes de Entrada al Tamaño Maestro ---
             
-            // Ajustar el canvas de procesamiento y los canvas ocultos al tamaño MAESTRO
             processingCanvas.width = targetWidth;
             processingCanvas.height = targetHeight;
-            hiddenRedCtx.canvas.width = targetWidth;
-            hiddenRedCtx.canvas.height = targetHeight;
-            hiddenGreenCtx.canvas.width = targetWidth;
-            hiddenGreenCtx.canvas.height = targetHeight;
-            hiddenBlueCtx.canvas.width = targetWidth;
-            hiddenBlueCtx.canvas.height = targetHeight;
             
-            // Borrar y redibujar los canvas ocultos (escalando las imágenes al target size)
-            hiddenRedCtx.imageSmoothingEnabled = false;
-            hiddenGreenCtx.imageSmoothingEnabled = false;
-            hiddenBlueCtx.imageSmoothingEnabled = false;
+            // Creamos canvases temporales para dibujar la imagen original escalada.
+            function redrawScaledChannel(sourceCtx, targetWidth, targetHeight) {
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = targetWidth;
+                tempCanvas.height = targetHeight;
 
-            // Solo redibujar si hay una imagen cargada.
-            // Si no está cargada, el canvas se mantendrá transparente (negro con alpha 0)
-            if (loadState.r) hiddenRedCtx.drawImage(images.r, 0, 0, targetWidth, targetHeight);
-            if (loadState.g) hiddenGreenCtx.drawImage(images.g, 0, 0, targetWidth, targetHeight);
-            if (loadState.b) hiddenBlueCtx.drawImage(images.b, 0, 0, targetWidth, targetHeight);
-
-
+                if (sourceCtx.canvas.width > 1) { // Solo si hay imagen cargada
+                    tempCtx.imageSmoothingEnabled = false;
+                    tempCtx.drawImage(sourceCtx.canvas, 0, 0, sourceCtx.canvas.width, sourceCtx.canvas.height, 0, 0, targetWidth, targetHeight);
+                }
+                return tempCtx.getImageData(0, 0, targetWidth, targetHeight).data;
+            }
+            
+            const redPixels = redrawScaledChannel(hiddenRedCtx, targetWidth, targetHeight);
+            const greenPixels = redrawScaledChannel(hiddenGreenCtx, targetWidth, targetHeight);
+            const bluePixels = redrawScaledChannel(hiddenBlueCtx, targetWidth, targetHeight);
+            
             // --- B. Obtener datos finales para el empaquetado ---
             
-            // Obtener datos de píxeles (si loadState es false, el canvas escalado estará vacío/negro)
-            const redData = hiddenRedCtx.getImageData(0, 0, targetWidth, targetHeight);
-            const greenData = hiddenGreenCtx.getImageData(0, 0, targetWidth, targetHeight);
-            const blueData = hiddenBlueCtx.getImageData(0, 0, targetWidth, targetHeight);
-            
-            const redPixels = redData.data;
-            const greenPixels = greenData.data;
-            const bluePixels = blueData.data;
-
             // Obtener valores de slider como fallback (para canales sin imagen cargada)
             const redValue = parseInt(redChannel.value);
             const greenValue = parseInt(greenChannel.value);
@@ -468,8 +778,7 @@
 
             // Iterar y empaquetar canales (4 bytes por píxel: R, G, B, A)
             for (let i = 0; i < totalPixels * 4; i += 4) {
-                // R (Occlusion): Si hay imagen, usa el canal R. Si no, usa el valor del slider.
-                // Se usa el canal Rojo (R) de la imagen de entrada, asumiendo que es escala de grises.
+                // R (Occlusion): Si hay imagen (canvas > 1x1), usa el canal R. Si no, usa el valor del slider.
                 const r = loadState.r ? redPixels[i + 0] : redValue; 
 
                 // G (Roughness): Si hay imagen, usa el canal R. Si no, usa el valor del slider.
@@ -501,7 +810,7 @@
             );
         }
 
-        // 6. Lógica de Descarga
+        // 7. Lógica de Descarga
         downloadButton.addEventListener('click', () => {
             const dataURL = outputCanvas.toDataURL('image/png');
             const link = document.createElement('a');
