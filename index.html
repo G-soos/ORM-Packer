@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ORM Texture Packer</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -37,6 +39,19 @@
             font-size: 0.75rem;
         }
     </style>
+    <!-- Open Graph (Preview on social media & chats) -->
+<meta property="og:title" content="ORM Texture Packer">
+<meta property="og:description" content="Herramienta para crear y descomponer texturas ORM (Occlusion, Roughness, Metallic).">
+<meta property="og:image" content="https://g-soos.github.io/ORM-Packer/preview.png">
+<meta property="og:url" content="https://g-soos.github.io/ORM-Packer/">
+<meta property="og:type" content="website">
+    
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ORM Texture Packer">
+<meta name="twitter:description" content="Crear y descomponer texturas ORM fácilmente.">
+<meta name="twitter:image" content="https://g-soos.github.io/ORM-Packer/preview.png">
+
+
 </head>
 <body class="bg-gray-900 text-gray-200 font-sans flex items-center justify-center h-screen p-4">
 
@@ -158,7 +173,7 @@
                         <div id="splitterLoadArea" class="space-y-3 mb-4 p-3 bg-gray-900 rounded-lg border-2 border-purple-500/50 transition duration-150" 
                              data-channel-color="purple" data-original-border-color="border-purple-500/50">
                             <label for="ormSplitterLoader" id="splitterLabel" class="block w-full cursor-pointer bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-center transition duration-200 text-sm">
-                                1. Load/Drag ORM Texture (RGB)
+                                Load/Drag ORM Texture (RGB)
                             </label>
                             <input type="file" id="ormSplitterLoader" class="hidden" accept="image/*">
                             
@@ -169,7 +184,7 @@
                             </div>
                         </div>
 
-                        <p id="splitterMessage" class="text-sm text-gray-400 mb-4">2. Drag and drop the desired thumbnail to the packing channel (Red, Green, or Blue).</p>
+                        <p id="splitterMessage" class="text-sm text-gray-400 mb-4">Drag and drop the desired thumbnail to the packing channel (Red, Green, or Blue).</p>
                         
                         <div id="splitterResults" class="grid grid-cols-3 gap-2">
                             <!-- RED -->
@@ -931,266 +946,7 @@
                 0, 0, targetWidth, targetHeight  
             );
         }
-        <!-- === MOBILE "TAP TO PLACE" OVERLAYS & CANCEL BUTTON === -->
-<style>
-/* Mobile overlay common */
-.mobile-overlay {
-  position: absolute;
-  inset: 0;
-  display: none; /* show only when active */
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.35);
-  z-index: 40;
-  pointer-events: none; /* default off, the inner box will accept clicks */
-  transition: opacity 180ms ease;
-}
-
-/* when active */
-.mobile-overlay.show {
-  display: flex;
-  pointer-events: auto;
-  opacity: 1;
-}
-
-/* The squared outline with dashed border and + sign */
-.mobile-plus {
-  width: 56px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  border: 2px dashed white; /* JS will recolor according to channel color */
-  background: rgba(255,255,255,0.03);
-  font-size: 26px;
-  font-weight: 700;
-  color: white;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-  pointer-events: auto;
-}
-
-/* Slight hint text under the + (small, optional) */
-.mobile-plus-label {
-  position: absolute;
-  top: calc(50% + 44px);
-  transform: translateY(-50%);
-  font-size: 12px;
-  color: rgba(255,255,255,0.9);
-  font-weight: 600;
-  text-align: center;
-}
-
-/* Mobile cancel X in the Splitter panel */
-#mobileCancelSelection {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 60;
-  display: none; /* only on mobile & when selection active */
-  font-size: 20px;
-  font-weight: 800;
-  color: white;
-  background: rgba(0,0,0,0.4);
-  padding: 6px 8px;
-  border-radius: 6px;
-  backdrop-filter: blur(4px);
-  cursor: pointer;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-}
-
-/* Show cancel button when active */
-#mobileCancelSelection.show {
-  display: block;
-}
-
-/* Make sure overlay sits above canal content but below global UI elements */
-.occlusion-container-relative,
-.roughness-container-relative,
-.metallic-container-relative {
-  position: relative; /* parent for overlay */
-}
-</style>
-
-<script>
-/* Mobile tap-to-place implementation (paste near end of your script) */
-
-(function(){
-  // Detect touch devices (mobile)
-  const isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
-
-  if (!isMobile) {
-    // nothing to do on desktop (keep drag & drop)
-    return;
-  }
-
-  // Parent container elements (they exist in your markup)
-  const occlusionContainerEl = document.getElementById('occlusionContainer');
-  const roughnessContainerEl = document.getElementById('roughnessContainer');
-  const metallicContainerEl = document.getElementById('metallicContainer');
-  const splitterLoadAreaEl = document.getElementById('splitterLoadArea');
-
-  // Ensure relative positioning classes so overlay absolute works
-  occlusionContainerEl.classList.add('occlusion-container-relative');
-  roughnessContainerEl.classList.add('roughness-container-relative');
-  metallicContainerEl.classList.add('metallic-container-relative');
-
-  // Create overlay elements per channel
-  function makeOverlay(channelId, colorHex) {
-    const overlay = document.createElement('div');
-    overlay.className = 'mobile-overlay';
-    overlay.dataset.channel = channelId;
-
-    const plus = document.createElement('div');
-    plus.className = 'mobile-plus';
-    plus.textContent = '+';
-
-    // apply channel colored outline (use dashed border same color)
-    plus.style.borderColor = colorHex;
-
-    // add small label (optional)
-    const label = document.createElement('div');
-    label.className = 'mobile-plus-label';
-    label.textContent = 'Colocar aquí';
-
-    // wrap and append
-    overlay.appendChild(plus);
-    overlay.appendChild(label);
-
-    // click handler: place into corresponding channel
-    overlay.addEventListener('click', (e) => {
-      // Only react to click on overlay (not bubbling)
-      e.stopPropagation();
-      if (!selectedSplit) return;
-      const channel = overlay.dataset.channel;
-      applySplitToChannel(channel);
-    });
-
-    return overlay;
-  }
-
-  // Choose colors to match UI (tailwind-ish hex)
-  const redColor = '#f87171';
-  const greenColor = '#34d399';
-  const blueColor = '#60a5fa';
-
-  const occlusionOverlay = makeOverlay('r', redColor);
-  const roughnessOverlay = makeOverlay('g', greenColor);
-  const metallicOverlay = makeOverlay('b', blueColor);
-
-  // Append overlays into each channel container
-  occlusionContainerEl.appendChild(occlusionOverlay);
-  roughnessContainerEl.appendChild(roughnessOverlay);
-  metallicContainerEl.appendChild(metallicOverlay);
-
-  // Create mobile cancel X button inside the splitter area
-  const mobileCancel = document.createElement('div');
-  mobileCancel.id = 'mobileCancelSelection';
-  mobileCancel.title = 'Cancelar colocación';
-  mobileCancel.innerHTML = '✕'; // style C: solo un texto "X" grande flotante
-  splitterLoadAreaEl.style.position = 'relative';
-  splitterLoadAreaEl.appendChild(mobileCancel);
-
-  mobileCancel.addEventListener('click', (e) => {
-    e.stopPropagation();
-    clearSelectionVisuals();
-  });
-
-  // Keep selected split data here
-  let selectedSplit = null;
-
-  // Clicking a split thumbnail (tap) should select it on mobile
-  const splitThumbs = [document.getElementById('splitRedContainer'), document.getElementById('splitGreenContainer'), document.getElementById('splitBlueContainer')];
-  splitThumbs.forEach(container => {
-    container.addEventListener('click', (e) => {
-      // Only on mobile: pick the dataUrl stored on canvas
-      const canvas = container.querySelector('canvas');
-      if (!canvas || !canvas.dataset.fullDataUrl) return;
-      selectedSplit = {
-        dataUrl: canvas.dataset.fullDataUrl,
-        width: parseInt(canvas.dataset.originalWidth || '0'),
-        height: parseInt(canvas.dataset.originalHeight || '0'),
-        channelName: container.dataset.channelName || 'split'
-      };
-      showSelectionVisuals();
-    });
-  });
-
-  // Show overlays & cancel button
-  function showSelectionVisuals() {
-    // add class to overlays to show them
-    [occlusionOverlay, roughnessOverlay, metallicOverlay].forEach(ov => ov.classList.add('show'));
-    mobileCancel.classList.add('show');
-
-    // Slightly dim inner content (already provided by overlay)
-    // Optional: set focus/aria
-    document.body.classList.add('mobile-split-selection-active');
-  }
-
-  // Hide overlays & cancel button
-  function clearSelectionVisuals() {
-    selectedSplit = null;
-    [occlusionOverlay, roughnessOverlay, metallicOverlay].forEach(ov => ov.classList.remove('show'));
-    mobileCancel.classList.remove('show');
-    document.body.classList.remove('mobile-split-selection-active');
-  }
-
-  // Mapping for calling handleImageLoad for each channel (reuse your existing DOM references)
-  const channelParams = {
-    r: { imageObj: images.r, stateKey: 'r', hiddenCtx: hiddenRedCtx, statusArea: redStatusArea, statusElement: redStatus, sliderInput: redChannel, numberInput: redValueInput, sliderContainer: redSliderContainer },
-    g: { imageObj: images.g, stateKey: 'g', hiddenCtx: hiddenGreenCtx, statusArea: greenStatusArea, statusElement: greenStatus, sliderInput: greenChannel, numberInput: greenValueInput, sliderContainer: greenSliderContainer },
-    b: { imageObj: images.b, stateKey: 'b', hiddenCtx: hiddenBlueCtx, statusArea: blueStatusArea, statusElement: blueStatus, sliderInput: blueChannel, numberInput: blueValueInput, sliderContainer: blueSliderContainer }
-  };
-
-  // Apply selected split to chosen channel
-  function applySplitToChannel(channelKey) {
-    if (!selectedSplit) return;
-    const params = channelParams[channelKey];
-    if (!params) return;
-
-    // create a new Image to preserve original Image objects
-    const img = new Image();
-    img.src = selectedSplit.dataUrl;
-    img.onload = () => {
-      // filename generated for clarity
-      const filename = `SPLIT_${(channelKey === 'r' ? 'RED' : (channelKey === 'g' ? 'GREEN' : 'BLUE'))}_${selectedSplit.width}x${selectedSplit.height}.png`;
-      // call your existing handleImageLoad function signature:
-      // handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, width, height, filename)
-      handleImageLoad(img, params.stateKey, params.hiddenCtx, params.statusArea, params.statusElement, params.sliderInput, params.numberInput, params.sliderContainer, img.width, img.height, filename);
-
-      // done — clear selection visuals
-      clearSelectionVisuals();
-    };
-
-    img.onerror = () => {
-      // fallback: notify user and clear visuals
-      clearSelectionVisuals();
-      // optional: show a brief status message in splitterStatus
-      if (splitterStatus) {
-        splitterStatus.textContent = 'Error cargando imagen';
-        splitterStatusArea.classList.remove('hidden');
-        setTimeout(() => splitterStatusArea.classList.add('hidden'), 2200);
-      }
-    };
-  }
-
-  // If user taps outside of splitter thumbnails or overlays, cancel selection
-  document.addEventListener('click', (e) => {
-    // If there is an active selection and click is outside splitThumbs or overlays, clear
-    if (!selectedSplit) return;
-
-    // check if click was inside any splitThumb or overlay or cancel button — if so, ignore
-    const clickedInsideSplitThumb = splitThumbs.some(c => c.contains(e.target));
-    const clickedInsideOverlay = [occlusionContainerEl, roughnessContainerEl, metallicContainerEl].some(c => c.contains(e.target) && (c.querySelector('.mobile-overlay.show') && c.querySelector('.mobile-overlay.show').contains(e.target)));
-    const clickedCancel = mobileCancel.contains(e.target);
-    if (!clickedInsideSplitThumb && !clickedInsideOverlay && !clickedCancel) {
-      clearSelectionVisuals();
-    }
-  }, true);
-
-})();
-</script>
-
+        
         // Add event listener to re-process and scale the canvas whenever the window resizes
         window.addEventListener('resize', debouncedProcessImage);
 
