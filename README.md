@@ -1,27 +1,110 @@
-Empaquetador de Texturas ORM (PBR)
+🔴🟢🔵 ORM Texture Packer & Splitter
 
-Esta es una herramienta simple y eficaz diseñada para optimizar activos 3D (Physically Based Rendering - PBR).
+Crea, combina y separa texturas ORM (Occlusion, Roughness, Metallic) fácilmente.
 
-Función principal:
+Este proyecto es una herramienta web que permite:
 
-Combina tres mapas de textura en escala de grises (Oclusión, Roughness, Metálico) en un solo archivo PNG (RGB) para reducir la carga de memoria (VRAM) y mejorar el rendimiento del motor 3D.
+✅ Generar texturas ORM combinando canales (R, G, B)
+✅ Cargar mapas individuales o valores sólidos
+✅ Separar un ORM existente en tres mapas independientes
+✅ Arrastrar y soltar imágenes entre canales
+✅ Elegir resolución de salida (hasta 4096 × 4096)
+✅ Descargar el resultado en PNG sin compresión
+✅ Interfaz moderna, responsiva y optimizada
+***********************************************************************************
 
-Características:
+🚀 Características principales
 
-Flujo de Trabajo Flexible: Carga los mapas de Oclusión (Rojo), Roughness (Verde) y Metálico (Azul) en cualquier orden.
+🎨 Empaquetador ORM
+Carga mapas de:
+Oclusión (Red / R)
+Rugosidad (Green / G)
+Metallic (Blue / B)
+Puedes usar imágenes o valores sólidos (0–255).
+Sincronización entre sliders y campos numéricos.
+Mini-estado del archivo cargado.
+Botón para limpiar canal y volver al valor sólido.
+***********************************************************************************
 
-Tamaño Maestro: La resolución de salida (ej. 2048x2048) se define al inicio, escalando automáticamente todas las texturas de entrada al tamaño requerido.
+🔧 Splitter (Desconstructor de Textura ORM)
 
-Control de Canal: Si no se carga un mapa, puedes usar un deslizador para asignar un valor sólido (negro a blanco) a ese canal.
+Carga una textura ORM completa.
+Divide automáticamente en:
+Canal Rojo → Occlusion
+Canal Verde → Roughness
+Canal Azul → Metallic
+Vista previa clara en miniaturas.
+Arrastra los canales separados directamente a los canales del empaquetador.
+Botón para limpiar y resetear el módulo.
+***********************************************************************************
+
+📦 Salida configurable
+
+Resoluciones disponibles:
+4096, 2048, 1024, 512, 256, 128, 64 + Original
+Vista previa escalable y responsiva
+Descarga en PNG con color exacto (sin smoothing).
+***********************************************************************************
+
+🖥️ Interfaz
+
+Construida con:
+HTML5 + TailwindCSS
+Canvas 2D para procesamiento pixel-perfect
+Diseño moderno, responsivo y fluido
+Modo oscuro automático
+Icono Favicon personalizado
+***********************************************************************************
+
+🧩 Cómo usar
+1️⃣ Empaquetar una textura ORM
+
+Cargar mapas R/G/B (o usar los sliders).
+Ajustar resolución.
+Ver la vista previa final.
+Descargar el archivo PNG.
+
+2️⃣ Separar una textura ORM
+Ir a la sección Splitter.
+Cargar la textura completa ORM.
+Revisar las miniaturas generadas.
+Arrastrar un canal a la sección correspondiente.
 
 ⚠️ Nota Importante para Usuarios de Firefox
 
 Debido a las estrictas políticas de seguridad de Firefox, el botón "Descargar Imagen ORM" podría ser bloqueado.
-
 Solución alternativa:
-
 Asegúrate de haber elegido el Tamaño de Salida (Maestro) deseado.
-
 Haz clic derecho sobre la imagen de previsualización de la textura ORM.
-
 Selecciona la opción "Guardar imagen como..." o "Save Image As..." para guardar el archivo PNG directamente.
+***********************************************************************************
+
+🌐 Vista previa al compartir (Open Graph)
+
+El proyecto incluye etiquetas OG para mostrar:
+Miniatura
+Título personalizado
+Descripción
+en redes como Discord, WhatsApp, Twitter, Facebook, Telegram, etc.
+***********************************************************************************
+
+🧠 Tecnologías utilizadas
+
+HTML5
+CSS (Tailwind)
+JavaScript Vanilla
+Canvas API
+Open Graph meta tags
+GitHub Pages
+***********************************************************************************
+
+📥 Descarga / Uso
+
+No requiere instalación.
+Funciona directamente en navegador moderno.
+***********************************************************************************
+
+✨ Autor
+
+Gsoos
+Herramientas prácticas para artistas 3D y devs.
