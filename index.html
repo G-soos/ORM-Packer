@@ -6,7 +6,6 @@
     <title>ORM Texture Packer</title>
     <link rel="icon" type="image/png" href="favicon.png">
 
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom style for canvas to prevent blurriness */
@@ -39,8 +38,7 @@
             font-size: 0.75rem;
         }
     </style>
-    <!-- Open Graph (Preview on social media & chats) -->
-<meta property="og:title" content="ORM Texture Packer">
+    <meta property="og:title" content="ORM Texture Packer">
 <meta property="og:description" content="Herramienta para crear y descomponer texturas ORM (Occlusion, Roughness, Metallic).">
 <meta property="og:image" content="https://g-soos.github.io/ORM-Packer/preview.png">
 <meta property="og:url" content="https://g-soos.github.io/ORM-Packer/">
@@ -55,26 +53,34 @@
 </head>
 <body class="bg-gray-900 text-gray-200 font-sans flex items-center justify-center h-screen p-4">
 
-    <!-- WATERMARK -->
-    <div class="fixed top-4 right-4 text-6xl text-white/10 pointer-events-none font-extrabold select-none z-50 transform rotate-12">Gsoos</div>
-    <!-- END WATERMARK -->
-
-    <!-- Main Container with the FLEX layout -->
-    <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl w-full max-w-7xl h-full main-container flex flex-col">
+    
+<style>
+@keyframes drift{
+ from{ transform:translateY(0px) rotate(10deg); opacity:0.05; }
+ to{ transform:translateY(-20px) rotate(14deg); opacity:0.12; }
+}
+.watermark {
+ position:absolute;
+ font-size:4rem; 
+ font-weight:800;
+ color:white;
+ opacity:0.07;
+ pointer-events:none;
+ user-select:none;
+ animation: drift 1.2s linear infinite alternate;
+}
+</style>
+<div id="mainContainer" class="bg-gray-800 p-6 rounded-2xl shadow-2xl w-full max-w-7xl h-full main-container flex flex-col relative overflow-hidden">
         
         <h1 class="text-3xl font-bold text-center text-white mb-2">ORM Texture Packer Workshop</h1>
         <p class="text-center text-lg text-gray-400 mb-6">Create your ORM (Occlusion, Roughness, Metallic) texture.</p>
 
-        <!-- Flex Container for the two columns -->
         <div class="flex flex-1 flex-col lg:flex-row gap-6 overflow-hidden">
             
-            <!-- LEFT COLUMN: Inputs and Splitter -->
             <div class="flex flex-col gap-6 lg:w-1/2 left-column pr-2">
                 
-                <!-- Channel Input Container -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     
-                    <!-- RED Channel (Occlusion) -->
                     <div id="occlusionContainer" class="space-y-2 p-3 bg-gray-900/50 rounded-lg border-2 border-red-700 transition duration-150" 
                          data-channel-color="red" data-original-border-color="border-red-700">
                         <h2 class="text-lg font-semibold text-red-400">R: Occlusion</h2>
@@ -83,7 +89,6 @@
                         </label>
                         <input type="file" id="occlusionLoader" class="hidden" accept="image/*">
                         
-                        <!-- Status Area and Clear Button -->
                         <div id="redStatusArea" class="hidden flex items-center justify-between p-1 bg-red-900/30 rounded">
                             <div id="red-status" class="text-red-300 font-mono text-xs truncate"></div>
                             <button id="redClearButton" data-channel="r" class="text-red-300 hover:text-white bg-red-700/50 hover:bg-red-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove texture">X</button>
@@ -94,7 +99,6 @@
                         <div id="redSliderContainer">
                             <input id="redChannel" type="range" min="0" max="255" value="255" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #f87171;">
                             
-                            <!-- UPDATED: Input field for direct value typing -->
                             <div class="flex justify-center items-center gap-2 mt-1">
                                 <input id="redValueInput" type="number" min="0" max="255" value="255" class="channel-input-number text-red-300 focus:ring-red-500 focus:border-red-500"/>
                                 <div class="text-red-300 font-mono text-xs" id="redValueLabelText">(White)</div>
@@ -102,7 +106,6 @@
                         </div>
                     </div>
 
-                    <!-- GREEN Channel (Roughness) -->
                     <div id="roughnessContainer" class="space-y-2 p-3 bg-gray-900/50 rounded-lg border-2 border-emerald-700 transition duration-150" 
                          data-channel-color="green" data-original-border-color="border-emerald-700">
                         <h2 class="text-lg font-semibold text-emerald-400">G: Roughness</h2>
@@ -111,7 +114,6 @@
                         </label>
                         <input type="file" id="imageLoader" class="hidden" accept="image/*">
                         
-                        <!-- Status Area and Clear Button -->
                         <div id="greenStatusArea" class="hidden flex items-center justify-between p-1 bg-emerald-900/30 rounded">
                             <div id="green-status" class="text-emerald-300 font-mono text-xs truncate"></div>
                             <button id="greenClearButton" data-channel="g" class="text-emerald-300 hover:text-white bg-emerald-700/50 hover:bg-emerald-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove texture">X</button>
@@ -122,7 +124,6 @@
                         <div id="greenSliderContainer">
                             <input id="greenChannel" type="range" min="0" max="255" value="255" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #34d399;">
                             
-                            <!-- UPDATED: Input field for direct value typing -->
                             <div class="flex justify-center items-center gap-2 mt-1">
                                 <input id="greenValueInput" type="number" min="0" max="255" value="255" class="channel-input-number text-emerald-300 focus:ring-emerald-500 focus:border-emerald-500"/>
                                 <div class="text-emerald-300 font-mono text-xs" id="greenValueLabelText">(Matte)</div>
@@ -130,7 +131,6 @@
                         </div>
                     </div>
 
-                    <!-- BLUE Channel (Metallic) -->
                     <div id="metallicContainer" class="space-y-2 p-3 bg-gray-900/50 rounded-lg border-2 border-blue-700 transition duration-150" 
                          data-channel-color="blue" data-original-border-color="border-blue-700">
                         <h2 class="text-lg font-semibold text-blue-400">B: Metallic</h2>
@@ -139,7 +139,6 @@
                         </label>
                         <input type="file" id="metallicLoader" class="hidden" accept="image/*">
                         
-                        <!-- Status Area and Clear Button -->
                         <div id="blueStatusArea" class="hidden flex items-center justify-between p-1 bg-blue-900/30 rounded">
                             <div id="blue-status" class="text-blue-300 font-mono text-xs truncate"></div>
                             <button id="blueClearButton" data-channel="b" class="text-blue-300 hover:text-white bg-blue-700/50 hover:bg-blue-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove texture">X</button>
@@ -150,7 +149,6 @@
                         <div id="blueSliderContainer">
                             <input id="blueChannel" type="range" min="0" max="255" value="0" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #60a5fa;">
                             
-                            <!-- UPDATED: Input field for direct value typing -->
                             <div class="flex justify-center items-center gap-2 mt-1">
                                 <input id="blueValueInput" type="number" min="0" max="255" value="0" class="channel-input-number text-blue-300 focus:ring-blue-500 focus:border-blue-500"/>
                                 <div class="text-blue-300 font-mono text-xs" id="blueValueLabelText">(Black)</div>
@@ -161,15 +159,12 @@
                 
                 <hr class="border-gray-700/50">
 
-                <!-- Splitter Dropdown Container (Now FIXED) -->
                 <div id="splitterMainContainer" class="bg-gray-700/30 p-4 rounded-lg transition duration-150 border border-gray-700">
                     <h2 class="w-full text-left py-1 text-lg font-semibold text-white mb-2">
                         Deconstruct ORM Texture (Splitter)
                     </h2>
                     
-                    <!-- Content which is now visible by default -->
                     <div id="splitterContent">
-                        <!-- Load Area and Status for ORM to Deconstruct -->
                         <div id="splitterLoadArea" class="space-y-3 mb-4 p-3 bg-gray-900 rounded-lg border-2 border-purple-500/50 transition duration-150" 
                              data-channel-color="purple" data-original-border-color="border-purple-500/50">
                             <label for="ormSplitterLoader" id="splitterLabel" class="block w-full cursor-pointer bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-center transition duration-200 text-sm">
@@ -177,7 +172,6 @@
                             </label>
                             <input type="file" id="ormSplitterLoader" class="hidden" accept="image/*">
                             
-                            <!-- Status Area and Clear Button for Splitter -->
                             <div id="splitterStatusArea" class="hidden flex items-center justify-between p-1 bg-purple-900/30 rounded">
                                 <div id="splitter-status" class="text-purple-300 font-mono text-xs truncate"></div>
                                 <button id="splitterClearButton" class="text-purple-300 hover:text-white bg-purple-700/50 hover:bg-purple-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove loaded ORM texture">X</button>
@@ -187,17 +181,14 @@
                         <p id="splitterMessage" class="text-sm text-gray-400 mb-4">Drag and drop the desired thumbnail to the packing channel (Red, Green, or Blue).</p>
                         
                         <div id="splitterResults" class="grid grid-cols-3 gap-2">
-                            <!-- RED -->
                             <div id="splitRedContainer" class="p-1 border border-red-500 rounded-lg text-center cursor-grab bg-gray-900/50 hover:bg-gray-700 transition duration-150 shadow-md opacity-50 pointer-events-none" draggable="true" data-channel-name="occlusion">
                                 <canvas id="splitRedCanvas" class="w-full aspect-square rounded mb-1 border border-gray-600"></canvas>
                                 <span class="text-red-300 text-sm font-bold">Red</span>
                             </div>
-                            <!-- GREEN -->
                             <div id="splitGreenContainer" class="p-1 border border-emerald-500 rounded-lg text-center cursor-grab bg-gray-900/50 hover:bg-gray-700 transition duration-150 shadow-md opacity-50 pointer-events-none" draggable="true" data-channel-name="roughness">
                                 <canvas id="splitGreenCanvas" class="w-full aspect-square rounded mb-1 border border-gray-600"></canvas>
                                 <span class="text-emerald-300 text-sm font-bold">Green</span>
                             </div>
-                            <!-- BLUE -->
                             <div id="splitBlueContainer" class="p-1 border border-blue-500 rounded-lg text-center cursor-grab bg-gray-900/50 hover:bg-gray-700 transition duration-150 shadow-md opacity-50 pointer-events-none" draggable="true" data-channel-name="metallic">
                                 <canvas id="splitBlueCanvas" class="w-full aspect-square rounded mb-1 border border-gray-600"></canvas>
                                 <span class="text-blue-300 text-sm font-bold">Blue</span>
@@ -205,30 +196,19 @@
                         </div>
                     </div>
                 </div>
-                <!-- End of Fixed Splitter Container -->
-
-            </div>
-            <!-- END LEFT COLUMN -->
-
-            <!-- RIGHT COLUMN: Output and Settings -->
-            <!-- Adjusted: Removed overflow-y-auto and pr-2, using overflow-hidden to prevent scrolling -->
+                </div>
             <div class="flex flex-col gap-6 lg:w-1/2 overflow-hidden">
                 
-                <!-- Output Preview (Top) - Set to flex-1 to occupy all available space -->
                 <div class="flex-1 min-h-[100px] flex flex-col">
-                    <h3 class="text-lg font-semibold mb-2 text-center text-white flex-shrink-0">Output (Your ORM Texture)</h3>
-                    <!-- Wrapper set to h-full to use the full height of the flex-1 container -->
+                    <h3 class="text-lg font-semibold mb-2 text-center text-white flex-shrink-0">Output (Your ORM Texture - 8-bit Only)</h3>
                     <div id="outputCanvasWrapper" class="relative w-full h-full bg-gray-700 rounded-lg p-2 flex items-center justify-center">
-                        <!-- Canvas is constrained by max-w-full and max-h-full to scale proportionally within the wrapper -->
                         <canvas id="outputCanvas" class="max-w-full max-h-full rounded-lg border-2 border-gray-600 shadow-xl"></canvas>
                     </div>
                 </div>
                 
                 <hr class="border-gray-700/50 flex-shrink-0">
 
-                <!-- Output Configuration Column (Bottom) - Fixed height -->
                 <div class="space-y-4 pt-4 flex-shrink-0">
-                    <!-- Title restored and visible -->
                     <h2 class="text-xl font-semibold text-white">Output Settings (Configurable)</h2>
                     
                     <div>
@@ -244,29 +224,22 @@
                             <option value="64">64x64</option>
                         </select>
                     </div>
+
                     
-                    <!-- DOWNLOAD BUTTON: Always enabled due to solid values -->
                     <button id="downloadButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition duration-200 shadow-md hover:shadow-lg">
                         Download ORM Image (.png)
                     </button>
                 </div>
 
             </div>
-            <!-- END RIGHT COLUMN -->
-
+            </div>
         </div>
-        <!-- End Flex Container -->
 
-    </div>
-
-    <!-- Hidden Canvases for processing -->
     <canvas id="hiddenRedCanvas" class="hidden"></canvas>
     <canvas id="hiddenGreenCanvas" class="hidden"></canvas>
     <canvas id="hiddenBlueCanvas" class="hidden"></canvas>
     <canvas id="processingCanvas" class="hidden"></canvas>
-    <canvas id="hiddenSplitCanvas" class="hidden"></canvas> <!-- Dedicated hidden canvas for splitting -->
-
-    <script>
+    <canvas id="hiddenSplitCanvas" class="hidden"></canvas> <script>
         // --- UTILITY: Debounce Function ---
         function debounce(func, delay) {
             let timeoutId;
@@ -456,7 +429,6 @@
             container.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 
-                // Apply dashed border and highlight color
                 // Check if external file or a split channel is being dragged
                 const isExternalFile = e.dataTransfer.items.length > 0 && e.dataTransfer.items[0].kind === 'file';
                 const isSplitChannel = e.dataTransfer.types.includes('application/x-split-channel');
@@ -951,16 +923,54 @@
         window.addEventListener('resize', debouncedProcessImage);
 
 
-        // 7. Download Logic
+        // 7. Download Logic (SIMPLIFIED FOR 8-BIT ONLY)
+        
         downloadButton.addEventListener('click', () => {
+            const w = outputCanvas.width;
+            const h = outputCanvas.height;
+
+            // Always use 8-bit PNG export via standard Canvas API
             const dataURL = outputCanvas.toDataURL('image/png');
+            triggerDownload(dataURL, `ORM_Texture_${w}x${h}_8bit.png`);
+        });
+
+        function triggerDownload(url, filename) {
             const link = document.createElement('a');
-            link.download = `ORM_Texture_${outputCanvas.width}x${outputCanvas.height}.png`;
-            link.href = dataURL;
+            link.href = url;
+            link.download = filename;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        });
+        }
+
+        // --- Watermark Spawning Logic (from gsoos.html) ---
+        function spawnWatermark(){
+            const c=document.getElementById("mainContainer");
+            // Exit if container not found (safety)
+            if (!c) return;
+            
+            const w=document.createElement("div");
+            w.className="watermark";
+            w.textContent="Gsoos";
+
+            // random position inside container
+            const rect=c.getBoundingClientRect();
+            // Using 200px safety margin for the large font size to keep the center of the watermark visible
+            const x=Math.random()*(rect.width-200); 
+            const y=Math.random()*(rect.height-200);
+
+            w.style.left=x+"px";
+            w.style.top=y+"px";
+
+            c.appendChild(w);
+
+            // remove after some seconds (4 seconds)
+            setTimeout(()=>w.remove(),4000);
+        }
+
+        // Start spawning a new watermark every 1.5 seconds
+        setInterval(spawnWatermark,1500);
+        spawnWatermark(); // Spawn one immediately
 
         // Initialize channel values and canvas on load
         function initializeApp() {
