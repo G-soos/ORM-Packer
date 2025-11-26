@@ -14,7 +14,10 @@ This web tool allows you to:
 
 If you like this and want to see development continue consider to
 
-<a href="https://www.buymeacoffee.com/Gsoos"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a beer&emoji=🍺&slug=Gsoos&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
+<a href="https://www.buymeacoffee.com/Gsoos">
+  <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a beer&emoji=🍺&slug=Gsoos&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+</a>
+
 ---
 
 ## 🚀 Main Features
@@ -146,5 +149,6 @@ to generate rich previews on Discord, WhatsApp, Twitter, Facebook, Telegram, etc
 
 **Gsoos**  
 Tools for 3D artists and developers.
+
 
 
