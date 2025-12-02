@@ -7,8 +7,7 @@
 </title>
     <link rel="icon" type="image/png" href="favicon.png">
     
-    <!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-X82FXXRY47"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-X82FXXRY47"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -85,7 +84,7 @@
  animation: drift 1.2s linear infinite alternate;
 }
 </style>
-<div id="mainContainer" class="bg-gray-800 p-6 rounded-2xl shadow-2xl w-full max-w-7xl h-full main-container flex flex-col relative overflow-hidden">
+<div id="mainContainer" class="bg-gray-800 p-3 rounded-2xl shadow-2xl w-full max-w-7xl h-full main-container flex flex-col relative overflow-hidden">
         
         <h1 class="text-3xl font-bold text-center text-white mb-2">ORM Texture Packer Workshop</h1>
         <p class="text-center text-lg text-gray-400 mb-6"> Free online tool to generate ORM (Occlusion, Roughness, Metallic) textures for PBR workflows. 
@@ -210,7 +209,15 @@
                                 <span class="text-blue-300 text-sm font-bold">Blue</span>
                             </div>
                         </div>
-                    </div>
+                        
+                        <button id="downloadSplitSetButton" 
+                            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-sm mt-4 transition duration-200 shadow-md opacity-50 pointer-events-none"
+                            title="Download Occlusion, Roughness, and Metallic textures as a set."
+                            style="display: none;"
+                        >
+                            Download Split Texture Set (.png)
+                        </button> 
+                        </div>
                 </div>
                 </div>
             <div class="flex flex-col gap-6 lg:w-1/2 overflow-hidden">
@@ -249,17 +256,15 @@
 
             </div>
             </div>
-<div class="mt-auto pt-6 flex items-center gap-6">
+<div class="mt-auto pt-3 flex items-center gap-6">
 
-    <!-- Buy Me a Beer -->
     <a href="https://www.buymeacoffee.com/Gsoos" target="_blank">
         <img 
           src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=Gsoos&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff"
-          class="w-40"
+          class="w-30"
         />
     </a>
 
-    <!-- PayPal Donate -->
     <a href="https://www.paypal.com/donate/?hosted_button_id=MKU4HJ2MHUNGJ" target="_blank">
         <img 
           src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" 
@@ -267,7 +272,6 @@
         />
     </a>
 
-    <!-- GitHub Link -->
     <a href="https://github.com/G-soos/ORM-Packer" target="_blank" class="ml-auto">
         <img 
           src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
@@ -373,6 +377,9 @@
         const splitterStatus = document.getElementById('splitter-status');
         const splitterClearButton = document.getElementById('splitterClearButton');
         const splitterLabel = document.getElementById('splitterLabel');
+        
+        // NEW: Splitter Download Button
+        const downloadSplitSetButton = document.getElementById('downloadSplitSetButton'); 
 
         // Image, state, and filename storage
         const images = {
@@ -751,6 +758,10 @@
                 container.classList.remove('opacity-50', 'pointer-events-none');
             });
             
+            // NUEVO: Mostrar y habilitar el botón de descarga del set
+            downloadSplitSetButton.style.display = 'block';
+            downloadSplitSetButton.classList.remove('opacity-50', 'pointer-events-none');
+
             // Execute splitting
             splitOrmImage(img);
         }
@@ -778,6 +789,10 @@
             // Reset interface
             splitterStatusArea.classList.add('hidden');
             splitterLabel.classList.remove('hidden');
+            
+            // NUEVO: Ocultar y deshabilitar el botón de descarga del set
+            downloadSplitSetButton.style.display = 'none';
+            downloadSplitSetButton.classList.add('opacity-50', 'pointer-events-none');
             
             // Disable draggable thumbnails
             [splitRedContainer, splitGreenContainer, splitBlueContainer].forEach(container => {
@@ -972,12 +987,13 @@
         // 7. Download Logic (SIMPLIFIED FOR 8-BIT ONLY)
         
         downloadButton.addEventListener('click', () => {
-            const w = outputCanvas.width;
-            const h = outputCanvas.height;
+            // const w = outputCanvas.width; // Resolution removed from filename
+            // const h = outputCanvas.height; // Resolution removed from filename
 
             // Always use 8-bit PNG export via standard Canvas API
             const dataURL = outputCanvas.toDataURL('image/png');
-            triggerDownload(dataURL, `ORM_Texture_${w}x${h}_8bit.png`);
+            // MODIFICACIÓN: Nombre de archivo simplificado a 'ORM_Texture.png'
+            triggerDownload(dataURL, `ORM_Texture.png`);
         });
 
         function triggerDownload(url, filename) {
@@ -988,7 +1004,41 @@
             link.click();
             document.body.removeChild(link);
         }
+        
+        
+        // 8. Logic for downloading the Splitter Set (NUEVA FUNCIONALIDAD)
 
+        downloadSplitSetButton.addEventListener('click', () => {
+            if (!loadState.splitter) return;
+
+            // Remueve la extensión para usar el nombre base
+            const baseName = filenames.splitter.replace(/\.[^/.]+$/, ""); 
+
+            const splitData = [
+                { canvas: splitRedCanvas, name: 'Occlusion', suffix: 'R' },
+                { canvas: splitGreenCanvas, name: 'Roughness', suffix: 'G' },
+                { canvas: splitBlueCanvas, name: 'Metallic', suffix: 'B' }
+            ];
+
+            splitData.forEach(item => {
+                // Asegúrate de usar el dataURL de alta resolución guardado
+                const dataURL = item.canvas.dataset.fullDataUrl; 
+                if (dataURL) {
+                    // const w = item.canvas.dataset.originalWidth; // Resolución eliminada del nombre
+                    // Formato: BASE_NAME_R_Occlusion.png
+                    // MODIFICACIÓN: Nombre de archivo simplificado a sin resolución
+                    const filename = `${baseName}_${item.suffix}_${item.name}.png`;
+                    // Usa un pequeño retraso para permitir múltiples descargas sin bloqueo del navegador
+                    setTimeout(() => {
+                        triggerDownload(dataURL, filename);
+                    }, 100); 
+                }
+            });
+        });
+        
+        // FIN DE NUEVA FUNCIONALIDAD
+        
+        
         // --- Watermark Spawning Logic (from gsoos.html) ---
         function spawnWatermark(){
             const c=document.getElementById("mainContainer");
@@ -1033,12 +1083,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
