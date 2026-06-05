@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ORM Texture Packer - Free Online Tool (PBR | Blender | Unreal)
-</title>
+    <title>ORM Texture Packer & Splitter - Free Online Tool | PBR, Blender, Unreal, Unity</title>
     <link rel="icon" type="image/png" href="favicon.png">
     
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-X82FXXRY47"></script>
@@ -18,56 +17,47 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom style for canvas to prevent blurriness */
         canvas {
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
-            background-color: #374151; /* bg-gray-700 */
+            background-color: #374151;
         }
-        /* Style for disabled containers (Now only used for visual opacity) */
         .disabled-container {
             opacity: 0.5;
             pointer-events: none;
         }
-
-        /* Allow scrolling only in the left column if necessary */
         .left-column {
             overflow-y: auto;
             max-height: 100%;
         }
-        /* Custom style for number inputs in the channel controls */
         .channel-input-number {
             width: 5rem;
             text-align: center;
-            background-color: #374151; /* bg-gray-700 */
-            border: 1px solid #4b5563; /* border-gray-600 */
+            background-color: #374151;
+            border: 1px solid #4b5563;
             padding: 0.25rem;
             border-radius: 0.375rem;
             font-family: monospace;
             font-size: 0.75rem;
         }
     </style>
-    <meta property="og:title" content="ORM Texture Packer">
-<meta property="og:description" content="Herramienta para crear y descomponer texturas ORM (Occlusion, Roughness, Metallic).">
+    <meta property="og:title" content="ORM Texture Packer & Splitter - Free Online Tool">
+<meta property="og:description" content="Pack and split ORM textures (Occlusion, Roughness, Metallic) directly in your browser. Free, no install, no Photoshop needed. Compatible with Blender, Unreal Engine, and Unity.">
 <meta property="og:image" content="https://g-soos.github.io/ORM-Packer/preview.png">
 <meta property="og:url" content="https://g-soos.github.io/ORM-Packer/">
 <meta property="og:type" content="website">
-    
+
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="ORM Texture Packer">
-<meta name="twitter:description" content="Crear y descomponer texturas ORM fácilmente.">
+<meta name="twitter:title" content="ORM Texture Packer & Splitter - Free Online Tool">
+<meta name="twitter:description" content="Pack and split ORM textures (Occlusion, Roughness, Metallic) directly in your browser. Free, no install, no Photoshop needed. Compatible with Blender, Unreal Engine, and Unity.">
 <meta name="twitter:image" content="https://g-soos.github.io/ORM-Packer/preview.png">
-<meta name="description" content="ORM Texture Packer - Create, combine and split Occlusion, Roughness, Metallic textures for 3D workflows. Free online tool.">
-<meta name="keywords" content="ORM, Texture Packer, Roughness, Occlusion, Metallic, 3D textures, PBR, Blender, Unreal Engine, Unity">
+<meta name="description" content="Free online ORM texture packer and splitter. Combine or extract Occlusion, Roughness and Metallic channels into a single PBR texture. No installation required. Works with Blender, Unreal Engine, Unity and any PBR workflow.">
+<meta name="keywords" content="ORM texture packer, ORM splitter, PBR texture tool, Occlusion Roughness Metallic, channel packer, free texture tool, Blender PBR, Unreal Engine ORM, Unity texture, online texture packer">
 <link rel="sitemap" type="application/xml" title="Sitemap" href="sitemap.xml" />
-
-
-
 </head>
 <body class="bg-gray-900 text-gray-200 font-sans flex items-center justify-center h-screen p-4">
 
-    
 <style>
 @keyframes drift{
  from{ transform:translateY(0px) rotate(10deg); opacity:0.05; }
@@ -88,15 +78,17 @@
         
         <h1 class="text-3xl font-bold text-center text-white mb-2">ORM Texture Packer Workshop</h1>
         <p class="text-center text-lg text-gray-400 mb-6"> Free online tool to generate ORM (Occlusion, Roughness, Metallic) textures for PBR workflows. 
-    Compatible with Blender, Unreal Engine, Unity and any 3D software.</p>
+    Compatible with Blender, Unreal Engine, Unity and any 3D software. <span class="text-xs text-gray-600">(Channel order is just a guide — load any map in any channel to suit your pipeline.)</span></p>
 
         <div class="flex flex-1 flex-col lg:flex-row gap-6 overflow-hidden">
             
             <div class="flex flex-col gap-2 lg:w-1/2 left-column pr-2">
                 
+                <p class="text-xs text-gray-500">Step 1 — Load your maps into each channel, or set a solid value.</p>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     
-                    <div id="occlusionContainer" class="space-y-2 p-3 bg-gray-900/50 rounded-lg border-2 border-red-700 transition duration-150" 
+                    <!-- R: Occlusion -->
+                    <div id="occlusionContainer" class="space-y-2 px-1 py-2 bg-gray-900/50 rounded-lg border-2 border-red-700 transition duration-150" 
                          data-channel-color="red" data-original-border-color="border-red-700">
                         <h2 class="text-lg font-semibold text-red-400">R: Occlusion</h2>
                         <label for="occlusionLoader" class="block w-full cursor-pointer bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-lg text-center transition duration-200 text-xs">
@@ -104,16 +96,26 @@
                         </label>
                         <input type="file" id="occlusionLoader" class="hidden" accept="image/*">
                         
-                        <div id="redStatusArea" class="hidden flex items-center justify-between p-1 bg-red-900/30 rounded">
-                            <div id="red-status" class="text-red-300 font-mono text-xs truncate"></div>
-                            <button id="redClearButton" data-channel="r" class="text-red-300 hover:text-white bg-red-700/50 hover:bg-red-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove texture">X</button>
+                        <!-- Status area: filename + size badge + warning -->
+                        <div id="redStatusArea" class="hidden flex flex-col gap-1 p-2 bg-red-900/30 rounded">
+                            <div class="flex items-center justify-between">
+                                <div id="red-status" class="text-red-300 font-mono text-xs truncate"></div>
+                                <button id="redClearButton" data-channel="r" class="text-red-300 hover:text-white bg-red-700/50 hover:bg-red-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove texture">X</button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">Texture size</span>
+                                <span id="redSizeBadge" class="text-xs font-mono font-semibold bg-red-900/60 text-red-300 px-2 py-0.5 rounded"></span>
+                            </div>
+                            <div id="redSizeWarning" class="hidden flex items-center gap-1">
+                                <span class="text-yellow-400 text-xs">⚠</span>
+                                <span class="text-yellow-400 text-xs">Size differs from other channels</span>
+                            </div>
                         </div>
 
                         <p id="redSolidLabel" class="text-xs text-gray-500 text-center">Or use a solid value:</p>
                         
                         <div id="redSliderContainer">
                             <input id="redChannel" type="range" min="0" max="255" value="255" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #f87171;">
-                            
                             <div class="flex justify-center items-center gap-2 mt-1">
                                 <input id="redValueInput" type="number" min="0" max="255" value="255" class="channel-input-number text-red-300 focus:ring-red-500 focus:border-red-500"/>
                                 <div class="text-red-300 font-mono text-xs" id="redValueLabelText">(White)</div>
@@ -121,7 +123,8 @@
                         </div>
                     </div>
 
-                    <div id="roughnessContainer" class="space-y-2 p-3 bg-gray-900/50 rounded-lg border-2 border-emerald-700 transition duration-150" 
+                    <!-- G: Roughness -->
+                    <div id="roughnessContainer" class="space-y-2 px-1 py-2 bg-gray-900/50 rounded-lg border-2 border-emerald-700 transition duration-150" 
                          data-channel-color="green" data-original-border-color="border-emerald-700">
                         <h2 class="text-lg font-semibold text-emerald-400">G: Roughness</h2>
                         <label for="imageLoader" class="block w-full cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1 px-3 rounded-lg text-center transition duration-200 text-xs">
@@ -129,16 +132,25 @@
                         </label>
                         <input type="file" id="imageLoader" class="hidden" accept="image/*">
                         
-                        <div id="greenStatusArea" class="hidden flex items-center justify-between p-1 bg-emerald-900/30 rounded">
-                            <div id="green-status" class="text-emerald-300 font-mono text-xs truncate"></div>
-                            <button id="greenClearButton" data-channel="g" class="text-emerald-300 hover:text-white bg-emerald-700/50 hover:bg-emerald-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove texture">X</button>
+                        <div id="greenStatusArea" class="hidden flex flex-col gap-1 p-2 bg-emerald-900/30 rounded">
+                            <div class="flex items-center justify-between">
+                                <div id="green-status" class="text-emerald-300 font-mono text-xs truncate"></div>
+                                <button id="greenClearButton" data-channel="g" class="text-emerald-300 hover:text-white bg-emerald-700/50 hover:bg-emerald-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove texture">X</button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">Texture size</span>
+                                <span id="greenSizeBadge" class="text-xs font-mono font-semibold bg-emerald-900/60 text-emerald-300 px-2 py-0.5 rounded"></span>
+                            </div>
+                            <div id="greenSizeWarning" class="hidden flex items-center gap-1">
+                                <span class="text-yellow-400 text-xs">⚠</span>
+                                <span class="text-yellow-400 text-xs">Size differs from other channels</span>
+                            </div>
                         </div>
                         
                         <p id="greenSolidLabel" class="text-xs text-gray-500 text-center">Or use a solid value:</p>
 
                         <div id="greenSliderContainer">
                             <input id="greenChannel" type="range" min="0" max="255" value="255" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #34d399;">
-                            
                             <div class="flex justify-center items-center gap-2 mt-1">
                                 <input id="greenValueInput" type="number" min="0" max="255" value="255" class="channel-input-number text-emerald-300 focus:ring-emerald-500 focus:border-emerald-500"/>
                                 <div class="text-emerald-300 font-mono text-xs" id="greenValueLabelText">(Matte)</div>
@@ -146,7 +158,8 @@
                         </div>
                     </div>
 
-                    <div id="metallicContainer" class="space-y-2 p-3 bg-gray-900/50 rounded-lg border-2 border-blue-700 transition duration-150" 
+                    <!-- B: Metallic -->
+                    <div id="metallicContainer" class="space-y-2 px-1 py-2 bg-gray-900/50 rounded-lg border-2 border-blue-700 transition duration-150" 
                          data-channel-color="blue" data-original-border-color="border-blue-700">
                         <h2 class="text-lg font-semibold text-blue-400">B: Metallic</h2>
                         <label for="metallicLoader" class="block w-full cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-lg text-center transition duration-200 text-xs">
@@ -154,16 +167,25 @@
                         </label>
                         <input type="file" id="metallicLoader" class="hidden" accept="image/*">
                         
-                        <div id="blueStatusArea" class="hidden flex items-center justify-between p-1 bg-blue-900/30 rounded">
-                            <div id="blue-status" class="text-blue-300 font-mono text-xs truncate"></div>
-                            <button id="blueClearButton" data-channel="b" class="text-blue-300 hover:text-white bg-blue-700/50 hover:bg-blue-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove texture">X</button>
+                        <div id="blueStatusArea" class="hidden flex flex-col gap-1 p-2 bg-blue-900/30 rounded">
+                            <div class="flex items-center justify-between">
+                                <div id="blue-status" class="text-blue-300 font-mono text-xs truncate"></div>
+                                <button id="blueClearButton" data-channel="b" class="text-blue-300 hover:text-white bg-blue-700/50 hover:bg-blue-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove texture">X</button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">Texture size</span>
+                                <span id="blueSizeBadge" class="text-xs font-mono font-semibold bg-blue-900/60 text-blue-300 px-2 py-0.5 rounded"></span>
+                            </div>
+                            <div id="blueSizeWarning" class="hidden flex items-center gap-1">
+                                <span class="text-yellow-400 text-xs">⚠</span>
+                                <span class="text-yellow-400 text-xs">Size differs from other channels</span>
+                            </div>
                         </div>
                         
                         <p id="blueSolidLabel" class="text-xs text-gray-500 text-center">Or use a solid value:</p>
                         
                         <div id="blueSliderContainer">
                             <input id="blueChannel" type="range" min="0" max="255" value="0" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #60a5fa;">
-                            
                             <div class="flex justify-center items-center gap-2 mt-1">
                                 <input id="blueValueInput" type="number" min="0" max="255" value="0" class="channel-input-number text-blue-300 focus:ring-blue-500 focus:border-blue-500"/>
                                 <div class="text-blue-300 font-mono text-xs" id="blueValueLabelText">(Black)</div>
@@ -175,6 +197,7 @@
                 <hr class="border-gray-700/50">
 
                 <div id="splitterMainContainer" class="bg-gray-700/30 p-4 rounded-lg transition duration-150 border border-gray-700">
+                    <p class="text-xs text-gray-500">Step 2 (optional) — Already have an ORM? Drop it here to extract each channel.</p>
                     <h2 class="w-full text-left py-1 text-lg font-semibold text-white mb-2">
                         Deconstruct ORM Texture (Splitter)
                     </h2>
@@ -217,12 +240,14 @@
                         >
                             Download Split Texture Set (.png)
                         </button> 
-                        </div>
+                    </div>
                 </div>
-                </div>
+            </div>
+
             <div class="flex flex-col gap-6 lg:w-1/2 overflow-hidden">
                 
                 <div class="flex-1 min-h-[100px] flex flex-col">
+                    <p class="text-xs text-gray-500 text-center flex-shrink-0">Step 2 — Pick a resolution and download your ORM texture.</p>
                     <h3 class="text-lg font-semibold mb-2 text-center text-white flex-shrink-0">Output (Your ORM Texture - 8-bit Only)</h3>
                     <div id="outputCanvasWrapper" class="relative w-full h-full bg-gray-700 rounded-lg p-2 flex items-center justify-center">
                         <canvas id="outputCanvas" class="max-w-full max-h-full rounded-lg border-2 border-gray-600 shadow-xl"></canvas>
@@ -248,60 +273,43 @@
                         </select>
                     </div>
 
-                    
                     <button id="downloadButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition duration-200 shadow-md hover:shadow-lg">
                         Download ORM Image (.png)
                     </button>
                 </div>
 
             </div>
-            </div>
+        </div>
+
 <div class="mt-auto pt-3 flex items-center gap-6">
-
     <a href="https://www.buymeacoffee.com/Gsoos" target="_blank">
-        <img 
-          src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=Gsoos&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff"
-          class="w-30"
-        />
+        <img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=Gsoos&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" class="w-30"/>
     </a>
-
     <a href="https://www.paypal.com/donate/?hosted_button_id=MKU4HJ2MHUNGJ" target="_blank">
-        <img 
-          src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" 
-          class="w-40"
-        />
+        <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" class="w-40"/>
     </a>
-
     <a href="https://github.com/G-soos/ORM-Packer" target="_blank" class="ml-auto">
-        <img 
-          src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-          alt="GitHub Repository"
-          class="w-10 h-10 opacity-80 hover:opacity-100 transition"
-        />
+        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Repository" class="w-10 h-10 opacity-80 hover:opacity-100 transition"/>
     </a>
-
 </div>
 
-
-        </div>
+</div>
 
     <canvas id="hiddenRedCanvas" class="hidden"></canvas>
     <canvas id="hiddenGreenCanvas" class="hidden"></canvas>
     <canvas id="hiddenBlueCanvas" class="hidden"></canvas>
     <canvas id="processingCanvas" class="hidden"></canvas>
-    <canvas id="hiddenSplitCanvas" class="hidden"></canvas> <script>
-        // --- UTILITY: Debounce Function ---
+    <canvas id="hiddenSplitCanvas" class="hidden"></canvas>
+
+<script>
         function debounce(func, delay) {
             let timeoutId;
             return function(...args) {
                 clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => {
-                    func.apply(this, args);
-                }, delay);
+                timeoutId = setTimeout(() => { func.apply(this, args); }, delay);
             };
         }
 
-        // --- Get DOM Elements ---
         const imageLoader = document.getElementById('imageLoader'); 
         const occlusionLoader = document.getElementById('occlusionLoader'); 
         const metallicLoader = document.getElementById('metallicLoader'); 
@@ -310,17 +318,14 @@
         const greenChannel = document.getElementById('greenChannel');
         const blueChannel = document.getElementById('blueChannel');
         
-        // NEW: Number inputs for direct typing
         const redValueInput = document.getElementById('redValueInput');
         const greenValueInput = document.getElementById('greenValueInput');
         const blueValueInput = document.getElementById('blueValueInput');
 
-        // NEW: Text labels (formerly the full value label)
         const redValueLabelText = document.getElementById('redValueLabelText');
         const greenValueLabelText = document.getElementById('greenValueLabelText');
         const blueValueLabelText = document.getElementById('blueValueLabelText');
         
-        // Status Labels and Clear Buttons
         const redStatus = document.getElementById('red-status');
         const greenStatus = document.getElementById('green-status');
         const blueStatus = document.getElementById('blue-status');
@@ -336,6 +341,14 @@
         const redSolidLabel = document.getElementById('redSolidLabel');
         const greenSolidLabel = document.getElementById('greenSolidLabel');
         const blueSolidLabel = document.getElementById('blueSolidLabel');
+
+        // Size badges and warnings
+        const redSizeBadge = document.getElementById('redSizeBadge');
+        const greenSizeBadge = document.getElementById('greenSizeBadge');
+        const blueSizeBadge = document.getElementById('blueSizeBadge');
+        const redSizeWarning = document.getElementById('redSizeWarning');
+        const greenSizeWarning = document.getElementById('greenSizeWarning');
+        const blueSizeWarning = document.getElementById('blueSizeWarning');
         
         const outputSize = document.getElementById('outputSize');
         const originalSizeOption = document.getElementById('originalSizeOption');
@@ -343,13 +356,10 @@
         const outputCanvas = document.getElementById('outputCanvas');
         const outputCtx = outputCanvas.getContext('2d');
 
-        // Slider Containers for visual state control
         const redSliderContainer = document.getElementById('redSliderContainer');
         const greenSliderContainer = document.getElementById('greenSliderContainer');
         const blueSliderContainer = document.getElementById('blueSliderContainer');
 
-
-        // Hidden canvas contexts
         const hiddenRedCtx = document.getElementById('hiddenRedCanvas').getContext('2d');
         const hiddenGreenCtx = document.getElementById('hiddenGreenCanvas').getContext('2d');
         const hiddenBlueCtx = document.getElementById('hiddenBlueCanvas').getContext('2d');
@@ -358,7 +368,6 @@
         
         const downloadButton = document.getElementById('downloadButton');
 
-        // Splitter elements
         const splitterContent = document.getElementById('splitterContent');
         const ormSplitterLoader = document.getElementById('ormSplitterLoader');
         const hiddenSplitCanvas = document.getElementById('hiddenSplitCanvas');
@@ -377,99 +386,103 @@
         const splitterStatus = document.getElementById('splitter-status');
         const splitterClearButton = document.getElementById('splitterClearButton');
         const splitterLabel = document.getElementById('splitterLabel');
-        
-        // NEW: Splitter Download Button
         const downloadSplitSetButton = document.getElementById('downloadSplitSetButton'); 
 
-        // Image, state, and filename storage
-        const images = {
-            r: new Image(),
-            g: new Image(),
-            b: new Image()
-        };
+        const images = { r: new Image(), g: new Image(), b: new Image() };
         const loadState = { r: false, g: false, b: false, splitter: false }; 
         const filenames = { r: '', g: '', b: '', splitter: '' }; 
+        // Store individual sizes per channel
+        const channelSizes = { r: null, g: null, b: null };
         const splitterImg = new Image(); 
 
         let originalImageSize = { w: 0, h: 0 };
 
+        // --- Check and update size warnings across all loaded channels ---
+        function updateSizeWarnings() {
+            const loaded = ['r', 'g', 'b'].filter(k => loadState[k]);
+            if (loaded.length < 2) {
+                // Only one or zero images loaded — no mismatch possible
+                [redSizeWarning, greenSizeWarning, blueSizeWarning].forEach(w => w.classList.add('hidden'));
+                return;
+            }
 
-        // --- Generic Load Handler Logic (For input[type=file] and drag-and-drop) ---
-        function handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, width, height, filename) {
+            const badgeMap = { r: redSizeWarning, g: greenSizeWarning, b: blueSizeWarning };
+            loaded.forEach(key => {
+                const mySize = channelSizes[key];
+                const hasMismatch = loaded.some(other => {
+                    if (other === key) return false;
+                    const s = channelSizes[other];
+                    return s && (s.w !== mySize.w || s.h !== mySize.h);
+                });
+                if (hasMismatch) {
+                    badgeMap[key].classList.remove('hidden');
+                } else {
+                    badgeMap[key].classList.add('hidden');
+                }
+            });
+        }
+
+        function handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, width, height, filename) {
             
-            // If it's the first image loaded in the app, update original size.
             if (!loadState.r && !loadState.g && !loadState.b) {
                 originalImageSize.w = width;
                 originalImageSize.h = height;
-            } else if (width > originalImageSize.w) { // Choose the largest size if a bigger image is loaded.
+            } else if (width > originalImageSize.w) {
                 originalImageSize.w = width;
                 originalImageSize.h = height;
             }
             
-            // Update 'Original' option
             originalSizeOption.text = `Original (${originalImageSize.w}x${originalImageSize.h}px)`;
             originalSizeOption.disabled = false;
             
             loadState[stateKey] = true;
-            filenames[stateKey] = filename; 
-            
-            // Determine the "Or use a solid value:" label
-            const solidLabelId = stateKey + 'SolidLabel';
-            const solidLabel = document.getElementById(solidLabelId);
-            
-            // Update visual status
+            filenames[stateKey] = filename;
+            channelSizes[stateKey] = { w: width, h: height };
+
+            // Show filename in status
+            const displayFilename = filename.length > 25 ? filename.substring(0, 22) + '...' : filename;
             if (statusElement) {
-                // Truncate filename (max 25 chars)
-                const displayFilename = filename.length > 25 ? filename.substring(0, 22) + '...' : filename;
-                statusElement.textContent = `Loaded: ${displayFilename}`;
-                statusArea.classList.remove('hidden'); // Show status area
-            }
-            
-            if (solidLabel) {
-                solidLabel.classList.add('hidden'); // Hide "Or use a solid value:"
+                statusElement.textContent = displayFilename;
+                statusArea.classList.remove('hidden');
             }
 
-            // Disable slider and number input for this channel
-            if (sliderInput) {
-                sliderInput.disabled = true;
-                numberInput.disabled = true; // DISABLE NEW INPUT
-                sliderContainer.classList.add('opacity-50');
-            }
+            // Set size badge
+            sizeBadge.textContent = `${width} × ${height}`;
 
-            // Redraw the hidden canvas for the original image (1:1 scale)
+            // Hide "Or use a solid value" label and the slider
+            solidLabel.classList.add('hidden');
+            sliderContainer.classList.add('hidden');
+
+            // Update warnings across all channels
+            updateSizeWarnings();
+
             hiddenCtx.canvas.width = width;
             hiddenCtx.canvas.height = height;
             hiddenCtx.drawImage(imageObj, 0, 0, width, height);
             
-            processImage(); // Immediate execution upon image load
+            processImage();
         }
 
-        function createChannelLoadHandler(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer) {
+        function createChannelLoadHandler(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge) {
             return function(event) {
                 const file = event.target.files[0];
                 if (!file) return;
-
                 const url = URL.createObjectURL(file);
                 imageObj.src = url;
                 imageObj.onload = () => {
-                    handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, imageObj.width, imageObj.height, file.name); 
+                    handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, imageObj.width, imageObj.height, file.name); 
                 };
             };
         }
         
-        // Assign handlers to the 3 channels (File Input) - Now passing number inputs too
-        occlusionLoader.addEventListener('change', createChannelLoadHandler(images.r, 'r', hiddenRedCtx, redStatusArea, redStatus, redChannel, redValueInput, redSliderContainer));
-        imageLoader.addEventListener('change', createChannelLoadHandler(images.g, 'g', hiddenGreenCtx, greenStatusArea, greenStatus, greenChannel, greenValueInput, greenSliderContainer));
-        metallicLoader.addEventListener('change', createChannelLoadHandler(images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueValueInput, blueSliderContainer));
+        occlusionLoader.addEventListener('change', createChannelLoadHandler(images.r, 'r', hiddenRedCtx, redStatusArea, redStatus, redChannel, redValueInput, redSliderContainer, redSolidLabel, redSizeBadge));
+        imageLoader.addEventListener('change', createChannelLoadHandler(images.g, 'g', hiddenGreenCtx, greenStatusArea, greenStatus, greenChannel, greenValueInput, greenSliderContainer, greenSolidLabel, greenSizeBadge));
+        metallicLoader.addEventListener('change', createChannelLoadHandler(images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueValueInput, blueSliderContainer, blueSolidLabel, blueSizeBadge));
 
-
-        // --- Drag and Drop Logic for Packing Channels (FIXED) ---
-        function setupPackerDragAndDrop(containerId, imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer) {
+        function setupPackerDragAndDrop(containerId, imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge) {
             const container = document.getElementById(containerId);
             const originalBorderColorClass = container.dataset.originalBorderColor; 
             const channelColor = container.dataset.channelColor; 
-            
-            // Map colors to Tailwind classes for highlighting
             const highlightColorClass = {
                 'red': 'border-red-400',
                 'green': 'border-emerald-400',
@@ -477,17 +490,11 @@
                 'purple': 'border-purple-400'
             }[channelColor];
 
-
-            // 1. Prevent default behavior and add visual feedback
             container.addEventListener('dragover', (e) => {
                 e.preventDefault();
-                
-                // Check if external file or a split channel is being dragged
                 const isExternalFile = e.dataTransfer.items.length > 0 && e.dataTransfer.items[0].kind === 'file';
                 const isSplitChannel = e.dataTransfer.types.includes('application/x-split-channel');
-
                 if (isExternalFile || isSplitChannel) {
-                    // Remove original border and apply dashed/highlight style
                     container.classList.remove(originalBorderColorClass); 
                     container.classList.add('border-dashed', 'border-4', highlightColorClass); 
                     e.dataTransfer.dropEffect = 'copy';
@@ -496,48 +503,40 @@
 
             container.addEventListener('dragleave', (e) => {
                 e.preventDefault();
-                // Restore original border
                 container.classList.remove('border-dashed', 'border-4', highlightColorClass); 
                 container.classList.add(originalBorderColorClass); 
             });
             
-            // 2. Handle the drop event
             container.addEventListener('drop', (e) => {
                 e.preventDefault();
-                // Restore original border after drop
                 container.classList.remove('border-dashed', 'border-4', highlightColorClass); 
                 container.classList.add(originalBorderColorClass);
                 
-                // --- A. Handle Split Channel Drop ---
                 const splitChannelId = e.dataTransfer.getData('text/plain');
                 const isSplitChannelDrop = e.dataTransfer.types.includes('application/x-split-channel');
 
                 if (isSplitChannelDrop && splitChannelId) {
                     const splitContainer = document.getElementById(splitChannelId);
                     const sourceCanvas = splitContainer ? splitContainer.querySelector('canvas') : null;
-                    
                     if (sourceCanvas && sourceCanvas.dataset.fullDataUrl) {
                         const url = sourceCanvas.dataset.fullDataUrl;
                         const w = parseInt(sourceCanvas.dataset.originalWidth);
                         const h = parseInt(sourceCanvas.dataset.originalHeight);
-                        const filename = `SPLIT_${splitContainer.dataset.channelName.toUpperCase()}_${w}.png`; // Create unique name
-
+                        const filename = `SPLIT_${splitContainer.dataset.channelName.toUpperCase()}_${w}.png`;
                         imageObj.src = url;
                         imageObj.onload = () => {
-                            handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, w, h, filename);
+                            handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, w, h, filename);
                         };
-                        return; // Exit if a split channel was handled
+                        return;
                     }
                 }
 
-                // --- B. Handle External File Drop (Original Logic) ---
                 const file = e.dataTransfer.files[0];
                 if (file && file.type.startsWith('image/')) {
                     const url = URL.createObjectURL(file);
-                    
                     imageObj.src = url;
                     imageObj.onload = () => {
-                        handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, imageObj.width, imageObj.height, file.name); 
+                        handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, imageObj.width, imageObj.height, file.name); 
                     };
                 } else if (!isSplitChannelDrop) { 
                     if (statusElement) {
@@ -549,97 +548,80 @@
             });
         }
         
-        // Assign Drag and Drop handlers to the 3 Packing Containers - Now passing number inputs too
-        setupPackerDragAndDrop('occlusionContainer', images.r, 'r', hiddenRedCtx, redStatusArea, redStatus, redChannel, redValueInput, redSliderContainer);
-        setupPackerDragAndDrop('roughnessContainer', images.g, 'g', hiddenGreenCtx, greenStatusArea, greenStatus, greenChannel, greenValueInput, greenSliderContainer);
-        setupPackerDragAndDrop('metallicContainer', images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueValueInput, blueSliderContainer);
+        setupPackerDragAndDrop('occlusionContainer', images.r, 'r', hiddenRedCtx, redStatusArea, redStatus, redChannel, redValueInput, redSliderContainer, redSolidLabel, redSizeBadge);
+        setupPackerDragAndDrop('roughnessContainer', images.g, 'g', hiddenGreenCtx, greenStatusArea, greenStatus, greenChannel, greenValueInput, greenSliderContainer, greenSolidLabel, greenSizeBadge);
+        setupPackerDragAndDrop('metallicContainer', images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueValueInput, blueSliderContainer, blueSolidLabel, blueSizeBadge);
 
-        // --- Drag Start Logic for Split Results ---
         [splitRedContainer, splitGreenContainer, splitBlueContainer].forEach(container => {
             container.addEventListener('dragstart', (e) => {
                 const canvas = container.querySelector('canvas');
-                if (!canvas.dataset.fullDataUrl) {
-                    e.preventDefault();
-                    return;
-                }
+                if (!canvas.dataset.fullDataUrl) { e.preventDefault(); return; }
                 e.dataTransfer.setData('text/plain', container.id);
                 e.dataTransfer.setData('application/x-split-channel', 'true');
                 e.dataTransfer.effectAllowed = 'copy';
-                
-                // Drag image
                 if (canvas.width > 0) {
                     e.dataTransfer.setDragImage(canvas, canvas.width / 2, canvas.height / 2);
                 }
             });
-
             container.addEventListener('dragend', (e) => {
                 const canvas = container.querySelector('canvas');
-                if (!canvas.dataset.fullDataUrl) {
-                    e.preventDefault();
-                }
+                if (!canvas.dataset.fullDataUrl) { e.preventDefault(); }
             });
         });
 
-
-        // --- Clear Texture Logic (Channel Clearing) ---
         function clearChannel(stateKey) {
-            
             const dataMap = {
-                r: { ctx: hiddenRedCtx, statusArea: redStatusArea, slider: redChannel, numberInput: redValueInput, sliderContainer: redSliderContainer, solidLabel: redSolidLabel },
-                g: { ctx: hiddenGreenCtx, statusArea: greenStatusArea, slider: greenChannel, numberInput: greenValueInput, sliderContainer: greenSliderContainer, solidLabel: greenSolidLabel },
-                b: { ctx: hiddenBlueCtx, statusArea: blueStatusArea, slider: blueChannel, numberInput: blueValueInput, sliderContainer: blueSliderContainer, solidLabel: blueSolidLabel }
+                r: { ctx: hiddenRedCtx, statusArea: redStatusArea, slider: redChannel, numberInput: redValueInput, sliderContainer: redSliderContainer, solidLabel: redSolidLabel, sizeWarning: redSizeWarning, fileInput: occlusionLoader },
+                g: { ctx: hiddenGreenCtx, statusArea: greenStatusArea, slider: greenChannel, numberInput: greenValueInput, sliderContainer: greenSliderContainer, solidLabel: greenSolidLabel, sizeWarning: greenSizeWarning, fileInput: imageLoader },
+                b: { ctx: hiddenBlueCtx, statusArea: blueStatusArea, slider: blueChannel, numberInput: blueValueInput, sliderContainer: blueSliderContainer, solidLabel: blueSolidLabel, sizeWarning: blueSizeWarning, fileInput: metallicLoader }
             };
 
-            const { ctx, statusArea, slider, numberInput, sliderContainer, solidLabel } = dataMap[stateKey];
+            const { ctx, statusArea, slider, numberInput, sliderContainer, solidLabel, sizeWarning, fileInput } = dataMap[stateKey];
+            
+            // Reset file input so the same file can be reloaded
+            fileInput.value = '';
 
-            // 1. Reset state
             loadState[stateKey] = false;
             filenames[stateKey] = '';
+            channelSizes[stateKey] = null;
 
-            // 2. Clear hidden canvas 
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             ctx.canvas.width = 1; 
             ctx.canvas.height = 1;
 
-            // 3. Hide status and show solid label
+            // Hide status area, restore solid label and slider
             statusArea.classList.add('hidden');
             solidLabel.classList.remove('hidden');
+            sliderContainer.classList.remove('hidden');
 
-            // 4. Re-enable slider and number input
+            // Re-enable slider and number input
             slider.disabled = false;
-            numberInput.disabled = false; // RE-ENABLE NEW INPUT
-            sliderContainer.classList.remove('opacity-50');
+            numberInput.disabled = false;
 
-            // 5. Check if original size should be reset
+            sizeWarning.classList.add('hidden');
+
             const anyImageLoaded = loadState.r || loadState.g || loadState.b;
             if (!anyImageLoaded) {
                  originalImageSize = { w: 0, h: 0 };
                  originalSizeOption.text = `Original (Load an image first)`;
                  originalSizeOption.disabled = true;
-                 outputSize.value = "1024"; // Reset to default size
+                 outputSize.value = "1024";
             }
 
-            // 6. Reprocess the image
+            updateSizeWarnings();
             processImage(); 
         }
         
-        // Assign handlers to channel clear buttons
         redClearButton.addEventListener('click', () => clearChannel('r'));
         greenClearButton.addEventListener('click', () => clearChannel('g'));
         blueClearButton.addEventListener('click', () => clearChannel('b'));
 
-        // --- Value Synchronization and Debounce Logic ---
-        
         const debouncedProcessImage = debounce(processImage, 50);
 
-        // Utility to clamp and get value
         function clamp(value) {
             return Math.min(255, Math.max(0, parseInt(value) || 0));
         }
 
-        // --- Channel Update Functions ---
-        
-        // R (Occlusion)
         function updateRedValues(value) {
             const val = clamp(value);
             redChannel.value = val;
@@ -648,17 +630,14 @@
             debouncedProcessImage();
         }
 
-        // G (Roughness)
         function updateGreenValues(value) {
             const val = clamp(value);
             greenChannel.value = val;
             greenValueInput.value = val;
-            // Roughness Logic: 255 (High) is Matte/Rough. 0 (Low) is Smooth/Shiny.
-            greenValueLabelText.textContent = `(${val > 128 ? 'Matte' : 'Shiny'})`; 
+            greenValueLabelText.textContent = `(${val > 128 ? 'Matte' : 'Shiny'})`;
             debouncedProcessImage();
         }
 
-        // B (Metallic)
         function updateBlueValues(value) {
             const val = clamp(value);
             blueChannel.value = val;
@@ -667,32 +646,23 @@
             debouncedProcessImage();
         }
 
-        // --- Event Listeners for Sliders (Range) ---
         redChannel.addEventListener('input', () => updateRedValues(redChannel.value));
         greenChannel.addEventListener('input', () => updateGreenValues(greenChannel.value));
         blueChannel.addEventListener('input', () => updateBlueValues(blueChannel.value));
 
-        // --- Event Listeners for Number Inputs ---
         redValueInput.addEventListener('input', () => updateRedValues(redValueInput.value));
         greenValueInput.addEventListener('input', () => updateGreenValues(greenValueInput.value));
         blueValueInput.addEventListener('input', () => updateBlueValues(blueValueInput.value));
 
-
         outputSize.addEventListener('input', debouncedProcessImage);
 
-
         // --- Splitter Logic ---
-
         const splitterOriginalBorderColorClass = splitterLoadArea.dataset.originalBorderColor;
-        const splitterChannelColor = splitterLoadArea.dataset.channelColor;
         const splitterHighlightColorClass = 'border-purple-400';
 
-
-        // A. Load by Input File (Kept original for compatibility)
         ormSplitterLoader.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (!file) return;
-
             const url = URL.createObjectURL(file);
             splitterImg.src = url;
             splitterImg.onload = () => {
@@ -701,17 +671,10 @@
             };
         });
 
-
-        // B. Load by Drag & Drop for Splitter
         splitterLoadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
-            const file = e.dataTransfer.files[0];
-            
-            // Check for external files
             const isExternalFile = e.dataTransfer.items.length > 0 && e.dataTransfer.items[0].kind === 'file';
-
-            if (isExternalFile || (file && file.type.startsWith('image/'))) {
-                // Apply visual feedback
+            if (isExternalFile) {
                 splitterLoadArea.classList.remove(splitterOriginalBorderColorClass);
                 splitterLoadArea.classList.add('border-dashed', 'border-4', splitterHighlightColorClass); 
                 e.dataTransfer.dropEffect = 'copy';
@@ -720,17 +683,14 @@
 
         splitterLoadArea.addEventListener('dragleave', (e) => {
             e.preventDefault();
-            // Remove visual feedback
             splitterLoadArea.classList.remove('border-dashed', 'border-4', splitterHighlightColorClass); 
             splitterLoadArea.classList.add(splitterOriginalBorderColorClass);
         });
 
         splitterLoadArea.addEventListener('drop', (e) => {
             e.preventDefault();
-            // Remove visual feedback
             splitterLoadArea.classList.remove('border-dashed', 'border-4', splitterHighlightColorClass); 
             splitterLoadArea.classList.add(splitterOriginalBorderColorClass);
-            
             const file = e.dataTransfer.files[0];
             if (file && file.type.startsWith('image/')) {
                 const url = URL.createObjectURL(file);
@@ -742,345 +702,195 @@
             }
         });
 
-        // C. Splitter Load Handler Function
         function handleSplitterLoad(img, filename) {
             loadState.splitter = true;
             filenames.splitter = filename;
-
-            // Update interface
             const displayFilename = filename.length > 25 ? filename.substring(0, 22) + '...' : filename;
             splitterStatus.textContent = `Loaded: ${displayFilename}`;
             splitterStatusArea.classList.remove('hidden');
-            splitterLabel.classList.add('hidden'); // Hide load button
-
-            // Enable draggable thumbnails
+            splitterLabel.classList.add('hidden');
             [splitRedContainer, splitGreenContainer, splitBlueContainer].forEach(container => {
                 container.classList.remove('opacity-50', 'pointer-events-none');
             });
-            
-            // NUEVO: Mostrar y habilitar el botón de descarga del set
             downloadSplitSetButton.style.display = 'block';
             downloadSplitSetButton.classList.remove('opacity-50', 'pointer-events-none');
-
-            // Execute splitting
             splitOrmImage(img);
         }
 
-        // D. Splitter Clear Function
         splitterClearButton.addEventListener('click', clearSplitter);
 
         function clearSplitter() {
             loadState.splitter = false;
             filenames.splitter = '';
-
-            // Clear hidden canvas and previews
             hiddenSplitCtx.clearRect(0, 0, hiddenSplitCanvas.width, hiddenSplitCanvas.height);
             hiddenSplitCanvas.width = 1;
             hiddenSplitCanvas.height = 1;
-            
             [splitRedCtx, splitGreenCtx, splitBlueCtx].forEach(ctx => {
                 ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             });
-            
             [splitRedCanvas, splitGreenCanvas, splitBlueCanvas].forEach(canvas => {
                 delete canvas.dataset.fullDataUrl;
             });
-
-            // Reset interface
             splitterStatusArea.classList.add('hidden');
             splitterLabel.classList.remove('hidden');
-            
-            // NUEVO: Ocultar y deshabilitar el botón de descarga del set
             downloadSplitSetButton.style.display = 'none';
             downloadSplitSetButton.classList.add('opacity-50', 'pointer-events-none');
-            
-            // Disable draggable thumbnails
             [splitRedContainer, splitGreenContainer, splitBlueContainer].forEach(container => {
                 container.classList.add('opacity-50', 'pointer-events-none');
             });
         }
 
-
-        // E. Splitting Function
         function splitOrmImage(img) {
             const w = img.width;
             const h = img.height;
-            
-            // 1. Draw the source image
             hiddenSplitCanvas.width = w;
             hiddenSplitCanvas.height = h;
             hiddenSplitCtx.drawImage(img, 0, 0);
-            
             const imageData = hiddenSplitCtx.getImageData(0, 0, w, h);
             const data = imageData.data;
             const length = data.length;
-
-            // 2. Create image data for the 3 channels
             const redImageData = hiddenSplitCtx.createImageData(w, h);
             const greenImageData = hiddenSplitCtx.createImageData(w, h);
             const blueImageData = hiddenSplitCtx.createImageData(w, h);
-
             const redData = redImageData.data;
             const greenData = greenImageData.data;
             const blueData = blueImageData.data;
-
-            // 3. Iterate and split channels
             for (let i = 0; i < length; i += 4) {
-                // R (Occlusion)
-                redData[i + 0] = data[i + 0]; 
-                redData[i + 1] = data[i + 0]; // Grayscale
-                redData[i + 2] = data[i + 0]; // Grayscale
-                redData[i + 3] = 255;
-
-                // G (Roughness)
-                greenData[i + 1] = data[i + 1]; 
-                greenData[i + 0] = data[i + 1]; // Grayscale
-                greenData[i + 2] = data[i + 1]; // Grayscale
-                greenData[i + 3] = 255;
-
-                // B (Metallic)
-                blueData[i + 2] = data[i + 2]; 
-                blueData[i + 0] = data[i + 2]; // Grayscale
-                blueData[i + 1] = data[i + 2]; // Grayscale
-                blueData[i + 3] = 255;
+                redData[i] = redData[i+1] = redData[i+2] = data[i]; redData[i+3] = 255;
+                greenData[i] = greenData[i+1] = greenData[i+2] = data[i+1]; greenData[i+3] = 255;
+                blueData[i] = blueData[i+1] = blueData[i+2] = data[i+2]; blueData[i+3] = 255;
             }
-
-            // 4. Draw previews and generate high-resolution DataURLs
             const previewSize = 96;
-
             [splitRedCanvas, splitGreenCanvas, splitBlueCanvas].forEach(canvas => {
-                canvas.width = previewSize; 
-                canvas.height = previewSize;
+                canvas.width = previewSize; canvas.height = previewSize;
             });
-
             function drawSplitPreview(sourceImageData, previewCtx) {
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
-                tempCanvas.width = w;
-                tempCanvas.height = h;
+                tempCanvas.width = w; tempCanvas.height = h;
                 tempCtx.putImageData(sourceImageData, 0, 0);
-                
                 previewCtx.imageSmoothingEnabled = false;
                 previewCtx.drawImage(tempCanvas, 0, 0, w, h, 0, 0, previewCtx.canvas.width, previewCtx.canvas.height);
             }
-            
-            // Draw thumbnails
             drawSplitPreview(redImageData, splitRedCtx);
             drawSplitPreview(greenImageData, splitGreenCtx);
             drawSplitPreview(blueImageData, splitBlueCtx);
-            
-            // 5. Store high-resolution DataURL and original size for Drag-and-Drop
             function getFullResDataUrl(imageData, w, h) {
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
-                tempCanvas.width = w;
-                tempCanvas.height = h;
+                tempCanvas.width = w; tempCanvas.height = h;
                 tempCtx.putImageData(imageData, 0, 0);
                 return tempCanvas.toDataURL('image/png');
             }
-            
             splitRedCanvas.dataset.fullDataUrl = getFullResDataUrl(redImageData, w, h);
             splitGreenCanvas.dataset.fullDataUrl = getFullResDataUrl(greenImageData, w, h);
             splitBlueCanvas.dataset.fullDataUrl = getFullResDataUrl(blueImageData, w, h);
-
             [splitRedCanvas, splitGreenCanvas, splitBlueCanvas].forEach(canvas => {
                 canvas.dataset.originalWidth = w;
                 canvas.dataset.originalHeight = h;
             });
         }
 
-
-        // 6. Main Processing Function
         function processImage() {
-            // Get the desired output size (This is the MASTER size for the ORM texture)
             let targetWidth, targetHeight;
             const sizeValue = outputSize.value;
-            
             if (sizeValue === 'original' && originalImageSize.w > 0) {
                 targetWidth = originalImageSize.w;
                 targetHeight = originalImageSize.h;
             } else if (sizeValue === 'original' && originalImageSize.w === 0) {
-                 // If 'Original' is selected but no image is loaded, use the default value
-                targetWidth = 1024;
-                targetHeight = 1024;
+                targetWidth = 1024; targetHeight = 1024;
             } else {
                 targetWidth = parseInt(sizeValue);
                 targetHeight = parseInt(sizeValue);
             }
-
-            // --- A. Adjust and Redraw Input Images to the Master Size ---
-            
-            // Set the processing canvas to the desired resolution (for data/download)
             processingCanvas.width = targetWidth;
             processingCanvas.height = targetHeight;
-            
-            // Create temporary canvases to draw the scaled original image.
             function redrawScaledChannel(sourceCtx, targetWidth, targetHeight) {
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
-                tempCanvas.width = targetWidth;
-                tempCanvas.height = targetHeight;
-
-                if (sourceCtx.canvas.width > 1) { // Only if image is loaded
+                tempCanvas.width = targetWidth; tempCanvas.height = targetHeight;
+                if (sourceCtx.canvas.width > 1) {
                     tempCtx.imageSmoothingEnabled = false;
                     tempCtx.drawImage(sourceCtx.canvas, 0, 0, sourceCtx.canvas.width, sourceCtx.canvas.height, 0, 0, targetWidth, targetHeight);
                 }
                 return tempCtx.getImageData(0, 0, targetWidth, targetHeight).data;
             }
-            
             const redPixels = redrawScaledChannel(hiddenRedCtx, targetWidth, targetHeight);
             const greenPixels = redrawScaledChannel(hiddenGreenCtx, targetWidth, targetHeight);
             const bluePixels = redrawScaledChannel(hiddenBlueCtx, targetWidth, targetHeight);
-            
-            // --- B. Get final data for packing ---
-            
-            // Get current value from the number input or slider (they are synchronized)
             const redValue = parseInt(redChannel.value);
             const greenValue = parseInt(greenChannel.value);
             const blueValue = parseInt(blueChannel.value);
-
-            // Create image data for the ORM output
             const outputImageData = processingCtx.createImageData(targetWidth, targetHeight);
             const outputPixels = outputImageData.data;
-
             const totalPixels = targetWidth * targetHeight;
-
-            // Iterate and pack channels (4 bytes per pixel: R, G, B, A)
             for (let i = 0; i < totalPixels * 4; i += 4) {
-                // R (Occlusion): If image is loaded (canvas > 1x1), use R channel. If not, use solid value.
-                const r = loadState.r ? redPixels[i + 0] : redValue; 
-
-                // G (Roughness): If image is loaded, use R channel. If not, use solid value.
-                const g = loadState.g ? greenPixels[i + 0] : greenValue; 
-
-                // B (Metallic): If image is loaded, use B channel. If not, use solid value.
-                const b = loadState.b ? bluePixels[i + 2] : blueValue; 
-
-                outputPixels[i + 0] = r;   // Red Channel (Occlusion)
-                outputPixels[i + 1] = g;   // Green Channel (Roughness)
-                outputPixels[i + 2] = b;   // Blue Channel (Metallic)
-                outputPixels[i + 3] = 255; // Alpha Channel (Full opacity)
+                outputPixels[i]   = loadState.r ? redPixels[i]   : redValue;
+                outputPixels[i+1] = loadState.g ? greenPixels[i] : greenValue;
+                outputPixels[i+2] = loadState.b ? bluePixels[i+2]: blueValue;
+                outputPixels[i+3] = 255;
             }
-            
-            // Put combined data on the processing canvas
             processingCtx.putImageData(outputImageData, 0, 0);
-
-            // --- C. Draw final result on the visible output canvas ---
-            
-            // Set the *logical* width and height of the canvas based on the selected resolution
             outputCanvas.width = targetWidth;
             outputCanvas.height = targetHeight;
             outputCtx.imageSmoothingEnabled = false;
-
-            // Draw the processed image onto the visible canvas
-            outputCtx.drawImage(
-                processingCanvas, 
-                0, 0, targetWidth, targetHeight, 
-                0, 0, targetWidth, targetHeight  
-            );
+            outputCtx.drawImage(processingCanvas, 0, 0, targetWidth, targetHeight, 0, 0, targetWidth, targetHeight);
         }
         
-        // Add event listener to re-process and scale the canvas whenever the window resizes
         window.addEventListener('resize', debouncedProcessImage);
 
-
-        // 7. Download Logic (SIMPLIFIED FOR 8-BIT ONLY)
-        
         downloadButton.addEventListener('click', () => {
-            // const w = outputCanvas.width; // Resolution removed from filename
-            // const h = outputCanvas.height; // Resolution removed from filename
-
-            // Always use 8-bit PNG export via standard Canvas API
             const dataURL = outputCanvas.toDataURL('image/png');
-            // MODIFICACIÓN: Nombre de archivo simplificado a 'ORM_Texture.png'
             triggerDownload(dataURL, `ORM_Texture.png`);
         });
 
         function triggerDownload(url, filename) {
             const link = document.createElement('a');
-            link.href = url;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            link.href = url; link.download = filename;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
-        
-        
-        // 8. Logic for downloading the Splitter Set (NUEVA FUNCIONALIDAD)
 
         downloadSplitSetButton.addEventListener('click', () => {
             if (!loadState.splitter) return;
-
-            // Remueve la extensión para usar el nombre base
             const baseName = filenames.splitter.replace(/\.[^/.]+$/, ""); 
-
             const splitData = [
                 { canvas: splitRedCanvas, name: 'Occlusion', suffix: 'R' },
                 { canvas: splitGreenCanvas, name: 'Roughness', suffix: 'G' },
                 { canvas: splitBlueCanvas, name: 'Metallic', suffix: 'B' }
             ];
-
             splitData.forEach(item => {
-                // Asegúrate de usar el dataURL de alta resolución guardado
                 const dataURL = item.canvas.dataset.fullDataUrl; 
                 if (dataURL) {
-                    // const w = item.canvas.dataset.originalWidth; // Resolución eliminada del nombre
-                    // Formato: BASE_NAME_R_Occlusion.png
-                    // MODIFICACIÓN: Nombre de archivo simplificado a sin resolución
-                    const filename = `${baseName}_${item.suffix}_${item.name}.png`;
-                    // Usa un pequeño retraso para permitir múltiples descargas sin bloqueo del navegador
-                    setTimeout(() => {
-                        triggerDownload(dataURL, filename);
-                    }, 100); 
+                    setTimeout(() => { triggerDownload(dataURL, `${baseName}_${item.suffix}_${item.name}.png`); }, 100); 
                 }
             });
         });
         
-        // FIN DE NUEVA FUNCIONALIDAD
-        
-        
-        // --- Watermark Spawning Logic (from gsoos.html) ---
         function spawnWatermark(){
             const c=document.getElementById("mainContainer");
-            // Exit if container not found (safety)
             if (!c) return;
-            
             const w=document.createElement("div");
             w.className="watermark";
             w.textContent="Gsoos";
-
-            // random position inside container
             const rect=c.getBoundingClientRect();
-            // Using 200px safety margin for the large font size to keep the center of the watermark visible
             const x=Math.random()*(rect.width-200); 
             const y=Math.random()*(rect.height-200);
-
             w.style.left=x+"px";
             w.style.top=y+"px";
-
             c.appendChild(w);
-
-            // remove after some seconds (4 seconds)
             setTimeout(()=>w.remove(),4000);
         }
-
-        // Start spawning a new watermark every 1.5 seconds
         setInterval(spawnWatermark,1500);
-        spawnWatermark(); // Spawn one immediately
+        spawnWatermark();
 
-        // Initialize channel values and canvas on load
         function initializeApp() {
-            // Set initial values and labels for consistency
             updateRedValues(redChannel.value);
             updateGreenValues(greenChannel.value);
             updateBlueValues(blueChannel.value);
-            
             processImage();
         }
         
         initializeApp();
-
-    </script>
+</script>
 </body>
 </html>
-
