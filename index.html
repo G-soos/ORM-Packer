@@ -41,7 +41,7 @@
             font-family: monospace;
             font-size: 0.75rem;
         }
-        .side-ad {
+        .promo-panel {
             position: fixed;
             bottom: 16px;
             width: 220px;
@@ -49,35 +49,35 @@
             text-decoration: none;
             display: none;
         }
-        .side-ad img,
-        .side-ad video {
+        .promo-panel img,
+        .promo-panel video {
             width: 100%;
             border-radius: 0.75rem;
             border: 1px solid #4b5563;
             display: block;
             background-color: #111827;
         }
-        .side-ad-caption {
+        .promo-caption {
             margin-top: 0.5rem;
             text-align: center;
             font-size: 0.75rem;
             line-height: 1.3;
             color: #d1d5db;
         }
-        .side-ad-caption strong {
+        .promo-caption strong {
             display: block;
             color: #ffffff;
             font-size: 0.85rem;
             margin-bottom: 0.15rem;
         }
-        .side-ad-right { right: 16px; }
-        .ad-slot-future { left: 16px; }
+        .promo-panel-right { right: 16px; }
+        .promo-panel-future { left: 16px; }
         /* Slot reservado para publicidad paga futura: oculto hasta activarlo.
            Cuando tengas el anunciante, borra o comenta esta regla (o cambia a display:block). */
-        .ad-slot-future { display: none !important; }
+        .promo-panel-future { display: none !important; }
         /* Solo se muestran cuando hay espacio libre real a los costados del contenedor (max-w-7xl = 80rem) */
         @media (min-width: 1400px) {
-            .side-ad { display: block; }
+            .promo-panel { display: block; }
         }
     </style>
     <meta property="og:title" content="ORM Texture Packer & Splitter - Free Online Tool">
@@ -115,19 +115,19 @@
 
 <!-- Self-promo ad slot (currently: own product). Replace video src + link + caption when a paying advertiser comes in. -->
 <a href="https://superhivemarket.com/products/quick-image-vectorizer-pro?utm_source=github_page&utm_medium=banner&utm_campaign=self_promo"
-   target="_blank" rel="noopener" class="side-ad side-ad-right" id="adSlotSelfPromo">
-    <video src="assets/ads/vectorizer-demo.webm" autoplay muted loop playsinline></video>
-    <div class="side-ad-caption">
+   target="_blank" rel="noopener" class="promo-panel promo-panel-right" id="promoPanelSelf">
+    <video src="assets/media/vectorizer-demo.webm" autoplay muted loop playsinline></video>
+    <div class="promo-caption">
         <strong>From flat to 3D in seconds</strong>
         Quick Image Vectorizer Pro for Blender
     </div>
 </a>
 
-<!-- Reserved slot for future PAID advertising. Hidden for now (see .ad-slot-future { display:none } below).
+<!-- Reserved slot for future PAID advertising. Hidden for now (see .promo-panel-future { display:none } below).
      To activate: fill href/src/caption, then set display:block (or remove the rule) in the CSS. -->
-<a href="#" target="_blank" rel="noopener sponsored" class="side-ad ad-slot-future" id="adSlotFuture">
+<a href="#" target="_blank" rel="noopener" class="promo-panel promo-panel-future" id="promoPanelFuture">
     <video src="" autoplay muted loop playsinline></video>
-    <div class="side-ad-caption">
+    <div class="promo-caption">
         <strong>[Advertiser name]</strong>
         [Advertiser tagline]
     </div>
