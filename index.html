@@ -480,7 +480,7 @@
     <h2 id="transparency">Add or remove transparency (alpha) from an albedo / diffuse texture</h2>
     <p>The packer also works with color images, for example to <strong>remove the alpha channel</strong> from a Base Color texture, or to <strong>add an opacity mask</strong> to it:</p>
     <ol>
-        <li>Drop the color texture on the page. Files named <code>_Albedo</code>, <code>_BaseColor</code>, <code>_Diffuse</code> or <code>_Color</code> go straight into R, G and B with their own colors, and their transparency into A. For any other name, drop it on a channel and click <em>Use as color (RGB)</em> on the square.</li>
+        <li>Drop the color texture on the page. Files named <code>_Albedo</code>, <code>_BaseColor</code>, <code>_Diffuse</code>, <code>_Color</code>, or ending in <code>_A</code>, <code>_BC</code>, <code>_D</code> go straight into R, G and B with their own colors, and their transparency into A. For any other name, drop it on a channel and click <em>Use as color (RGB)</em> on the square.</li>
         <li><strong>Remove transparency:</strong> turn <em>Alpha</em> off. The PNG is saved as RGB, keeping the colors that were hidden under transparent pixels.</li>
         <li><strong>Add or replace transparency:</strong> drop a grayscale opacity mask on the A channel (white = opaque, black = transparent). Use <em>Invert</em> or <em>Levels</em> on A to adjust it.</li>
         <li>Check the result with the <strong>RGBA</strong> preview, which shows transparency over a checkerboard, and download.</li>
@@ -570,6 +570,9 @@
     // Keyword list for detection, longest first so "roughness" wins over "rough"
     const KEYWORDS = [];
     Object.entries(MAP_TYPES).forEach(([type, info]) => info.keys.forEach(key => KEYWORDS.push([key, type])));
+    // Short color suffixes (T_Rock_A, T_Rock_BC, T_Rock_D): only count as the LAST part of the name,
+    // so "Building_A_Roughness" or "Tile_D_AO" are still read by their real map type
+    const COLOR_SUFFIXES = ['a', 'bc', 'd', 'col'];
     KEYWORDS.sort((a, b) => b[0].length - a[0].length);
 
     // ---------------------------------------------------------------------
@@ -637,6 +640,7 @@
     function detectType(name) {
         const t = tokens(name);
         for (let i = t.length - 1; i >= 0; i--) {
+            if (i === t.length - 1 && i > 0 && COLOR_SUFFIXES.includes(t[i])) return 'color';
             for (const [key, type] of KEYWORDS) {
                 if (t[i] === key || t[i] === key + 'map') return type;
             }

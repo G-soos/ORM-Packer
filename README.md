@@ -55,7 +55,7 @@ Switching the target re-routes the maps you already loaded, so a Roughness map m
 - Size badge per map, with a warning when sizes differ
 
 ### 🖼️ Color images & transparency
-- Files named `_Albedo`, `_BaseColor`, `_Diffuse`, `_Color` go straight to R, G, B (and their transparency to A)
+- Files named `_Albedo`, `_BaseColor`, `_Diffuse`, `_Color` (or ending in `_A`, `_BC`, `_D`) go straight to R, G, B (and their transparency to A)
 - Any other color image: drop it on a channel and click **Use as color (RGB)**
 - Turn Alpha off to remove transparency, or drop an opacity mask on A to add it
 - **RGBA** preview over a checkerboard
