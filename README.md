@@ -104,7 +104,13 @@ All processing happens locally in your browser with the Canvas API. Images never
 
 HTML5 · Vanilla JavaScript · Canvas 2D API · TailwindCSS · GitHub Pages
 
-A single static `index.html`, with no build step and no dependencies to install. To run it locally, open `index.html` in a browser.
+A single static `index.html`, with no build step and no dependencies to install.
+
+---
+
+## 📄 License
+
+© 2025-2026 Gsoos. All rights reserved. The tool is free to use and the textures you create with it are yours, including for commercial work. The source code is public so it can be read, but it is **not open source**: it may not be copied, re-hosted or redistributed without permission. See [LICENSE](LICENSE).
 
 ---
 
