@@ -187,6 +187,7 @@
         .guide p, .guide li { color: #9ca3af; line-height: 1.65; }
         .guide ul, .guide ol { padding-left: 1.25rem; margin: 0.5rem 0; }
         .guide p + p { margin-top: 0.75rem; }
+        .guide .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .guide ul { list-style: disc; }
         .guide ol { list-style: decimal; }
         .guide code { background: #1f2937; color: #e5e7eb; padding: 0.1rem 0.35rem; border-radius: 0.25rem; font-size: 0.85em; }
@@ -449,14 +450,14 @@
     <p>Switching the target re-routes the maps you already loaded. To <strong>convert</strong> a texture between formats (e.g. Unreal ORM → Unity Mask Map), load it in the Splitter, press <em>Send all to packer</em>, then change the target.</p>
 
     <h2>Channel layouts per engine</h2>
-    <table>
+    <div class="table-wrap"><table>
         <thead><tr><th>Target</th><th>R</th><th>G</th><th>B</th><th>A</th></tr></thead>
         <tbody>
             <tr><td>Unreal Engine / Godot / glTF / Blender (ORM)</td><td>Ambient Occlusion</td><td>Roughness</td><td>Metallic</td><td>— (optional Height)</td></tr>
             <tr><td>Unity HDRP — Mask Map</td><td>Metallic</td><td>Ambient Occlusion</td><td>Detail Mask</td><td>Smoothness</td></tr>
             <tr><td>Unity URP / Built-in — Metallic map</td><td>Metallic</td><td>—</td><td>—</td><td>Smoothness</td></tr>
         </tbody>
-    </table>
+    </table></div>
 
     <h2>Importing the packed texture</h2>
     <h3>Unreal Engine</h3>
