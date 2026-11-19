@@ -153,6 +153,25 @@
         @media (min-width: 1780px) {
             .promo-panel { display: block; }
         }
+        .promo-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ef4444;
+            color: #fff;
+            font-weight: 800;
+            font-size: 15px;
+            line-height: 1;
+            padding: 8px 9px;
+            border-radius: 9999px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            transform: rotate(8deg);
+        }
+        /* Footer line: only where the side panel does not fit */
+        .promo-footer { display: none; }
+        @media (min-width: 640px) and (max-width: 1779px) {
+            .promo-footer.on { display: inline-flex; }
+        }
         .guide h2 { font-size: 1.5rem; font-weight: 700; color: #fff; margin: 2.5rem 0 0.75rem; }
         .guide h3 { font-size: 1.1rem; font-weight: 600; color: #e5e7eb; margin: 1.5rem 0 0.5rem; }
         .guide p, .guide li { color: #9ca3af; line-height: 1.65; }
@@ -222,6 +241,7 @@
 <!-- Self-promo ad slot (currently: own product). Replace video src + link + caption when a paying advertiser comes in. -->
 <a href="https://superhivemarket.com/products/quick-image-vectorizer-pro?utm_source=github_page&utm_medium=banner&utm_campaign=self_promo"
    target="_blank" rel="noopener" class="promo-panel promo-panel-right" id="promoPanelSelf">
+    <span id="promoBadge" class="promo-badge" hidden></span>
     <video src="assets/media/vectorizer-demo.webm" autoplay muted loop playsinline></video>
     <div class="promo-caption">
         <strong>From flat to 3D in seconds</strong>
@@ -362,7 +382,13 @@
     <a href="https://www.paypal.com/donate/?hosted_button_id=MKU4HJ2MHUNGJ" target="_blank" rel="noopener">
         <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" alt="Donate with PayPal" class="w-32 sm:w-40"/>
     </a>
-    <a href="https://github.com/G-soos/ORM-Packer" target="_blank" rel="noopener" class="ml-auto">
+    <a id="promoFooter" href="#" target="_blank" rel="noopener" class="promo-footer items-center gap-2 text-xs text-gray-400 hover:text-gray-200 min-w-0">
+        <span class="text-gray-500 shrink-0">Also by me:</span>
+        <span id="promoFooterName" class="truncate text-gray-300"></span>
+        <span id="promoFooterSale" class="shrink-0 bg-red-500 text-white font-bold rounded px-1.5 py-0.5" hidden></span>
+        <span class="shrink-0">→</span>
+    </a>
+    <a href="https://github.com/G-soos/ORM-Packer" target="_blank" rel="noopener" class="ml-auto shrink-0">
         <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Repository" class="w-10 h-10 opacity-80 hover:opacity-100 transition"/>
     </a>
 </div>
@@ -385,6 +411,7 @@
 <div id="toast"class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-md w-[calc(100%-2rem)] bg-gray-950/95 border border-gray-600 text-gray-100 text-sm rounded-lg px-4 py-3 shadow-2xl whitespace-pre-line"></div>
 
 <!-- ===================== Guide / SEO content ===================== -->
+<script src="promo.js"></script>
 <article id="guide" class="guide max-w-4xl mx-auto px-4 pb-16 pt-4">
 
     <h2>What is an ORM texture?</h2>
@@ -1556,6 +1583,38 @@
         track('support_nudge_shown');
     }
 
+    // ---------------------------------------------------------------------
+    // Self-promo: settings live in promo.js (window.PROMO). The sale badge and
+    // footer discount switch off by themselves when sale.until has passed.
+    // ---------------------------------------------------------------------
+    function setupPromo() {
+        const P = window.PROMO;
+        if (!P || !P.url) return;
+        const link = (placement) => `${P.url}?utm_source=orm_packer&utm_medium=${placement}&utm_campaign=self_promo`;
+        const panel = $('promoPanelSelf'), footer = $('promoFooter');
+        panel.href = link('banner');
+        footer.href = link('footer');
+        $('promoFooterName').textContent = P.name || '';
+        footer.classList.add('on');
+        panel.addEventListener('click', () => track('promo_click', { placement: 'banner' }));
+        footer.addEventListener('click', () => track('promo_click', { placement: 'footer' }));
+
+        const sale = P.sale || {};
+        const end = Date.parse(sale.until || '');
+        const applySale = () => {
+            const on = sale.percent > 0 && (!end || Date.now() < end);
+            $('promoBadge').hidden = !on;
+            $('promoFooterSale').hidden = !on;
+            if (on) {
+                $('promoBadge').textContent = `−${sale.percent}%`;
+                $('promoFooterSale').textContent = `${sale.percent}% off`;
+            }
+            return on;
+        };
+        // Re-check at the end time if the page is still open (only when it is within a day)
+        if (applySale() && end && end - Date.now() < 864e5) setTimeout(applySale, end - Date.now() + 1000);
+    }
+
     async function downloadSplitZip() {
         const sp = state.split;
         if (!sp) return;
@@ -1660,6 +1719,7 @@
         $('downloadSplitSetButton').addEventListener('click', downloadSplitZip);
         $('nudgeClose').addEventListener('click', () => { snoozeNudge(14); hideNudge(); track('support_nudge_closed'); });
         $('nudgeCoffee').addEventListener('click', () => { snoozeNudge(90); hideNudge(); track('support_nudge_click'); });
+        setupPromo();
         area.addEventListener('dragover', (e) => {
             if (!hasFiles(e)) return;
             e.preventDefault(); e.stopPropagation();
