@@ -265,7 +265,7 @@
 <!-- Reserved slot for future PAID advertising. Hidden for now (see .promo-panel-future { display:none } above).
      To activate: fill href/src/caption, then set display:block (or remove the rule) in the CSS. -->
 <a href="#" target="_blank" rel="noopener" class="promo-panel promo-panel-future" id="promoPanelFuture">
-    <video src="" autoplay muted loop playsinline></video>
+    <video autoplay muted loop playsinline></video>
     <div class="promo-caption">
         <strong>[Advertiser name]</strong>
         [Advertiser tagline]
@@ -447,7 +447,7 @@
         <li><strong>Adjust a channel</strong> &mdash; every channel has <em>Invert</em> and <em>Levels</em> (output min/max), e.g. to make a roughness map less glossy by raising its minimum. The square shows the result.</li>
         <li><strong>Pick the output size</strong> (longest side — non-square textures keep their aspect ratio) and download. The PNG is written losslessly, pixel-exact, including the alpha channel.</li>
     </ol>
-    <p>Switching the target re-routes the maps you already loaded. To <strong>convert</strong> a texture between formats (e.g. Unreal ORM → Unity Mask Map), load it in the Splitter, press <em>Send all to packer</em>, then change the target.</p>
+    <p>Switching the target re-routes the maps you already loaded. To <strong>convert</strong> a texture between formats (e.g. Unreal ORM → Unity Mask Map): first select the format it is <em>in now</em> as the target (ORM), load it in the Splitter and press <em>Send all to packer</em>, then change the target to the format you want (Unity HDRP).</p>
 
     <h2>Channel layouts per engine</h2>
     <div class="table-wrap"><table>
@@ -638,10 +638,20 @@
     }
 
     // Detect map type from a file name, looking at the last tokens first (suffixes)
+    const PACKED_RE = /metallicsmoothness|occlusionroughnessmetallic|roughnessmetallic|maskmap/;
+    const PACKED_WORDS = ['orm', 'arm', 'mra', 'rma', 'maskmap'];
+    const isKeyword = (tok) => KEYWORDS.some(([key]) => tok === key || tok === key + 'map');
     function detectType(name) {
         const t = tokens(name);
+        if (PACKED_RE.test(t.join('_').replace(/metallic_smoothness/g, 'metallicsmoothness')
+                                       .replace(/occlusion_roughness_metallic/g, 'occlusionroughnessmetallic')
+                                       .replace(/roughness_metallic/g, 'roughnessmetallic')
+                                       .replace(/mask_map/g, 'maskmap'))) return null;
         for (let i = t.length - 1; i >= 0; i--) {
-            if (i === t.length - 1 && i > 0 && COLOR_SUFFIXES.includes(t[i])) return 'color';
+            // "T_Rock_A" = albedo, but "T_Rock_Roughness_A" stays roughness
+            if (i === t.length - 1 && i > 0 && COLOR_SUFFIXES.includes(t[i]) && !isKeyword(t[i - 1])) return 'color';
+            // Packed texture (rock_arm_4k, T_Rock_ORM) unless a map type comes after it (Robot_Arm_AO)
+            if (PACKED_WORDS.includes(t[i])) return null;
             for (const [key, type] of KEYWORDS) {
                 if (t[i] === key || t[i] === key + 'map') return type;
             }
@@ -700,12 +710,57 @@
             });
         }
         const w = bmp.width, h = bmp.height;
-        const c = document.createElement('canvas');
-        c.width = w; c.height = h;
-        const ctx = c.getContext('2d', { willReadFrequently: true });
-        ctx.drawImage(bmp, 0, 0);
+        let data = readPixelsExact(bmp, w, h);
+        if (!data) {
+            // Fallback: 2D canvas (colors under fully transparent pixels may be lost)
+            const c = document.createElement('canvas');
+            c.width = w; c.height = h;
+            const ctx = c.getContext('2d', { willReadFrequently: true });
+            ctx.drawImage(bmp, 0, 0);
+            data = ctx.getImageData(0, 0, w, h).data;
+        }
         if (bmp.close) bmp.close();
-        return { w, h, data: ctx.getImageData(0, 0, w, h).data, channels: 4 };
+        return { w, h, data, channels: 4 };
+    }
+
+    // Read straight (non-premultiplied) RGBA through WebGL: upload as a texture with
+    // premultiply/colorspace conversion off and read it back from a framebuffer.
+    let glCtx = null;
+    function readPixelsExact(src, w, h) {
+        try {
+            if (!glCtx) {
+                const c = document.createElement('canvas');
+                glCtx = c.getContext('webgl2', { premultipliedAlpha: false, antialias: false }) ||
+                        c.getContext('webgl', { premultipliedAlpha: false, antialias: false });
+                if (!glCtx) return null;
+            }
+            const gl = glCtx;
+            if (gl.isContextLost()) { glCtx = null; return null; }
+            const max = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+            if (w > max || h > max) return null;
+            const tex = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, tex);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+            gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+            gl.pixelStorei(gl.PACK_ALIGNMENT, 1);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
+            const fb = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+            let out = null;
+            if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE) {
+                const buf = new Uint8Array(w * h * 4);
+                gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, buf);
+                if (gl.getError() === gl.NO_ERROR) out = new Uint8ClampedArray(buf.buffer);
+            }
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            gl.deleteFramebuffer(fb);
+            gl.deleteTexture(tex);
+            return out;
+        } catch {
+            return null;
+        }
     }
 
     // ---------------------------------------------------------------------
@@ -951,7 +1006,8 @@
     function isMaskName(name) {
         const det = detectType(name);
         if (det && det !== 'color') return true;
-        return tokens(name).some(t => PACKED_TOKENS.includes(t));
+        const t = tokens(name);
+        return t.some(x => PACKED_TOKENS.includes(x)) || /metallic_smoothness|occlusion_roughness_metallic|roughness_metallic|mask_map/.test(t.join('_'));
     }
 
     // Put a color image into R, G, B (its own channels) and its transparency into A.
@@ -964,18 +1020,20 @@
             applyPreset('custom');
         }
         const group = nextGroup++;
+        for (const [id, s] of state.library) { if (s.group && !SLOTS.some(k => state.slots[k].sourceId === id)) state.library.delete(id); }
         const img = { w: base.w, h: base.h, data: base.data, channels: base.channels };
         ['r', 'g', 'b'].concat(base.hasAlpha ? ['a'] : []).forEach(k => {
             const src = makeSource(img, base.name, null);
             src.component = k; src.group = group; src.isColor = base.isColor; src.hasAlpha = base.hasAlpha;
-            placeSource(k, src);
+            const old = sourceOf(k);
+            // Typed maps (AO, Roughness…) are kept so switching back to their target restores them
+            placeSource(k, src, !!old && isTyped(old.contentType) && old.contentType !== 'color');
             Object.assign(state.slots[k], { invert: false, lo: 0, hi: 255 });
         });
         if (base.hasAlpha) {
             state.alpha = true;
             state.view = 'rgba';
         } else {
-            if (state.slots.a.sourceId) { state.library.delete(state.slots.a.sourceId); state.slots.a.sourceId = null; }
             state.alpha = false;
             state.view = 'rgb';
         }
@@ -985,9 +1043,9 @@
         renderAll();
     }
 
-    function placeSource(k, src) {
+    function placeSource(k, src, keepReplaced) {
         const sl = state.slots[k];
-        if (sl.sourceId && sl.sourceId !== src.id) state.library.delete(sl.sourceId);
+        if (sl.sourceId && sl.sourceId !== src.id && !keepReplaced) state.library.delete(sl.sourceId);
         // A source may only live in one slot
         SLOTS.forEach(o => { if (o !== k && state.slots[o].sourceId === src.id) state.slots[o].sourceId = null; });
         sl.sourceId = src.id;
@@ -1184,7 +1242,7 @@
         $('file-' + k).addEventListener('change', (e) => { if (e.target.files[0]) loadFileIntoSlot(k, e.target.files[0]); });
         const tile = $('tile-' + k);
         tile.addEventListener('click', (e) => { if (!e.target.closest('button')) $('file-' + k).click(); });
-        tile.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('file-' + k).click(); } });
+        tile.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button')) { e.preventDefault(); $('file-' + k).click(); } });
         $('clear-' + k).addEventListener('click', (e) => { e.stopPropagation(); clearSlot(k); });
         $('asColor-' + k).addEventListener('click', (e) => { e.stopPropagation(); const src = sourceOf(k); if (src) useAsColor(src); });
         $('comp-' + k).addEventListener('change', (e) => {
@@ -1419,13 +1477,15 @@
         return sizeFor(parseInt(v, 10));
     }
 
-    let processTimer = null;
+    let processTimer = null, processInner = null, dirty = false;
     function scheduleProcess() {
+        dirty = true;
         clearTimeout(processTimer);
+        clearTimeout(processInner);
         processTimer = setTimeout(() => {
             setBusy(true);
             // Short delay so the "Processing…" badge can paint (no rAF: it stalls in background tabs)
-            setTimeout(() => {
+            processInner = setTimeout(() => {
                 try { processNow(); }
                 finally { setBusy(false); }
             }, 20);
@@ -1449,6 +1509,7 @@
             }
         });
         state.output = { w, h, data: out };
+        dirty = false;
         drawPreview();
         updateFileName();
         $('outputInfo').textContent = `${w}×${h} · ${state.alpha ? 'RGBA' : 'RGB'} · 8-bit PNG`;
@@ -1648,7 +1709,12 @@
     function sendAllToPacker() {
         if (!state.split) return;
         SLOTS.forEach(k => {
-            if (k === 'a' && !state.split.hasAlpha) return;
+            if (k === 'a' && !state.split.hasAlpha) {
+                const sl = state.slots.a;
+                if (sl.sourceId) { state.library.delete(sl.sourceId); sl.sourceId = null; }
+                state.alpha = false;
+                return;
+            }
             placeSource(k, splitSource(k));
         });
         toast('Channels sent to the packer. Change the target to convert to another format.');
@@ -1804,6 +1870,7 @@
         fitTiles();
 
         $('downloadButton').addEventListener('click', async () => {
+            if (dirty) { clearTimeout(processTimer); clearTimeout(processInner); processNow(); }
             if (!state.output) return;
             setBusy(true);
             try {
