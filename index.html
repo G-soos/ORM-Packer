@@ -73,6 +73,27 @@
             background-position: 0 0, 0 6px, 6px -6px, -6px 0;
         }
         .tile canvas { background: transparent; }
+        .slot-card {
+            border-top: 3px solid var(--acc);
+            background-image: linear-gradient(to bottom, var(--acc-soft), transparent 110px);
+        }
+        .slot-card .tile { border-color: var(--acc-line); }
+        .slot-card .tool-btn[aria-pressed="true"] {
+            background-color: var(--acc-bg);
+            border-color: var(--acc);
+            color: #fff;
+        }
+        .view-btn[data-view="r"][aria-pressed="true"] { background-color: #b91c1c; }
+        .view-btn[data-view="g"][aria-pressed="true"] { background-color: #047857; }
+        .view-btn[data-view="b"][aria-pressed="true"] { background-color: #1d4ed8; }
+        .view-btn[data-view="a"][aria-pressed="true"] { background-color: #6b7280; }
+        .view-btn[aria-pressed="true"] { color: #fff !important; }
+        .lv-pop {
+            background: rgba(17, 24, 39, 0.94);
+            backdrop-filter: blur(2px);
+            border: 1px solid var(--acc);
+        }
+        .lv-pop input[type=range] { accent-color: var(--acc); }
         .promo-panel {
             position: fixed;
             bottom: 16px;
@@ -407,10 +428,10 @@
     // Configuration
     // ---------------------------------------------------------------------
     const STYLE = {
-        r: { name: 'R', text: 'text-red-400',     accent: '#f87171' },
-        g: { name: 'G', text: 'text-emerald-400', accent: '#34d399' },
-        b: { name: 'B', text: 'text-blue-400',    accent: '#60a5fa' },
-        a: { name: 'A', text: 'text-gray-200',    accent: '#e5e7eb' }
+        r: { name: 'R', text: 'text-red-400',     accent: '#f87171', rgb: '248,113,113' },
+        g: { name: 'G', text: 'text-emerald-400', accent: '#34d399', rgb: '52,211,153' },
+        b: { name: 'B', text: 'text-blue-400',    accent: '#60a5fa', rgb: '96,165,250' },
+        a: { name: 'A', text: 'text-gray-200',    accent: '#d1d5db', rgb: '209,213,219' }
     };
 
     // Map types: default solid value, value hints, and file-name keywords used for auto-detection
@@ -915,12 +936,13 @@
     function cardHTML(k) {
         const s = STYLE[k];
         return `
-<div id="card-${k}" data-slot="${k}" class="slot-card flex flex-col gap-1.5 p-2 bg-gray-900/60 rounded-lg border border-gray-700 transition duration-150">
+<div id="card-${k}" data-slot="${k}" class="slot-card flex flex-col gap-1.5 p-2 bg-gray-900/60 rounded-lg border border-gray-700 transition duration-150" style="--acc:${s.accent};--acc-soft:rgba(${s.rgb},.16);--acc-line:rgba(${s.rgb},.35);--acc-bg:rgba(${s.rgb},.35)">
   <div class="flex items-center justify-between gap-1">
     <h2 class="text-xs font-semibold text-gray-200 truncate"><span class="font-mono font-bold ${s.text} mr-1">${s.name}</span><span id="type-${k}"></span></h2>
     ${k === 'a' ? `<label class="flex items-center gap-1 text-[11px] text-gray-400 cursor-pointer select-none shrink-0" title="Write an alpha channel (RGBA output)"><input type="checkbox" id="alphaToggle">On</label>` : ''}
   </div>
   <div id="body-${k}" class="flex flex-col gap-1.5">
+    <div class="relative">
     <div id="tile-${k}" role="button" tabindex="0" title="Click or drop a map" class="tile group relative aspect-square rounded-md border border-gray-700 overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
       <canvas id="tileCanvas-${k}" width="1" height="1" class="absolute inset-0 w-full h-full" style="object-fit:contain"></canvas>
       <div id="tileText-${k}" class="absolute inset-0 flex flex-col items-center justify-center font-mono text-center pointer-events-none"></div>
@@ -929,6 +951,19 @@
       </div>
       <span id="size-${k}" class="hidden absolute top-1 left-1 text-[10px] font-mono bg-black/70 text-gray-200 px-1 py-0.5 rounded"></span>
       <button id="clear-${k}" type="button" class="hidden absolute top-1 right-1 w-5 h-5 rounded bg-black/70 hover:bg-red-700 text-gray-200 text-[11px] leading-none" title="Remove map">✕</button>
+    </div>
+    <div id="levels-${k}" class="lv-pop hidden absolute inset-x-0 top-0 min-h-full z-10 rounded-md p-1.5 flex flex-col gap-1 text-[11px] text-gray-300 shadow-lg" role="dialog" aria-label="Levels">
+      <div class="flex items-center gap-1">
+        <span class="font-semibold text-gray-100 flex-1">Levels</span>
+        <button id="lvReset-${k}" type="button" class="w-5 h-5 rounded hover:bg-gray-700 text-gray-300 leading-none" title="Reset to 0–255">↺</button>
+        <button id="lvClose-${k}" type="button" class="w-5 h-5 rounded hover:bg-gray-700 text-gray-300 leading-none" title="Close (Esc)">✕</button>
+      </div>
+      <label class="flex items-center justify-between gap-1 mt-0.5"><span class="text-gray-400">Min</span><input id="lo-${k}" type="number" min="0" max="255" class="channel-input-number text-gray-200" style="width:2.9rem"></label>
+      <input id="loR-${k}" type="range" min="0" max="255" class="w-full h-1" aria-label="Min">
+      <label class="flex items-center justify-between gap-1"><span class="text-gray-400">Max</span><input id="hi-${k}" type="number" min="0" max="255" class="channel-input-number text-gray-200" style="width:2.9rem"></label>
+      <input id="hiR-${k}" type="range" min="0" max="255" class="w-full h-1" aria-label="Max">
+      <div id="lvBar-${k}" class="h-1.5 rounded mt-auto"></div>
+    </div>
     </div>
     <input type="file" id="file-${k}" class="hidden" accept="image/*">
     <div id="mapRow-${k}" class="hidden flex items-center gap-1 min-h-[1.5rem]">
@@ -944,10 +979,6 @@
     <div class="grid grid-cols-2 gap-1">
       <button id="inv-${k}" type="button" class="tool-btn" aria-pressed="false" title="Invert (255 − value), e.g. Roughness ↔ Smoothness">⇅ Invert</button>
       <button id="lvBtn-${k}" type="button" class="tool-btn" aria-pressed="false" title="Output levels: remap the channel to a min–max range">Levels</button>
-    </div>
-    <div id="levels-${k}" class="hidden flex items-center justify-between gap-1 text-[10px] text-gray-400">
-      <label class="flex items-center gap-1">Min<input id="lo-${k}" type="number" min="0" max="255" class="channel-input-number text-gray-200" style="width:2.9rem"></label>
-      <label class="flex items-center gap-1">Max<input id="hi-${k}" type="number" min="0" max="255" class="channel-input-number text-gray-200" style="width:2.9rem"></label>
     </div>
   </div>
 </div>`;
@@ -982,8 +1013,22 @@
             scheduleProcess();
         });
         $('lvBtn-' + k).addEventListener('click', () => {
-            state.slots[k].levelsOpen = !state.slots[k].levelsOpen;
-            renderSlot(k);
+            const open = !state.slots[k].levelsOpen;
+            SLOTS.forEach(o => { state.slots[o].levelsOpen = false; });
+            state.slots[k].levelsOpen = open;
+            SLOTS.forEach(o => renderLevels(o));
+        });
+        $('lvClose-' + k).addEventListener('click', () => { state.slots[k].levelsOpen = false; renderLevels(k); });
+        $('lvReset-' + k).addEventListener('click', () => {
+            state.slots[k].lo = 0; state.slots[k].hi = 255;
+            renderLevels(k); drawTile(k); scheduleProcess();
+        });
+        $('lvBtn-' + k).addEventListener('dblclick', () => {
+            state.slots[k].lo = 0; state.slots[k].hi = 255; state.slots[k].levelsOpen = false;
+            renderLevels(k); drawTile(k); scheduleProcess();
+        });
+        $('levels-' + k).addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { state.slots[k].levelsOpen = false; renderLevels(k); $('lvBtn-' + k).focus(); }
         });
 
         const onValue = (v) => {
@@ -998,16 +1043,17 @@
         $('num-' + k).addEventListener('input', (e) => onValue(e.target.value));
         $('num-' + k).addEventListener('blur', () => { $('num-' + k).value = state.slots[k].value; });
 
-        const onLevel = (which, v) => {
+        const onLevel = (which, v, fromNumber) => {
             state.slots[k][which] = clamp255(v);
-            renderLevelButton(k);
+            renderLevels(k, fromNumber);
             drawTile(k);
             scheduleProcess();
         };
         ['lo', 'hi'].forEach(which => {
             const el = $(which + '-' + k);
-            el.addEventListener('input', (e) => onLevel(which, e.target.value));
+            el.addEventListener('input', (e) => onLevel(which, e.target.value, true));
             el.addEventListener('blur', () => { el.value = state.slots[k][which]; });
+            $(which + 'R-' + k).addEventListener('input', (e) => onLevel(which, e.target.value, false));
         });
 
         card.addEventListener('mouseenter', () => { hoverTarget = k; });
@@ -1066,10 +1112,20 @@
         }
     }
 
-    function renderLevelButton(k) {
-        const sl = state.slots[k];
-        $('lvBtn-' + k).setAttribute('aria-pressed', String(sl.levelsOpen || !levelsDefault(sl)));
-        $('lvBtn-' + k).textContent = levelsDefault(sl) ? 'Levels' : `${sl.lo}–${sl.hi}`;
+    // Levels popover (over the tile) + button state; fromNumber = don't overwrite the field being typed in
+    function renderLevels(k, fromNumber) {
+        const sl = state.slots[k], def = levelsDefault(sl);
+        $('levels-' + k).classList.toggle('hidden', !sl.levelsOpen);
+        $('lvBtn-' + k).setAttribute('aria-pressed', String(sl.levelsOpen || !def));
+        $('lvBtn-' + k).setAttribute('aria-expanded', String(sl.levelsOpen));
+        $('lvBtn-' + k).textContent = def ? 'Levels' : `${sl.lo}–${sl.hi}`;
+        $('lvBtn-' + k).title = def ? 'Output levels: remap the channel to a min–max range' : 'Levels active — click to edit, double-click to reset';
+        $('loR-' + k).value = sl.lo;
+        $('hiR-' + k).value = sl.hi;
+        if (!fromNumber) { $('lo-' + k).value = sl.lo; $('hi-' + k).value = sl.hi; }
+        $('lvBar-' + k).style.background = `linear-gradient(to right, rgb(${sl.lo},${sl.lo},${sl.lo}), rgb(${sl.hi},${sl.hi},${sl.hi}))`;
+        $('lvReset-' + k).disabled = def;
+        $('lvReset-' + k).classList.toggle('opacity-30', def);
     }
 
     function renderSlot(k) {
@@ -1091,10 +1147,7 @@
         $('range-' + k).value = sl.value;
         $('num-' + k).value = sl.value;
         $('inv-' + k).setAttribute('aria-pressed', String(sl.invert));
-        $('levels-' + k).classList.toggle('hidden', !sl.levelsOpen);
-        $('lo-' + k).value = sl.lo;
-        $('hi-' + k).value = sl.hi;
-        renderLevelButton(k);
+        renderLevels(k);
         drawTile(k);
         if (k === 'a') {
             $('alphaToggle').checked = state.alpha;
@@ -1394,6 +1447,15 @@
         $('slotGrid').innerHTML = SLOTS.map(cardHTML).join('');
         $('splitterResults').innerHTML = SLOTS.map(thumbHTML).join('');
         SLOTS.forEach(setupSlot);
+        // Close an open Levels popover when clicking anywhere else
+        document.addEventListener('pointerdown', (e) => {
+            SLOTS.forEach(k => {
+                if (!state.slots[k].levelsOpen) return;
+                if ($('levels-' + k).contains(e.target) || $('lvBtn-' + k).contains(e.target)) return;
+                state.slots[k].levelsOpen = false;
+                renderLevels(k);
+            });
+        });
 
         // Preset selector
         const presetSelect = $('presetSelect');
