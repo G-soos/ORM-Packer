@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ORM Texture Packer & Splitter - Free Online Tool | PBR, Blender, Unreal, Unity</title>
     <link rel="icon" type="image/png" href="favicon.png">
-    
+    <link rel="canonical" href="https://g-soos.github.io/ORM-Packer/">
+
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-X82FXXRY47"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -18,28 +19,33 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         canvas {
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
             background-color: #374151;
         }
         .disabled-container {
-            opacity: 0.5;
+            opacity: 0.4;
             pointer-events: none;
         }
-        .left-column {
-            overflow-y: auto;
-            max-height: 100%;
-        }
         .channel-input-number {
-            width: 5rem;
+            width: 4.5rem;
             text-align: center;
             background-color: #374151;
             border: 1px solid #4b5563;
-            padding: 0.25rem;
+            padding: 0.2rem;
             border-radius: 0.375rem;
             font-family: monospace;
             font-size: 0.75rem;
+        }
+        .view-btn[aria-pressed="true"] {
+            background-color: #2563eb;
+            color: #fff;
+        }
+        .view-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .drop-highlight {
+            outline: 3px dashed rgba(255, 255, 255, 0.7);
+            outline-offset: 2px;
         }
         .promo-panel {
             position: fixed;
@@ -79,39 +85,66 @@
         @media (min-width: 1400px) {
             .promo-panel { display: block; }
         }
+        .guide h2 { font-size: 1.5rem; font-weight: 700; color: #fff; margin: 2.5rem 0 0.75rem; }
+        .guide h3 { font-size: 1.1rem; font-weight: 600; color: #e5e7eb; margin: 1.5rem 0 0.5rem; }
+        .guide p, .guide li { color: #9ca3af; line-height: 1.65; }
+        .guide ul, .guide ol { padding-left: 1.25rem; margin: 0.5rem 0; }
+        .guide ul { list-style: disc; }
+        .guide ol { list-style: decimal; }
+        .guide code { background: #1f2937; color: #e5e7eb; padding: 0.1rem 0.35rem; border-radius: 0.25rem; font-size: 0.85em; }
+        .guide table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 0.75rem 0; }
+        .guide th, .guide td { border: 1px solid #374151; padding: 0.5rem 0.6rem; text-align: left; }
+        .guide th { background: #1f2937; color: #e5e7eb; }
+        .guide td { color: #9ca3af; }
+        .guide details { border: 1px solid #374151; border-radius: 0.5rem; padding: 0.75rem 1rem; margin: 0.5rem 0; background: #111827; }
+        .guide summary { cursor: pointer; color: #e5e7eb; font-weight: 600; }
+        .guide details p { margin-top: 0.5rem; }
     </style>
     <meta property="og:title" content="ORM Texture Packer & Splitter - Free Online Tool">
-<meta property="og:description" content="Pack and split ORM textures (Occlusion, Roughness, Metallic) directly in your browser. Free, no install, no Photoshop needed. Compatible with Blender, Unreal Engine, and Unity.">
+<meta property="og:description" content="Pack and split ORM textures (Occlusion, Roughness, Metallic) and Unity Mask Maps directly in your browser. Free, no install, no Photoshop needed. Compatible with Blender, Unreal Engine, Unity and Godot.">
 <meta property="og:image" content="https://g-soos.github.io/ORM-Packer/preview.png">
 <meta property="og:url" content="https://g-soos.github.io/ORM-Packer/">
 <meta property="og:type" content="website">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="ORM Texture Packer & Splitter - Free Online Tool">
-<meta name="twitter:description" content="Pack and split ORM textures (Occlusion, Roughness, Metallic) directly in your browser. Free, no install, no Photoshop needed. Compatible with Blender, Unreal Engine, and Unity.">
+<meta name="twitter:description" content="Pack and split ORM textures (Occlusion, Roughness, Metallic) and Unity Mask Maps directly in your browser. Free, no install, no Photoshop needed. Compatible with Blender, Unreal Engine, Unity and Godot.">
 <meta name="twitter:image" content="https://g-soos.github.io/ORM-Packer/preview.png">
-<meta name="description" content="Free online ORM texture packer and splitter. Combine or extract Occlusion, Roughness and Metallic channels into a single PBR texture. No installation required. Works with Blender, Unreal Engine, Unity and any PBR workflow.">
-<meta name="keywords" content="ORM texture packer, ORM splitter, PBR texture tool, Occlusion Roughness Metallic, channel packer, free texture tool, Blender PBR, Unreal Engine ORM, Unity texture, online texture packer">
+<meta name="description" content="Free online ORM texture packer and splitter. Combine or extract Occlusion, Roughness, Metallic, Smoothness and Height channels into a single PBR texture: Unreal ORM, Unity HDRP Mask Map, Unity Metallic-Smoothness. Runs in your browser, no upload, no install.">
+<meta name="keywords" content="ORM texture packer, ORM splitter, PBR texture tool, Occlusion Roughness Metallic, channel packer, Unity mask map, HDRP mask map, smoothness from roughness, free texture tool, Blender PBR, Unreal Engine ORM, Godot ORM, online texture packer">
 <link rel="sitemap" type="application/xml" title="Sitemap" href="sitemap.xml" />
-</head>
-<body class="bg-gray-900 text-gray-200 font-sans flex items-center justify-center h-screen p-4">
 
-<style>
-@keyframes drift{
- from{ transform:translateY(0px) rotate(10deg); opacity:0.05; }
- to{ transform:translateY(-20px) rotate(14deg); opacity:0.12; }
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "ORM Texture Packer & Splitter",
+  "url": "https://g-soos.github.io/ORM-Packer/",
+  "applicationCategory": "DesignApplication",
+  "operatingSystem": "Any (web browser)",
+  "description": "Free in-browser tool to pack and split ORM textures and Unity Mask Maps for PBR workflows in Unreal Engine, Unity, Godot and Blender.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "Gsoos" }
 }
-.watermark {
- position:absolute;
- font-size:4rem; 
- font-weight:800;
- color:white;
- opacity:0.07;
- pointer-events:none;
- user-select:none;
- animation: drift 1.2s linear infinite alternate;
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is an ORM texture?",
+      "acceptedAnswer": { "@type": "Answer", "text": "An ORM texture stores three grayscale PBR maps in one image: Ambient Occlusion in the red channel, Roughness in the green channel and Metallic in the blue channel. It saves texture memory and samplers in game engines." } },
+    { "@type": "Question", "name": "How do I turn a Roughness map into Smoothness?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Smoothness is the inverse of roughness (255 minus the value). Enable Invert on the channel. When a file named like _Roughness is loaded into a Smoothness channel, the tool inverts it automatically." } },
+    { "@type": "Question", "name": "Are my textures uploaded to a server?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. All processing happens locally in your browser. Your images never leave your computer." } },
+    { "@type": "Question", "name": "Why does my packed texture look wrong in the engine?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Packed masks contain linear data, not color. Disable sRGB in Unreal and Unity import settings and set the Color Space to Non-Color in Blender." } }
+  ]
 }
-</style>
+</script>
+</head>
+<body class="bg-gray-900 text-gray-200 font-sans">
 
 <!-- Self-promo ad slot (currently: own product). Replace video src + link + caption when a paying advertiser comes in. -->
 <a href="https://superhivemarket.com/products/quick-image-vectorizer-pro?utm_source=github_page&utm_medium=banner&utm_campaign=self_promo"
@@ -123,7 +156,7 @@
     </div>
 </a>
 
-<!-- Reserved slot for future PAID advertising. Hidden for now (see .promo-panel-future { display:none } below).
+<!-- Reserved slot for future PAID advertising. Hidden for now (see .promo-panel-future { display:none } above).
      To activate: fill href/src/caption, then set display:block (or remove the rule) in the CSS. -->
 <a href="#" target="_blank" rel="noopener" class="promo-panel promo-panel-future" id="promoPanelFuture">
     <video src="" autoplay muted loop playsinline></video>
@@ -133,849 +166,1246 @@
     </div>
 </a>
 
-<div id="mainContainer" class="bg-gray-800 p-3 rounded-2xl shadow-2xl w-full max-w-7xl h-full main-container flex flex-col relative overflow-hidden">
-        
-        <h1 class="text-3xl font-bold text-center text-white mb-2">ORM Texture Packer Workshop</h1>
-        <p class="text-center text-lg text-gray-400 mb-6"> Free online tool to generate ORM (Occlusion, Roughness, Metallic) textures for PBR workflows. 
-    Compatible with Blender, Unreal Engine, Unity and any 3D software. <span class="text-xs text-gray-600">(Channel order is just a guide — load any map in any channel to suit your pipeline.)</span></p>
+<main class="lg:h-screen p-2 sm:p-4 flex items-center justify-center">
+<div id="mainContainer" class="bg-gray-800 p-3 rounded-2xl shadow-2xl w-full max-w-7xl lg:h-full flex flex-col relative lg:overflow-hidden">
 
-        <div class="flex flex-1 flex-col lg:flex-row gap-6 overflow-hidden">
-            
-            <div class="flex flex-col gap-2 lg:w-1/2 left-column pr-2">
-                
-                <p class="text-xs text-gray-500">Step 1 — Load your maps into each channel, or set a solid value.</p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    
-                    <!-- R: Occlusion -->
-                    <div id="occlusionContainer" class="space-y-2 px-1 py-2 bg-gray-900/50 rounded-lg border-2 border-red-700 transition duration-150" 
-                         data-channel-color="red" data-original-border-color="border-red-700">
-                        <h2 class="text-lg font-semibold text-red-400">R: Occlusion</h2>
-                        <label for="occlusionLoader" class="block w-full cursor-pointer bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-lg text-center transition duration-200 text-xs">
-                            Load Map
-                        </label>
-                        <input type="file" id="occlusionLoader" class="hidden" accept="image/*">
-                        
-                        <!-- Status area: filename + size badge + warning -->
-                        <div id="redStatusArea" class="hidden flex flex-col gap-1 p-2 bg-red-900/30 rounded">
-                            <div class="flex items-center justify-between">
-                                <div id="red-status" class="text-red-300 font-mono text-xs truncate"></div>
-                                <button id="redClearButton" data-channel="r" class="text-red-300 hover:text-white bg-red-700/50 hover:bg-red-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove texture">X</button>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-gray-500">Texture size</span>
-                                <span id="redSizeBadge" class="text-xs font-mono font-semibold bg-red-900/60 text-red-300 px-2 py-0.5 rounded"></span>
-                            </div>
-                            <div id="redSizeWarning" class="hidden flex items-center gap-1">
-                                <span class="text-yellow-400 text-xs">⚠</span>
-                                <span class="text-yellow-400 text-xs">Size differs from other channels</span>
-                            </div>
-                        </div>
+        <div class="flex-shrink-0">
+            <h1 class="text-2xl sm:text-3xl font-bold text-center text-white mb-1">ORM Texture Packer Workshop <span class="text-xs font-normal text-gray-500 align-middle">by Gsoos</span></h1>
+            <p class="text-center text-sm sm:text-base text-gray-400 mb-4">Free online tool to pack PBR masks (Occlusion, Roughness, Metallic, Smoothness, Height) for Unreal, Unity, Godot and Blender.
+                Everything runs in your browser — nothing is uploaded. <a href="#guide" class="text-blue-400 hover:underline whitespace-nowrap">How to use ↓</a></p>
+        </div>
 
-                        <p id="redSolidLabel" class="text-xs text-gray-500 text-center">Or use a solid value:</p>
-                        
-                        <div id="redSliderContainer">
-                            <input id="redChannel" type="range" min="0" max="255" value="255" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #f87171;">
-                            <div class="flex justify-center items-center gap-2 mt-1">
-                                <input id="redValueInput" type="number" min="0" max="255" value="255" class="channel-input-number text-red-300 focus:ring-red-500 focus:border-red-500"/>
-                                <div class="text-red-300 font-mono text-xs" id="redValueLabelText">(White)</div>
-                            </div>
-                        </div>
+        <div class="flex flex-1 flex-col lg:flex-row gap-6 lg:overflow-hidden min-h-0">
+
+            <!-- LEFT: inputs -->
+            <div class="flex flex-col gap-3 lg:w-1/2 lg:overflow-y-auto lg:pr-2">
+
+                <div class="flex flex-col gap-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <label for="presetSelect" class="text-sm font-semibold text-white">Target</label>
+                        <select id="presetSelect" class="flex-1 min-w-[12rem] bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2"></select>
+                        <button id="resetAllButton" type="button" class="text-xs text-gray-400 hover:text-white bg-gray-700 hover:bg-gray-600 rounded-lg px-2 py-2" title="Remove all loaded maps and reset values">Reset all</button>
                     </div>
-
-                    <!-- G: Roughness -->
-                    <div id="roughnessContainer" class="space-y-2 px-1 py-2 bg-gray-900/50 rounded-lg border-2 border-emerald-700 transition duration-150" 
-                         data-channel-color="green" data-original-border-color="border-emerald-700">
-                        <h2 class="text-lg font-semibold text-emerald-400">G: Roughness</h2>
-                        <label for="imageLoader" class="block w-full cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1 px-3 rounded-lg text-center transition duration-200 text-xs">
-                            Load Map
-                        </label>
-                        <input type="file" id="imageLoader" class="hidden" accept="image/*">
-                        
-                        <div id="greenStatusArea" class="hidden flex flex-col gap-1 p-2 bg-emerald-900/30 rounded">
-                            <div class="flex items-center justify-between">
-                                <div id="green-status" class="text-emerald-300 font-mono text-xs truncate"></div>
-                                <button id="greenClearButton" data-channel="g" class="text-emerald-300 hover:text-white bg-emerald-700/50 hover:bg-emerald-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove texture">X</button>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-gray-500">Texture size</span>
-                                <span id="greenSizeBadge" class="text-xs font-mono font-semibold bg-emerald-900/60 text-emerald-300 px-2 py-0.5 rounded"></span>
-                            </div>
-                            <div id="greenSizeWarning" class="hidden flex items-center gap-1">
-                                <span class="text-yellow-400 text-xs">⚠</span>
-                                <span class="text-yellow-400 text-xs">Size differs from other channels</span>
-                            </div>
-                        </div>
-                        
-                        <p id="greenSolidLabel" class="text-xs text-gray-500 text-center">Or use a solid value:</p>
-
-                        <div id="greenSliderContainer">
-                            <input id="greenChannel" type="range" min="0" max="255" value="255" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #34d399;">
-                            <div class="flex justify-center items-center gap-2 mt-1">
-                                <input id="greenValueInput" type="number" min="0" max="255" value="255" class="channel-input-number text-emerald-300 focus:ring-emerald-500 focus:border-emerald-500"/>
-                                <div class="text-emerald-300 font-mono text-xs" id="greenValueLabelText">(Matte)</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- B: Metallic -->
-                    <div id="metallicContainer" class="space-y-2 px-1 py-2 bg-gray-900/50 rounded-lg border-2 border-blue-700 transition duration-150" 
-                         data-channel-color="blue" data-original-border-color="border-blue-700">
-                        <h2 class="text-lg font-semibold text-blue-400">B: Metallic</h2>
-                        <label for="metallicLoader" class="block w-full cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-lg text-center transition duration-200 text-xs">
-                            Load Map
-                        </label>
-                        <input type="file" id="metallicLoader" class="hidden" accept="image/*">
-                        
-                        <div id="blueStatusArea" class="hidden flex flex-col gap-1 p-2 bg-blue-900/30 rounded">
-                            <div class="flex items-center justify-between">
-                                <div id="blue-status" class="text-blue-300 font-mono text-xs truncate"></div>
-                                <button id="blueClearButton" data-channel="b" class="text-blue-300 hover:text-white bg-blue-700/50 hover:bg-blue-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove texture">X</button>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-gray-500">Texture size</span>
-                                <span id="blueSizeBadge" class="text-xs font-mono font-semibold bg-blue-900/60 text-blue-300 px-2 py-0.5 rounded"></span>
-                            </div>
-                            <div id="blueSizeWarning" class="hidden flex items-center gap-1">
-                                <span class="text-yellow-400 text-xs">⚠</span>
-                                <span class="text-yellow-400 text-xs">Size differs from other channels</span>
-                            </div>
-                        </div>
-                        
-                        <p id="blueSolidLabel" class="text-xs text-gray-500 text-center">Or use a solid value:</p>
-                        
-                        <div id="blueSliderContainer">
-                            <input id="blueChannel" type="range" min="0" max="255" value="0" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer range-sm" style="accent-color: #60a5fa;">
-                            <div class="flex justify-center items-center gap-2 mt-1">
-                                <input id="blueValueInput" type="number" min="0" max="255" value="0" class="channel-input-number text-blue-300 focus:ring-blue-500 focus:border-blue-500"/>
-                                <div class="text-blue-300 font-mono text-xs" id="blueValueLabelText">(Black)</div>
-                            </div>
-                        </div>
-                    </div>
+                    <p id="presetInfo" class="text-xs text-gray-400 font-mono"></p>
                 </div>
-                
+
+                <p class="text-xs text-gray-500">Step 1 — Load a map into each channel, or set a solid value. <span class="text-gray-400">Tip: drop all your maps at once anywhere on the page (e.g. <code class="text-gray-300">Rock_AO.png</code>, <code class="text-gray-300">Rock_Roughness.png</code>) and they are assigned by name. Hover a channel and press <kbd class="text-gray-300">Ctrl+V</kbd> to paste.</span></p>
+
+                <div id="slotGrid" class="grid grid-cols-2 xl:grid-cols-4 gap-3"></div>
+
                 <hr class="border-gray-700/50">
 
-                <div id="splitterMainContainer" class="bg-gray-700/30 p-4 rounded-lg transition duration-150 border border-gray-700">
-                    <p class="text-xs text-gray-500">Optional — Already have an ORM? Drop it here to extract each channel.</p>
-                    <h2 class="w-full text-left py-1 text-lg font-semibold text-white mb-2">
-                        Deconstruct ORM Texture (Splitter)
-                    </h2>
-                    
-                    <div id="splitterContent">
-                        <div id="splitterLoadArea" class="space-y-3 mb-4 p-3 bg-gray-900 rounded-lg border-2 border-purple-500/50 transition duration-150" 
-                             data-channel-color="purple" data-original-border-color="border-purple-500/50">
-                            <label for="ormSplitterLoader" id="splitterLabel" class="block w-full cursor-pointer bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-center transition duration-200 text-sm">
-                                Load/Drag ORM Texture (RGB)
-                            </label>
-                            <input type="file" id="ormSplitterLoader" class="hidden" accept="image/*">
-                            
-                            <div id="splitterStatusArea" class="hidden flex items-center justify-between p-1 bg-purple-900/30 rounded">
-                                <div id="splitter-status" class="text-purple-300 font-mono text-xs truncate"></div>
-                                <button id="splitterClearButton" class="text-purple-300 hover:text-white bg-purple-700/50 hover:bg-purple-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove loaded ORM texture">X</button>
-                            </div>
-                        </div>
+                <div id="splitterMainContainer" class="bg-gray-700/30 p-4 rounded-lg border border-gray-700">
+                    <p class="text-xs text-gray-500">Optional — Already have a packed texture? Drop it here to extract each channel.</p>
+                    <h2 class="w-full text-left py-1 text-lg font-semibold text-white mb-2">Deconstruct Packed Texture (Splitter)</h2>
 
-                        <p id="splitterMessage" class="text-sm text-gray-400 mb-4">Drag and drop the desired thumbnail to the packing channel (Red, Green, or Blue).</p>
-                        
-                        <div id="splitterResults" class="grid grid-cols-3 gap-2">
-                            <div id="splitRedContainer" class="p-1 border border-red-500 rounded-lg text-center cursor-grab bg-gray-900/50 hover:bg-gray-700 transition duration-150 shadow-md opacity-50 pointer-events-none" draggable="true" data-channel-name="occlusion">
-                                <canvas id="splitRedCanvas" class="w-full aspect-square rounded mb-1 border border-gray-600"></canvas>
-                                <span class="text-red-300 text-sm font-bold">Red</span>
-                            </div>
-                            <div id="splitGreenContainer" class="p-1 border border-emerald-500 rounded-lg text-center cursor-grab bg-gray-900/50 hover:bg-gray-700 transition duration-150 shadow-md opacity-50 pointer-events-none" draggable="true" data-channel-name="roughness">
-                                <canvas id="splitGreenCanvas" class="w-full aspect-square rounded mb-1 border border-gray-600"></canvas>
-                                <span class="text-emerald-300 text-sm font-bold">Green</span>
-                            </div>
-                            <div id="splitBlueContainer" class="p-1 border border-blue-500 rounded-lg text-center cursor-grab bg-gray-900/50 hover:bg-gray-700 transition duration-150 shadow-md opacity-50 pointer-events-none" draggable="true" data-channel-name="metallic">
-                                <canvas id="splitBlueCanvas" class="w-full aspect-square rounded mb-1 border border-gray-600"></canvas>
-                                <span class="text-blue-300 text-sm font-bold">Blue</span>
-                            </div>
+                    <div id="splitterLoadArea" class="space-y-3 mb-4 p-3 bg-gray-900 rounded-lg border-2 border-purple-500/50 transition duration-150">
+                        <label for="splitterLoader" id="splitterLabel" class="block w-full cursor-pointer bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-center transition duration-200 text-sm">
+                            Load/Drag Packed Texture (RGB/RGBA)
+                        </label>
+                        <input type="file" id="splitterLoader" class="hidden" accept="image/*">
+                        <div id="splitterStatusArea" class="hidden flex items-center justify-between p-1 bg-purple-900/30 rounded">
+                            <div id="splitterStatus" class="text-purple-300 font-mono text-xs truncate"></div>
+                            <button id="splitterClearButton" type="button" class="text-purple-300 hover:text-white bg-purple-700/50 hover:bg-purple-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove loaded texture">✕</button>
                         </div>
-                        
-                        <button id="downloadSplitSetButton" 
-                            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-sm mt-4 transition duration-200 shadow-md opacity-50 pointer-events-none"
-                            title="Download Occlusion, Roughness, and Metallic textures as a set."
-                            style="display: none;"
-                        >
-                            Download Split Texture Set (.png)
-                        </button> 
+                    </div>
+
+                    <p class="text-sm text-gray-400 mb-3">Drag a thumbnail onto any packing channel, or send them all at once. Channel names follow the selected target.</p>
+
+                    <div id="splitterResults" class="grid grid-cols-3 gap-2"></div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
+                        <button id="sendSplitButton" type="button" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg text-sm transition duration-200 shadow-md opacity-50 pointer-events-none"
+                            title="Put every extracted channel into the same packing channel. Then switch the target to convert between formats.">
+                            Send all to packer
+                        </button>
+                        <button id="downloadSplitSetButton" type="button" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition duration-200 shadow-md opacity-50 pointer-events-none"
+                            title="Download every channel as a grayscale PNG, bundled in one .zip">
+                            Download channels (.zip)
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <div class="flex flex-col gap-6 lg:w-1/2 overflow-hidden">
-                
-                <div class="flex-1 min-h-[100px] flex flex-col">
-                    <p class="text-xs text-gray-500 text-center flex-shrink-0">Step 2 — Pick a resolution and download your ORM texture.</p>
-                    <h3 class="text-lg font-semibold mb-2 text-center text-white flex-shrink-0">Output (Your ORM Texture - 8-bit Only)</h3>
-                    <div id="outputCanvasWrapper" class="relative w-full h-full bg-gray-700 rounded-lg p-2 flex items-center justify-center">
-                        <canvas id="outputCanvas" class="max-w-full max-h-full rounded-lg border-2 border-gray-600 shadow-xl"></canvas>
+            <!-- RIGHT: output -->
+            <div class="flex flex-col gap-4 lg:w-1/2 min-h-0">
+
+                <div class="flex-1 min-h-0 flex flex-col">
+                    <p class="text-xs text-gray-500 text-center flex-shrink-0">Step 2 — Check the result, pick a size and download.</p>
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2 flex-shrink-0">
+                        <h3 class="text-lg font-semibold text-white">Output <span id="outputInfo" class="text-xs font-mono font-normal text-gray-400"></span></h3>
+                        <div class="flex items-center gap-1">
+                            <div class="flex rounded-lg overflow-hidden border border-gray-600 text-xs font-mono" role="group" aria-label="Preview channel">
+                                <button type="button" class="view-btn px-2 py-1 bg-gray-700 hover:bg-gray-600" data-view="rgb">RGB</button>
+                                <button type="button" class="view-btn px-2 py-1 bg-gray-700 hover:bg-gray-600 text-red-300" data-view="r">R</button>
+                                <button type="button" class="view-btn px-2 py-1 bg-gray-700 hover:bg-gray-600 text-emerald-300" data-view="g">G</button>
+                                <button type="button" class="view-btn px-2 py-1 bg-gray-700 hover:bg-gray-600 text-blue-300" data-view="b">B</button>
+                                <button type="button" class="view-btn px-2 py-1 bg-gray-700 hover:bg-gray-600" data-view="a">A</button>
+                            </div>
+                            <button id="zoomButton" type="button" class="px-2 py-1 text-xs font-mono rounded-lg border border-gray-600 bg-gray-700 hover:bg-gray-600" title="Toggle fit / 100% zoom">Fit</button>
+                        </div>
+                    </div>
+                    <div id="outputCanvasWrapper" class="relative w-full flex-1 min-h-[280px] lg:min-h-0 bg-gray-700 rounded-lg p-2 flex items-center justify-center overflow-hidden">
+                        <canvas id="outputCanvas" class="rounded border-2 border-gray-600 shadow-xl"></canvas>
+                        <div id="busyBadge" class="hidden absolute top-3 right-3 text-xs bg-black/70 text-white px-2 py-1 rounded">Processing…</div>
                     </div>
                 </div>
-                
-                <hr class="border-gray-700/50 flex-shrink-0">
 
-                <div class="space-y-4 pt-4 flex-shrink-0">
-                    <h2 class="text-xl font-semibold text-white">Output Settings (Configurable)</h2>
-                    
-                    <div>
-                        <label for="outputSize" class="block mb-2 text-sm font-medium text-gray-300">Define Output Size <span class="text-xs text-gray-500">(longest side — keeps the aspect ratio of your maps)</span></label>
-                        <select id="outputSize" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                            <option id="originalSizeOption" value="original" disabled>Original (Load an image first)</option>
-                            <option value="4096">4096x4096</option>
-                            <option value="2048">2048x2048</option>
-                            <option value="1024" selected>1024x1024 (Default)</option>
-                            <option value="512">512x512</option>
-                            <option value="256">256x256</option>
-                            <option value="128">128x128</option>
-                            <option value="64">64x64</option>
-                        </select>
+                <div class="space-y-3 flex-shrink-0">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label for="outputSize" class="block mb-1 text-sm font-medium text-gray-300">Output size <span class="text-xs text-gray-500">(longest side, keeps aspect ratio)</span></label>
+                            <select id="outputSize" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+                                <option id="originalSizeOption" value="original" disabled>Original (Load an image first)</option>
+                                <option value="8192">8192x8192</option>
+                                <option value="4096">4096x4096</option>
+                                <option value="2048">2048x2048</option>
+                                <option value="1024" selected>1024x1024 (Default)</option>
+                                <option value="512">512x512</option>
+                                <option value="256">256x256</option>
+                                <option value="128">128x128</option>
+                                <option value="64">64x64</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterSelect" class="block mb-1 text-sm font-medium text-gray-300">Resize filter</label>
+                            <select id="filterSelect" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+                                <option value="smooth">Smooth (recommended)</option>
+                                <option value="nearest">Nearest (pixel art / hard edges)</option>
+                            </select>
+                        </div>
                     </div>
-
-                    <button id="downloadButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition duration-200 shadow-md hover:shadow-lg">
-                        Download ORM Image (.png)
+                    <div>
+                        <label for="outputName" class="block mb-1 text-sm font-medium text-gray-300">File name</label>
+                        <input id="outputName" type="text" spellcheck="false" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 font-mono">
+                    </div>
+                    <button id="downloadButton" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition duration-200 shadow-md hover:shadow-lg">
+                        Download (.png)
                     </button>
                 </div>
-
             </div>
         </div>
 
-<div class="mt-auto pt-3 flex items-center gap-6">
-    <a href="https://www.buymeacoffee.com/Gsoos" target="_blank">
-        <img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=Gsoos&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" class="w-30"/>
+<div class="mt-auto pt-3 flex items-center gap-6 flex-shrink-0">
+    <a href="https://www.buymeacoffee.com/Gsoos" target="_blank" rel="noopener">
+        <img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=Gsoos&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a beer" class="h-10"/>
     </a>
-    <a href="https://www.paypal.com/donate/?hosted_button_id=MKU4HJ2MHUNGJ" target="_blank">
-        <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" class="w-40"/>
+    <a href="https://www.paypal.com/donate/?hosted_button_id=MKU4HJ2MHUNGJ" target="_blank" rel="noopener">
+        <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" alt="Donate with PayPal" class="w-32 sm:w-40"/>
     </a>
-    <a href="https://github.com/G-soos/ORM-Packer" target="_blank" class="ml-auto">
+    <a href="https://github.com/G-soos/ORM-Packer" target="_blank" rel="noopener" class="ml-auto">
         <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Repository" class="w-10 h-10 opacity-80 hover:opacity-100 transition"/>
     </a>
 </div>
 
 </div>
+</main>
 
-    <canvas id="hiddenRedCanvas" class="hidden"></canvas>
-    <canvas id="hiddenGreenCanvas" class="hidden"></canvas>
-    <canvas id="hiddenBlueCanvas" class="hidden"></canvas>
-    <canvas id="processingCanvas" class="hidden"></canvas>
-    <canvas id="hiddenSplitCanvas" class="hidden"></canvas>
+<div id="toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-md w-[calc(100%-2rem)] bg-gray-950/95 border border-gray-600 text-gray-100 text-sm rounded-lg px-4 py-3 shadow-2xl whitespace-pre-line"></div>
+
+<!-- ===================== Guide / SEO content ===================== -->
+<article id="guide" class="guide max-w-4xl mx-auto px-4 pb-16 pt-4">
+
+    <h2>How to use the ORM Packer</h2>
+    <ol>
+        <li><strong>Choose a target</strong> — Unreal/Godot/glTF ORM, Unity HDRP Mask Map, Unity URP/Built-in Metallic, or Custom. The channels relabel themselves.</li>
+        <li><strong>Load your maps</strong> — drop all of them at once anywhere on the page; they are matched by file name suffix (<code>_AO</code>, <code>_Occlusion</code>, <code>_Roughness</code>, <code>_Metallic</code>, <code>_Smoothness</code>, <code>_Gloss</code>, <code>_Height</code>, <code>_Detail</code>…). You can also click <em>Load Map</em>, drag a file onto a channel, or hover a channel and paste with <kbd>Ctrl+V</kbd>.</li>
+        <li><strong>Missing a map?</strong> Use a solid value instead (e.g. Metallic = 0 for non-metals, Occlusion = 255 for no occlusion).</li>
+        <li><strong>Roughness ↔ Smoothness</strong> — enable <em>Invert</em>. It is switched on automatically when a Roughness file lands in a Smoothness channel (and vice versa).</li>
+        <li><strong>Pick the output size</strong> (longest side — non-square textures keep their aspect ratio) and download. The PNG is written losslessly, pixel-exact, including the alpha channel.</li>
+    </ol>
+    <p>Switching the target re-routes the maps you already loaded. To <strong>convert</strong> a texture between formats (e.g. Unreal ORM → Unity Mask Map), load it in the Splitter, press <em>Send all to packer</em>, then change the target.</p>
+
+    <h2>Channel layouts per engine</h2>
+    <table>
+        <thead><tr><th>Target</th><th>R</th><th>G</th><th>B</th><th>A</th></tr></thead>
+        <tbody>
+            <tr><td>Unreal Engine / Godot / glTF / Blender (ORM)</td><td>Ambient Occlusion</td><td>Roughness</td><td>Metallic</td><td>— (optional Height)</td></tr>
+            <tr><td>Unity HDRP — Mask Map</td><td>Metallic</td><td>Ambient Occlusion</td><td>Detail Mask</td><td>Smoothness</td></tr>
+            <tr><td>Unity URP / Built-in — Metallic map</td><td>Metallic</td><td>—</td><td>—</td><td>Smoothness</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Importing the packed texture</h2>
+    <h3>Unreal Engine</h3>
+    <p>Import the PNG, <strong>uncheck sRGB</strong> and set Compression Settings to <code>Masks (no sRGB)</code>. In the material connect R → Ambient Occlusion, G → Roughness, B → Metallic.</p>
+    <h3>Unity</h3>
+    <p>In the texture import settings <strong>uncheck sRGB (Color Texture)</strong>. HDRP: assign it to the <em>Mask Map</em> slot. URP / Built-in: assign it to <em>Metallic</em> and set <em>Smoothness Source</em> to <em>Metallic Alpha</em>.</p>
+    <h3>Godot</h3>
+    <p>Use an <code>ORMMaterial3D</code> and assign the texture to its ORM slot.</p>
+    <h3>Blender</h3>
+    <p>In the Image Texture node set Color Space to <strong>Non-Color</strong>, add a <em>Separate Color</em> node and connect G → Roughness and B → Metallic. R (occlusion) is used by the glTF exporter through the <em>glTF Material Output</em> group.</p>
+
+    <h2>FAQ</h2>
+    <details>
+        <summary>What is an ORM texture?</summary>
+        <p>An ORM texture stores three grayscale PBR maps in one image: Ambient Occlusion in the red channel, Roughness in the green channel and Metallic in the blue channel. It saves texture memory and samplers in game engines.</p>
+    </details>
+    <details>
+        <summary>How do I turn a Roughness map into Smoothness?</summary>
+        <p>Smoothness is the inverse of roughness (255 minus the value). Enable Invert on the channel. When a file named like <code>_Roughness</code> is loaded into a Smoothness channel, the tool inverts it automatically.</p>
+    </details>
+    <details>
+        <summary>Are my textures uploaded to a server?</summary>
+        <p>No. All processing happens locally in your browser. Your images never leave your computer.</p>
+    </details>
+    <details>
+        <summary>Why does my packed texture look wrong in the engine?</summary>
+        <p>Packed masks contain linear data, not color. Disable sRGB in Unreal and Unity import settings and set the Color Space to Non-Color in Blender.</p>
+    </details>
+    <details>
+        <summary>Which resize filter should I use?</summary>
+        <p><em>Smooth</em> averages pixels when reducing size (and interpolates when enlarging), which avoids noise and aliasing in roughness and occlusion. Use <em>Nearest</em> only for pixel art or masks that must keep hard edges.</p>
+    </details>
+    <details>
+        <summary>Does it support 16-bit textures?</summary>
+        <p>Browsers decode images at 8 bits per channel, so the output is an 8-bit PNG. That is the standard precision for packed masks in real-time engines.</p>
+    </details>
+
+    <p class="mt-10 text-sm">Made by <strong>Gsoos</strong> — tools for 3D artists and developers. <a class="text-blue-400 hover:underline" href="https://github.com/G-soos/ORM-Packer" target="_blank" rel="noopener">Source on GitHub</a>.</p>
+</article>
 
 <script>
-        function debounce(func, delay) {
-            let timeoutId;
-            return function(...args) {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => { func.apply(this, args); }, delay);
-            };
+(() => {
+    'use strict';
+
+    const $ = (id) => document.getElementById(id);
+    const SLOTS = ['r', 'g', 'b', 'a'];
+    const SLOT_INDEX = { r: 0, g: 1, b: 2, a: 3 };
+
+    // ---------------------------------------------------------------------
+    // Configuration
+    // ---------------------------------------------------------------------
+    const STYLE = {
+        r: { name: 'R', border: 'border-red-700',     text: 'text-red-400',     soft: 'text-red-300',     btn: 'bg-red-600 hover:bg-red-700',         status: 'bg-red-900/30',     badge: 'bg-red-900/60 text-red-300',         accent: '#f87171', thumb: 'border-red-500' },
+        g: { name: 'G', border: 'border-emerald-700', text: 'text-emerald-400', soft: 'text-emerald-300', btn: 'bg-emerald-600 hover:bg-emerald-700', status: 'bg-emerald-900/30', badge: 'bg-emerald-900/60 text-emerald-300', accent: '#34d399', thumb: 'border-emerald-500' },
+        b: { name: 'B', border: 'border-blue-700',    text: 'text-blue-400',    soft: 'text-blue-300',    btn: 'bg-blue-600 hover:bg-blue-700',       status: 'bg-blue-900/30',    badge: 'bg-blue-900/60 text-blue-300',       accent: '#60a5fa', thumb: 'border-blue-500' },
+        a: { name: 'A', border: 'border-gray-500',    text: 'text-gray-200',    soft: 'text-gray-300',    btn: 'bg-gray-600 hover:bg-gray-500',       status: 'bg-gray-700/40',    badge: 'bg-gray-700 text-gray-200',          accent: '#e5e7eb', thumb: 'border-gray-400' }
+    };
+
+    // Map types: default solid value, value hints, and file-name keywords used for auto-detection
+    const MAP_TYPES = {
+        occlusion:  { label: 'Occlusion',   def: 255, lo: 'Occluded',   hi: 'No occlusion', keys: ['ambientocclusion', 'occlusion', 'ao', 'occ'] },
+        roughness:  { label: 'Roughness',   def: 255, lo: 'Shiny',      hi: 'Matte',        keys: ['roughness', 'rough', 'rgh'] },
+        metallic:   { label: 'Metallic',    def: 0,   lo: 'Dielectric', hi: 'Metal',        keys: ['metallic', 'metalness', 'metal', 'mtl'] },
+        smoothness: { label: 'Smoothness',  def: 128, lo: 'Matte',      hi: 'Shiny',        keys: ['smoothness', 'smooth', 'glossiness', 'gloss'] },
+        height:     { label: 'Height',      def: 128, lo: 'Low',        hi: 'High',         keys: ['height', 'heightmap', 'displacement', 'disp'] },
+        detail:     { label: 'Detail Mask', def: 255, lo: 'No detail',  hi: 'Full detail',  keys: ['detailmask', 'detail'] },
+        unused:     { label: 'Unused',      def: 0,   lo: '',           hi: '',             keys: [] },
+        custom:     { label: 'Custom',      def: 255, lo: '',           hi: '',             keys: [] }
+    };
+    const INVERSE = { roughness: 'smoothness', smoothness: 'roughness' };
+    const isTyped = (t) => !!t && t !== 'custom' && t !== 'unused';
+
+    const PRESETS = {
+        orm:    { label: 'ORM — Unreal / Godot / glTF / Blender', suffix: 'ORM',                slots: { r: 'occlusion', g: 'roughness', b: 'metallic', a: 'height' },     alphaOn: false, alphaSuffix: 'ORMH' },
+        hdrp:   { label: 'Unity HDRP — Mask Map',                 suffix: 'MaskMap',            slots: { r: 'metallic',  g: 'occlusion', b: 'detail',   a: 'smoothness' }, alphaOn: true },
+        unity:  { label: 'Unity URP / Built-in — Metallic map',   suffix: 'MetallicSmoothness', slots: { r: 'metallic',  g: 'unused',    b: 'unused',   a: 'smoothness' }, alphaOn: true },
+        custom: { label: 'Custom (free channels)',                suffix: 'Packed',             slots: { r: 'custom',    g: 'custom',    b: 'custom',   a: 'custom' },     alphaOn: false }
+    };
+
+    // Keyword list for detection, longest first so "roughness" wins over "rough"
+    const KEYWORDS = [];
+    Object.entries(MAP_TYPES).forEach(([type, info]) => info.keys.forEach(key => KEYWORDS.push([key, type])));
+    KEYWORDS.sort((a, b) => b[0].length - a[0].length);
+
+    // ---------------------------------------------------------------------
+    // State
+    // ---------------------------------------------------------------------
+    const state = {
+        preset: 'orm',
+        alpha: false,
+        filter: 'smooth',
+        view: 'rgb',
+        zoom: 'fit',
+        slots: {},                 // k -> { sourceId, invert, value }
+        library: new Map(),        // id -> source (every loaded map, also those not used by the current preset)
+        reference: { w: 0, h: 0 },
+        fileNameEdited: false,
+        output: null,              // { w, h, data: RGBA Uint8ClampedArray }
+        split: null                // { name, w, h, planes: {r,g,b,a}, hasAlpha }
+    };
+    SLOTS.forEach(k => state.slots[k] = { sourceId: null, invert: false, value: 255 });
+    let nextSourceId = 1;
+    let hoverTarget = null;
+
+    const typeOf = (k) => PRESETS[state.preset].slots[k];
+    const typeInfo = (t) => MAP_TYPES[t] || MAP_TYPES.custom;
+    const slotLabel = (k) => typeOf(k) === 'custom' ? `Channel ${STYLE[k].name}` : typeInfo(typeOf(k)).label;
+    const sourceOf = (k) => state.slots[k].sourceId ? state.library.get(state.slots[k].sourceId) : null;
+    const slotActive = (k) => k !== 'a' || state.alpha;
+    const clamp255 = (v) => Math.min(255, Math.max(0, parseInt(v, 10) || 0));
+
+    // ---------------------------------------------------------------------
+    // Small helpers
+    // ---------------------------------------------------------------------
+    let toastTimer = null;
+    function toast(msg, ms = 4000) {
+        const t = $('toast');
+        t.textContent = msg;
+        t.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.add('hidden'), ms);
+    }
+
+    function setBusy(on) { $('busyBadge').classList.toggle('hidden', !on); }
+
+    function tokens(name) {
+        return name.replace(/\.[^.]+$/, '')
+                   .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+                   .toLowerCase()
+                   .split(/[^a-z0-9]+/)
+                   .filter(Boolean);
+    }
+
+    // Detect map type from a file name, looking at the last tokens first (suffixes)
+    function detectType(name) {
+        const t = tokens(name);
+        for (let i = t.length - 1; i >= 0; i--) {
+            for (const [key, type] of KEYWORDS) {
+                if (t[i] === key || t[i] === key + 'map') return type;
+            }
         }
+        return null;
+    }
 
-        const imageLoader = document.getElementById('imageLoader'); 
-        const occlusionLoader = document.getElementById('occlusionLoader'); 
-        const metallicLoader = document.getElementById('metallicLoader'); 
+    // "T_Rock_Roughness.png" -> "T_Rock"
+    const SUFFIX_RE = new RegExp(`[_\\-. ]+(?:${KEYWORDS.map(k => k[0]).join('|')})(?:map)?$`, 'i');
+    function baseName(name) {
+        let b = name.replace(/\.[^.]+$/, '');
+        for (let i = 0; i < 3; i++) {
+            const nb = b.replace(/[_\-. ]+map$/i, '').replace(SUFFIX_RE, '');
+            if (nb === b) break;
+            b = nb;
+        }
+        return b;
+    }
 
-        const redChannel = document.getElementById('redChannel');
-        const greenChannel = document.getElementById('greenChannel');
-        const blueChannel = document.getElementById('blueChannel');
-        
-        const redValueInput = document.getElementById('redValueInput');
-        const greenValueInput = document.getElementById('greenValueInput');
-        const blueValueInput = document.getElementById('blueValueInput');
+    function triggerDownload(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+    }
 
-        const redValueLabelText = document.getElementById('redValueLabelText');
-        const greenValueLabelText = document.getElementById('greenValueLabelText');
-        const blueValueLabelText = document.getElementById('blueValueLabelText');
-        
-        const redStatus = document.getElementById('red-status');
-        const greenStatus = document.getElementById('green-status');
-        const blueStatus = document.getElementById('blue-status');
+    function loadSettings() {
+        try { return JSON.parse(localStorage.getItem('ormPacker.settings') || '{}'); } catch { return {}; }
+    }
+    function saveSettings() {
+        try {
+            localStorage.setItem('ormPacker.settings', JSON.stringify({
+                preset: state.preset, size: $('outputSize').value, filter: state.filter
+            }));
+        } catch { /* storage unavailable */ }
+    }
 
-        const redStatusArea = document.getElementById('redStatusArea');
-        const greenStatusArea = document.getElementById('greenStatusArea');
-        const blueStatusArea = document.getElementById('blueStatusArea');
-        
-        const redClearButton = document.getElementById('redClearButton');
-        const greenClearButton = document.getElementById('greenClearButton');
-        const blueClearButton = document.getElementById('blueClearButton');
+    // ---------------------------------------------------------------------
+    // Image decoding (no color management, so data maps keep their exact values)
+    // ---------------------------------------------------------------------
+    async function decodeImage(blob) {
+        let bmp;
+        try {
+            bmp = await createImageBitmap(blob, { premultiplyAlpha: 'none', colorSpaceConversion: 'none' });
+        } catch {
+            bmp = await new Promise((resolve, reject) => {
+                const img = new Image();
+                const url = URL.createObjectURL(blob);
+                img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+                img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('decode failed')); };
+                img.src = url;
+            });
+        }
+        const w = bmp.width, h = bmp.height;
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const ctx = c.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(bmp, 0, 0);
+        if (bmp.close) bmp.close();
+        return { w, h, data: ctx.getImageData(0, 0, w, h).data, channels: 4 };
+    }
 
-        const redSolidLabel = document.getElementById('redSolidLabel');
-        const greenSolidLabel = document.getElementById('greenSolidLabel');
-        const blueSolidLabel = document.getElementById('blueSolidLabel');
+    // ---------------------------------------------------------------------
+    // Resampling (separable: area average when shrinking, bilinear when enlarging)
+    // ---------------------------------------------------------------------
+    function buildWeights(srcLen, dstLen, filter) {
+        const scale = srcLen / dstLen;
+        const starts = new Int32Array(dstLen), counts = new Int32Array(dstLen);
+        const idx = [], wts = [];
+        for (let i = 0; i < dstLen; i++) {
+            starts[i] = idx.length;
+            if (filter === 'nearest') {
+                idx.push(Math.min(srcLen - 1, Math.floor((i + 0.5) * scale))); wts.push(1);
+            } else if (scale > 1) {
+                const a = i * scale, b = (i + 1) * scale;
+                for (let j = Math.floor(a); j < Math.ceil(b) && j < srcLen; j++) {
+                    const ov = Math.min(b, j + 1) - Math.max(a, j);
+                    if (ov > 0) { idx.push(j); wts.push(ov / scale); }
+                }
+            } else {
+                const x = (i + 0.5) * scale - 0.5;
+                const f = Math.floor(x), t = x - f;
+                const j0 = Math.max(0, f), j1 = Math.min(srcLen - 1, f + 1);
+                if (t === 0 || j0 === j1) { idx.push(j0); wts.push(1); }
+                else { idx.push(j0, j1); wts.push(1 - t, t); }
+            }
+            counts[i] = idx.length - starts[i];
+        }
+        return { starts, counts, idx: Int32Array.from(idx), wts: Float32Array.from(wts) };
+    }
 
-        // Size badges and warnings
-        const redSizeBadge = document.getElementById('redSizeBadge');
-        const greenSizeBadge = document.getElementById('greenSizeBadge');
-        const blueSizeBadge = document.getElementById('blueSizeBadge');
-        const redSizeWarning = document.getElementById('redSizeWarning');
-        const greenSizeWarning = document.getElementById('greenSizeWarning');
-        const blueSizeWarning = document.getElementById('blueSizeWarning');
-        
-        const outputSize = document.getElementById('outputSize');
-        const originalSizeOption = document.getElementById('originalSizeOption');
-        
-        const outputCanvas = document.getElementById('outputCanvas');
-        const outputCtx = outputCanvas.getContext('2d');
+    function resample(plane, sw, sh, dw, dh, filter) {
+        if (sw === dw && sh === dh) return plane;
+        const hx = buildWeights(sw, dw, filter), vy = buildWeights(sh, dh, filter);
+        const tmp = new Float32Array(dw * sh);
+        for (let y = 0; y < sh; y++) {
+            const row = y * sw, o = y * dw;
+            for (let x = 0; x < dw; x++) {
+                const st = hx.starts[x], c = hx.counts[x];
+                let s = 0;
+                for (let t = 0; t < c; t++) s += plane[row + hx.idx[st + t]] * hx.wts[st + t];
+                tmp[o + x] = s;
+            }
+        }
+        const out = new Uint8Array(dw * dh);
+        const acc = new Float32Array(dw);
+        for (let y = 0; y < dh; y++) {
+            acc.fill(0);
+            const st = vy.starts[y], c = vy.counts[y];
+            for (let t = 0; t < c; t++) {
+                const row = vy.idx[st + t] * dw, w = vy.wts[st + t];
+                for (let x = 0; x < dw; x++) acc[x] += tmp[row + x] * w;
+            }
+            const o = y * dw;
+            for (let x = 0; x < dw; x++) {
+                const v = Math.round(acc[x]);
+                out[o + x] = v < 0 ? 0 : v > 255 ? 255 : v;
+            }
+        }
+        return out;
+    }
 
-        const redSliderContainer = document.getElementById('redSliderContainer');
-        const greenSliderContainer = document.getElementById('greenSliderContainer');
-        const blueSliderContainer = document.getElementById('blueSliderContainer');
+    // Single 8-bit plane from a source, according to its selected component
+    function extractPlane(src) {
+        if (src.channels === 1) return src.data;
+        const n = src.w * src.h, d = src.data, p = new Uint8Array(n);
+        const comp = src.component;
+        if (comp === 'lum') {
+            // Rec.601 integer weights (sum 256): grayscale maps keep their exact values
+            for (let i = 0, j = 0; i < n; i++, j += 4) p[i] = (d[j] * 77 + d[j + 1] * 150 + d[j + 2] * 29) >> 8;
+        } else {
+            const off = SLOT_INDEX[comp];
+            for (let i = 0, j = off; i < n; i++, j += 4) p[i] = d[j];
+        }
+        return p;
+    }
 
-        const hiddenRedCtx = document.getElementById('hiddenRedCanvas').getContext('2d');
-        const hiddenGreenCtx = document.getElementById('hiddenGreenCanvas').getContext('2d');
-        const hiddenBlueCtx = document.getElementById('hiddenBlueCanvas').getContext('2d');
-        const processingCanvas = document.getElementById('processingCanvas');
-        const processingCtx = processingCanvas.getContext('2d');
-        
-        const downloadButton = document.getElementById('downloadButton');
+    function getPlane(src, w, h) {
+        const key = `${src.component}|${w}x${h}|${state.filter}`;
+        if (src.cache && src.cache.key === key) return src.cache.plane;
+        const plane = resample(extractPlane(src), src.w, src.h, w, h, state.filter);
+        src.cache = { key, plane };
+        return plane;
+    }
 
-        const splitterContent = document.getElementById('splitterContent');
-        const ormSplitterLoader = document.getElementById('ormSplitterLoader');
-        const hiddenSplitCanvas = document.getElementById('hiddenSplitCanvas');
-        const hiddenSplitCtx = hiddenSplitCanvas.getContext('2d');
-        const splitRedCanvas = document.getElementById('splitRedCanvas');
-        const splitGreenCanvas = document.getElementById('splitGreenCanvas');
-        const splitBlueCanvas = document.getElementById('splitBlueCanvas');
-        const splitRedCtx = splitRedCanvas.getContext('2d');
-        const splitGreenCtx = splitGreenCanvas.getContext('2d');
-        const splitBlueCtx = splitBlueCanvas.getContext('2d');
-        const splitRedContainer = document.getElementById('splitRedContainer');
-        const splitGreenContainer = document.getElementById('splitGreenContainer');
-        const splitBlueContainer = document.getElementById('splitBlueContainer');
-        const splitterLoadArea = document.getElementById('splitterLoadArea'); 
-        const splitterStatusArea = document.getElementById('splitterStatusArea');
-        const splitterStatus = document.getElementById('splitter-status');
-        const splitterClearButton = document.getElementById('splitterClearButton');
-        const splitterLabel = document.getElementById('splitterLabel');
-        const downloadSplitSetButton = document.getElementById('downloadSplitSetButton'); 
+    // ---------------------------------------------------------------------
+    // PNG + ZIP writers (exact values, straight alpha — no canvas premultiplication)
+    // ---------------------------------------------------------------------
+    const CRC_TABLE = (() => {
+        const t = new Uint32Array(256);
+        for (let n = 0; n < 256; n++) {
+            let c = n;
+            for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+            t[n] = c >>> 0;
+        }
+        return t;
+    })();
+    function crc32(bytes) {
+        let c = 0xFFFFFFFF;
+        for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+        return (c ^ 0xFFFFFFFF) >>> 0;
+    }
 
-        const images = { r: new Image(), g: new Image(), b: new Image() };
-        const loadState = { r: false, g: false, b: false, splitter: false }; 
-        const filenames = { r: '', g: '', b: '', splitter: '' }; 
-        // Store individual sizes per channel
-        const channelSizes = { r: null, g: null, b: null };
-        const splitterImg = new Image(); 
+    async function zlibDeflate(raw) {
+        const stream = new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate'));
+        return new Uint8Array(await new Response(stream).arrayBuffer());
+    }
 
-        let originalImageSize = { w: 0, h: 0 };
+    function pngChunk(type, data) {
+        const buf = new Uint8Array(12 + data.length);
+        const dv = new DataView(buf.buffer);
+        dv.setUint32(0, data.length);
+        for (let i = 0; i < 4; i++) buf[4 + i] = type.charCodeAt(i);
+        buf.set(data, 8);
+        dv.setUint32(8 + data.length, crc32(buf.subarray(4, 8 + data.length)));
+        return buf;
+    }
 
-        // --- Check and update size warnings across all loaded channels ---
-        function updateSizeWarnings() {
-            const loaded = ['r', 'g', 'b'].filter(k => loadState[k]);
-            if (loaded.length < 2) {
-                // Only one or zero images loaded — no mismatch possible
-                [redSizeWarning, greenSizeWarning, blueSizeWarning].forEach(w => w.classList.add('hidden'));
+    // colorType 0 = gray (data is a w*h plane), 2 = RGB, 6 = RGBA (data is RGBA)
+    async function encodePNG(w, h, data, colorType) {
+        if (typeof CompressionStream === 'undefined') return encodePNGFallback(w, h, data, colorType);
+        const bpp = colorType === 0 ? 1 : colorType === 2 ? 3 : 4;
+        const stride = w * bpp;
+        const raw = new Uint8Array((stride + 1) * h);
+        for (let y = 0; y < h; y++) {
+            const o = y * (stride + 1);
+            raw[o] = 1; // filter: Sub
+            if (colorType === 0) {
+                const s = y * w;
+                raw[o + 1] = data[s];
+                for (let x = 1; x < w; x++) raw[o + 1 + x] = (data[s + x] - data[s + x - 1]) & 0xFF;
+            } else {
+                const s = y * w * 4;
+                for (let c = 0; c < bpp; c++) raw[o + 1 + c] = data[s + c];
+                for (let x = 1; x < w; x++) {
+                    const si = s + x * 4, di = o + 1 + x * bpp;
+                    for (let c = 0; c < bpp; c++) raw[di + c] = (data[si + c] - data[si + c - 4]) & 0xFF;
+                }
+            }
+        }
+        const ihdr = new Uint8Array(13);
+        const dv = new DataView(ihdr.buffer);
+        dv.setUint32(0, w); dv.setUint32(4, h);
+        ihdr[8] = 8; ihdr[9] = colorType; // 8-bit, compression/filter/interlace = 0
+        const idat = await zlibDeflate(raw);
+        const sig = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+        return new Blob([sig, pngChunk('IHDR', ihdr), pngChunk('IDAT', idat), pngChunk('IEND', new Uint8Array(0))], { type: 'image/png' });
+    }
+
+    // Old browsers without CompressionStream: canvas export (alpha may lose color under transparent pixels)
+    function encodePNGFallback(w, h, data, colorType) {
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const ctx = c.getContext('2d');
+        const img = ctx.createImageData(w, h);
+        const d = img.data;
+        for (let i = 0, j = 0; i < w * h; i++, j += 4) {
+            if (colorType === 0) { d[j] = d[j + 1] = d[j + 2] = data[i]; d[j + 3] = 255; }
+            else { d[j] = data[j]; d[j + 1] = data[j + 1]; d[j + 2] = data[j + 2]; d[j + 3] = colorType === 6 ? data[j + 3] : 255; }
+        }
+        ctx.putImageData(img, 0, 0);
+        return new Promise(resolve => c.toBlob(resolve, 'image/png'));
+    }
+
+    function makeZip(files) { // [{ name, bytes: Uint8Array }], stored (PNG is already compressed)
+        const enc = new TextEncoder();
+        const now = new Date();
+        const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+        const dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+        const parts = [], central = [];
+        let offset = 0;
+        files.forEach(f => {
+            const name = enc.encode(f.name), crc = crc32(f.bytes), len = f.bytes.length;
+            const local = new Uint8Array(30 + name.length);
+            let dv = new DataView(local.buffer);
+            dv.setUint32(0, 0x04034b50, true); dv.setUint16(4, 20, true); dv.setUint16(6, 0x0800, true); dv.setUint16(8, 0, true);
+            dv.setUint16(10, dosTime, true); dv.setUint16(12, dosDate, true); dv.setUint32(14, crc, true);
+            dv.setUint32(18, len, true); dv.setUint32(22, len, true); dv.setUint16(26, name.length, true); dv.setUint16(28, 0, true);
+            local.set(name, 30);
+            parts.push(local, f.bytes);
+
+            const cen = new Uint8Array(46 + name.length);
+            dv = new DataView(cen.buffer);
+            dv.setUint32(0, 0x02014b50, true); dv.setUint16(4, 20, true); dv.setUint16(6, 20, true); dv.setUint16(8, 0x0800, true);
+            dv.setUint16(10, 0, true); dv.setUint16(12, dosTime, true); dv.setUint16(14, dosDate, true); dv.setUint32(16, crc, true);
+            dv.setUint32(20, len, true); dv.setUint32(24, len, true); dv.setUint16(28, name.length, true);
+            dv.setUint32(42, offset, true);
+            cen.set(name, 46);
+            central.push(cen);
+            offset += local.length + len;
+        });
+        const cdSize = central.reduce((s, c) => s + c.length, 0);
+        const end = new Uint8Array(22);
+        const dv = new DataView(end.buffer);
+        dv.setUint32(0, 0x06054b50, true); dv.setUint16(8, files.length, true); dv.setUint16(10, files.length, true);
+        dv.setUint32(12, cdSize, true); dv.setUint32(16, offset, true);
+        return new Blob([...parts, ...central, end], { type: 'application/zip' });
+    }
+
+    // ---------------------------------------------------------------------
+    // Sources & slot assignment
+    // ---------------------------------------------------------------------
+    function makeSource(img, name, contentType) {
+        // A newer map of the same kind replaces an older one that is not in use
+        if (isTyped(contentType)) {
+            const inUse = new Set(SLOTS.map(k => state.slots[k].sourceId));
+            for (const [id, s] of state.library) {
+                if (s.contentType === contentType && !inUse.has(id)) state.library.delete(id);
+            }
+        }
+        const src = { id: nextSourceId++, name, w: img.w, h: img.h, data: img.data, channels: img.channels,
+                      contentType, component: 'lum', cache: null, lastSlot: null };
+        state.library.set(src.id, src);
+        return src;
+    }
+
+    function placeSource(k, src) {
+        const sl = state.slots[k];
+        if (sl.sourceId && sl.sourceId !== src.id) state.library.delete(sl.sourceId);
+        // A source may only live in one slot
+        SLOTS.forEach(o => { if (o !== k && state.slots[o].sourceId === src.id) state.slots[o].sourceId = null; });
+        sl.sourceId = src.id;
+        const t = typeOf(k);
+        sl.invert = isTyped(t) && src.contentType === INVERSE[t];
+        src.lastSlot = k;
+        if (k === 'a') state.alpha = true;
+    }
+
+    function resolveContentType(k, fileName) {
+        const t = typeOf(k), det = detectType(fileName);
+        if (det && (det === t || INVERSE[t] === det)) return det;
+        return isTyped(t) ? t : det;
+    }
+
+    async function loadFileIntoSlot(k, file, displayName) {
+        if (!file || !file.type.startsWith('image/')) { toast('That file is not an image.'); return; }
+        const name = displayName || file.name;
+        let img;
+        setBusy(true);
+        try { img = await decodeImage(file); }
+        catch { setBusy(false); toast(`Could not read "${name}".`); return; }
+        const src = makeSource(img, name, resolveContentType(k, file.name));
+        placeSource(k, src);
+        $('file-' + k).value = '';
+        if (state.slots[k].invert) toast(`${name} → ${STYLE[k].name} (${slotLabel(k)}), inverted automatically.`);
+        renderAll();
+    }
+
+    async function autoAssign(fileList) {
+        const files = [...fileList].filter(f => f.type.startsWith('image/'));
+        if (!files.length) { toast('No images found in what you dropped.'); return; }
+        const used = new Set(), placed = [], kept = [], unknown = [];
+        setBusy(true);
+        for (const f of files) {
+            const det = detectType(f.name);
+            if (!det) { unknown.push(f.name); continue; }
+            let img;
+            try { img = await decodeImage(f); } catch { unknown.push(f.name); continue; }
+            // Pick the target after decoding, so a preset change meanwhile is respected
+            let target = SLOTS.find(k => !used.has(k) && typeOf(k) === det);
+            if (!target) target = SLOTS.find(k => !used.has(k) && INVERSE[typeOf(k)] === det);
+            const src = makeSource(img, f.name, det);
+            if (target) {
+                used.add(target);
+                placeSource(target, src);
+                placed.push(`${f.name} → ${STYLE[target].name} (${slotLabel(target)})${state.slots[target].invert ? ', inverted' : ''}`);
+            } else {
+                kept.push(f.name);
+            }
+        }
+        const lines = [];
+        if (placed.length) lines.push(...placed);
+        if (kept.length) lines.push(`Kept for other targets: ${kept.join(', ')}`);
+        if (unknown.length) lines.push(`Not recognised (drop onto a channel instead): ${unknown.join(', ')}`);
+        toast(lines.join('\n'), 6000);
+        renderAll();
+    }
+
+    function clearSlot(k) {
+        const sl = state.slots[k];
+        if (sl.sourceId) state.library.delete(sl.sourceId);
+        sl.sourceId = null;
+        sl.invert = false;
+        $('file-' + k).value = '';
+        renderAll();
+    }
+
+    function resetAll() {
+        state.library.clear();
+        applyPreset(state.preset);
+        state.fileNameEdited = false;
+        renderAll();
+    }
+
+    // Switch target: re-route loaded maps by what they contain
+    function applyPreset(p) {
+        const P = PRESETS[p];
+        const wasVisible = new Set(SLOTS.map(k => state.slots[k].sourceId).filter(Boolean));
+        const prevInvert = {};
+        SLOTS.forEach(k => { const sl = state.slots[k]; if (sl.sourceId) prevInvert[sl.sourceId] = sl.invert; });
+
+        state.preset = p;
+        SLOTS.forEach(k => {
+            const sl = state.slots[k];
+            sl.sourceId = null;
+            sl.invert = false;
+            sl.value = typeInfo(P.slots[k]).def;
+        });
+
+        const sources = [...state.library.values()];
+        const taken = new Set();
+        if (p !== 'custom') {
+            SLOTS.forEach(k => {
+                const t = P.slots[k];
+                if (!isTyped(t)) return;
+                let s = sources.find(s => !taken.has(s.id) && s.contentType === t), inv = false;
+                if (!s) { s = sources.find(s => !taken.has(s.id) && s.contentType && s.contentType === INVERSE[t]); inv = !!s; }
+                if (s) { taken.add(s.id); state.slots[k].sourceId = s.id; state.slots[k].invert = inv; s.lastSlot = k; }
+            });
+        }
+        // Maps of unknown kind (or everything, in Custom) stay in the channel they were in
+        sources.forEach(s => {
+            if (taken.has(s.id) || !wasVisible.has(s.id) || !s.lastSlot) return;
+            if (p !== 'custom' && isTyped(s.contentType)) return;
+            const sl = state.slots[s.lastSlot];
+            if (!sl.sourceId) { sl.sourceId = s.id; sl.invert = !!prevInvert[s.id]; taken.add(s.id); }
+        });
+        state.alpha = P.alphaOn || !!state.slots.a.sourceId;
+    }
+
+    // ---------------------------------------------------------------------
+    // UI building
+    // ---------------------------------------------------------------------
+    function cardHTML(k) {
+        const s = STYLE[k];
+        return `
+<div id="card-${k}" data-slot="${k}" class="slot-card flex flex-col gap-2 p-2 bg-gray-900/50 rounded-lg border-2 ${s.border} transition duration-150">
+  <div class="flex items-center justify-between gap-1 min-h-[1.5rem]">
+    <h2 class="text-sm font-semibold ${s.text} truncate"><span class="font-mono">${s.name}</span> · <span id="type-${k}"></span></h2>
+    ${k === 'a' ? `<label class="flex items-center gap-1 text-[11px] text-gray-400 cursor-pointer select-none" title="Write an alpha channel (RGBA output)"><input type="checkbox" id="alphaToggle">On</label>` : ''}
+  </div>
+  <div id="body-${k}" class="flex flex-col gap-2">
+    <label for="file-${k}" class="block w-full cursor-pointer ${s.btn} text-white font-bold py-1 px-2 rounded-lg text-center transition duration-200 text-xs">Load Map</label>
+    <input type="file" id="file-${k}" class="hidden" accept="image/*">
+    <div id="status-${k}" class="hidden flex flex-col gap-1 p-1.5 ${s.status} rounded">
+      <div class="flex items-center justify-between gap-1">
+        <div id="name-${k}" class="${s.soft} font-mono text-[11px] truncate"></div>
+        <button id="clear-${k}" type="button" class="${s.soft} hover:text-white bg-black/30 hover:bg-black/60 w-5 h-5 shrink-0 rounded-full flex items-center justify-center font-bold text-xs" title="Remove texture">✕</button>
+      </div>
+      <div class="flex items-center justify-between"><span class="text-[11px] text-gray-500">Size</span><span id="size-${k}" class="text-[11px] font-mono font-semibold ${s.badge} px-1.5 py-0.5 rounded"></span></div>
+      <div id="warn-${k}" class="hidden text-yellow-400 text-[11px]">⚠ Size differs from other maps</div>
+      <div class="flex items-center justify-between gap-1">
+        <select id="comp-${k}" class="bg-gray-800 border border-gray-600 text-[11px] rounded px-1 py-0.5" title="Which part of the loaded image to use">
+          <option value="lum">Gray</option><option value="r">R</option><option value="g">G</option><option value="b">B</option><option value="a">A</option>
+        </select>
+        <label class="flex items-center gap-1 text-[11px] text-gray-300 cursor-pointer select-none" title="255 − value (e.g. Roughness ↔ Smoothness)"><input type="checkbox" id="inv-${k}">Invert</label>
+      </div>
+    </div>
+    <div id="solid-${k}">
+      <p class="text-[11px] text-gray-500 text-center mb-1">Or a solid value:</p>
+      <input id="range-${k}" type="range" min="0" max="255" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer" style="accent-color:${s.accent}">
+      <div class="flex justify-center items-center gap-2 mt-1">
+        <input id="num-${k}" type="number" min="0" max="255" class="channel-input-number ${s.soft}">
+      </div>
+      <div id="hint-${k}" class="${s.soft} font-mono text-[11px] text-center mt-1 min-h-[1rem]"></div>
+    </div>
+  </div>
+</div>`;
+    }
+
+    function thumbHTML(k) {
+        const s = STYLE[k];
+        return `
+<div id="thumb-${k}" data-slot="${k}" draggable="true" class="p-1 border ${s.thumb} rounded-lg text-center cursor-grab bg-gray-900/50 hover:bg-gray-700 transition duration-150 shadow-md opacity-50 pointer-events-none">
+  <canvas id="thumbCanvas-${k}" width="96" height="96" class="w-full aspect-square rounded mb-1 border border-gray-600 object-contain"></canvas>
+  <span id="thumbLabel-${k}" class="${s.soft} text-xs font-bold"></span>
+</div>`;
+    }
+
+    function hasFiles(e) { return !!e.dataTransfer && [...e.dataTransfer.types].includes('Files'); }
+    function isSplitDrag(e) { return !!e.dataTransfer && [...e.dataTransfer.types].includes('application/x-split-channel'); }
+
+    function setupSlot(k) {
+        const card = $('card-' + k);
+        $('file-' + k).addEventListener('change', (e) => { if (e.target.files[0]) loadFileIntoSlot(k, e.target.files[0]); });
+        $('clear-' + k).addEventListener('click', () => clearSlot(k));
+        $('comp-' + k).addEventListener('change', (e) => {
+            const src = sourceOf(k);
+            if (src) { src.component = e.target.value; src.cache = null; scheduleProcess(); }
+        });
+        $('inv-' + k).addEventListener('change', (e) => { state.slots[k].invert = e.target.checked; scheduleProcess(); });
+
+        const onValue = (v) => {
+            const val = clamp255(v);
+            state.slots[k].value = val;
+            $('range-' + k).value = val;
+            if (document.activeElement !== $('num-' + k)) $('num-' + k).value = val;
+            renderHint(k);
+            scheduleProcess();
+        };
+        $('range-' + k).addEventListener('input', (e) => onValue(e.target.value));
+        $('num-' + k).addEventListener('input', (e) => onValue(e.target.value));
+        $('num-' + k).addEventListener('blur', () => { $('num-' + k).value = state.slots[k].value; });
+
+        card.addEventListener('mouseenter', () => { hoverTarget = k; });
+        card.addEventListener('mouseleave', () => { if (hoverTarget === k) hoverTarget = null; });
+
+        card.addEventListener('dragover', (e) => {
+            if (!hasFiles(e) && !isSplitDrag(e)) return;
+            e.preventDefault();
+            e.stopPropagation();
+            e.dataTransfer.dropEffect = 'copy';
+            card.classList.add('drop-highlight');
+        });
+        card.addEventListener('dragleave', (e) => {
+            if (!card.contains(e.relatedTarget)) card.classList.remove('drop-highlight');
+        });
+        card.addEventListener('drop', (e) => {
+            card.classList.remove('drop-highlight');
+            if (!hasFiles(e) && !isSplitDrag(e)) return;
+            e.preventDefault();
+            e.stopPropagation();
+            if (isSplitDrag(e)) {
+                const from = e.dataTransfer.getData('application/x-split-channel');
+                if (from) useSplitChannel(from, k);
                 return;
             }
+            const files = e.dataTransfer.files;
+            if (files.length > 1) autoAssign(files);
+            else if (files.length === 1) loadFileIntoSlot(k, files[0]);
+        });
+    }
 
-            const badgeMap = { r: redSizeWarning, g: greenSizeWarning, b: blueSizeWarning };
-            loaded.forEach(key => {
-                const mySize = channelSizes[key];
-                const hasMismatch = loaded.some(other => {
-                    if (other === key) return false;
-                    const s = channelSizes[other];
-                    return s && (s.w !== mySize.w || s.h !== mySize.h);
-                });
-                if (hasMismatch) {
-                    badgeMap[key].classList.remove('hidden');
-                } else {
-                    badgeMap[key].classList.add('hidden');
-                }
-            });
+    // ---------------------------------------------------------------------
+    // Rendering
+    // ---------------------------------------------------------------------
+    function renderHint(k) {
+        const t = typeOf(k), info = typeInfo(t), v = state.slots[k].value;
+        let hint = '';
+        if (t === 'unused') hint = 'Not used by this target';
+        else if (info.lo) hint = `(${v >= 128 ? info.hi : info.lo})`;
+        $('hint-' + k).textContent = hint;
+    }
+
+    function renderSlot(k) {
+        const sl = state.slots[k];
+        const src = sourceOf(k);
+        $('type-' + k).textContent = slotLabel(k);
+        $('status-' + k).classList.toggle('hidden', !src);
+        $('solid-' + k).classList.toggle('hidden', !!src);
+        if (src) {
+            $('name-' + k).textContent = src.name;
+            $('name-' + k).title = src.name;
+            $('size-' + k).textContent = `${src.w} × ${src.h}`;
+            $('comp-' + k).value = src.component;
+            $('comp-' + k).classList.toggle('invisible', src.channels === 1);
+            $('inv-' + k).checked = sl.invert;
         }
-
-        // Output size for a given "longest side" value, keeping the aspect ratio of the reference map
-        function sizeFor(longSide) {
-            const { w, h } = originalImageSize;
-            if (w === 0 || w === h) return { w: longSide, h: longSide };
-            if (w > h) return { w: longSide, h: Math.max(1, Math.round(longSide * h / w)) };
-            return { w: Math.max(1, Math.round(longSide * w / h)), h: longSide };
+        $('range-' + k).value = sl.value;
+        $('num-' + k).value = sl.value;
+        renderHint(k);
+        if (k === 'a') {
+            $('alphaToggle').checked = state.alpha;
+            $('body-a').classList.toggle('disabled-container', !state.alpha);
         }
+    }
 
-        function updateSizeOptionLabels() {
-            Array.from(outputSize.options).forEach(opt => {
-                if (opt.value === 'original') return;
-                const s = parseInt(opt.value);
-                const { w, h } = sizeFor(s);
-                opt.text = `${w}x${h}` + (s === 1024 ? ' (Default)' : '');
+    function renderWarnings() {
+        const loaded = SLOTS.filter(k => slotActive(k) && sourceOf(k));
+        SLOTS.forEach(k => {
+            const src = sourceOf(k);
+            const mismatch = !!src && slotActive(k) && loaded.some(o => {
+                const s = sourceOf(o);
+                return o !== k && (s.w !== src.w || s.h !== src.h);
             });
+            $('warn-' + k).classList.toggle('hidden', !mismatch);
+        });
+    }
+
+    // Reference size = largest active map (by area)
+    function renderReference() {
+        let best = null;
+        SLOTS.forEach(k => {
+            const s = slotActive(k) ? sourceOf(k) : null;
+            if (s && (!best || s.w * s.h > best.w * best.h)) best = s;
+        });
+        const opt = $('originalSizeOption');
+        if (best) {
+            state.reference = { w: best.w, h: best.h };
+            opt.text = `Original (${best.w}x${best.h}px)`;
+            opt.disabled = false;
+        } else {
+            state.reference = { w: 0, h: 0 };
+            opt.text = 'Original (Load an image first)';
+            opt.disabled = true;
+            if ($('outputSize').value === 'original') $('outputSize').value = '1024';
         }
+        [...$('outputSize').options].forEach(o => {
+            if (o.value === 'original') return;
+            const s = parseInt(o.value, 10), { w, h } = sizeFor(s);
+            o.text = `${w}x${h}` + (s === 1024 ? ' (Default)' : '');
+        });
+    }
 
-        // Reference size = largest loaded map (by area). Recomputed on every load/clear.
-        function recomputeReferenceSize() {
-            let best = null;
-            ['r', 'g', 'b'].forEach(k => {
-                const s = channelSizes[k];
-                if (s && (!best || s.w * s.h > best.w * best.h)) best = s;
-            });
-            if (best) {
-                originalImageSize = { w: best.w, h: best.h };
-                originalSizeOption.text = `Original (${best.w}x${best.h}px)`;
-                originalSizeOption.disabled = false;
+    function renderPresetInfo() {
+        const P = PRESETS[state.preset];
+        $('presetInfo').textContent = SLOTS.map(k => {
+            const label = slotLabel(k);
+            return k === 'a' && !P.alphaOn ? `A = ${label} (optional)` : `${STYLE[k].name} = ${label}`;
+        }).join(' · ');
+    }
+
+    function renderSplitLabels() {
+        SLOTS.forEach(k => { $('thumbLabel-' + k).textContent = `${STYLE[k].name} · ${slotLabel(k)}`; });
+    }
+
+    function renderViewButtons() {
+        if (!state.alpha && state.view === 'a') state.view = 'rgb';
+        document.querySelectorAll('.view-btn').forEach(b => {
+            b.setAttribute('aria-pressed', String(b.dataset.view === state.view));
+            if (b.dataset.view === 'a') b.disabled = !state.alpha;
+        });
+    }
+
+    function renderAll() {
+        SLOTS.forEach(renderSlot);
+        renderWarnings();
+        renderReference();
+        renderPresetInfo();
+        renderSplitLabels();
+        renderViewButtons();
+        scheduleProcess();
+    }
+
+    // ---------------------------------------------------------------------
+    // Processing
+    // ---------------------------------------------------------------------
+    function sizeFor(longSide) {
+        const { w, h } = state.reference;
+        if (w === 0 || w === h) return { w: longSide, h: longSide };
+        if (w > h) return { w: longSide, h: Math.max(1, Math.round(longSide * h / w)) };
+        return { w: Math.max(1, Math.round(longSide * w / h)), h: longSide };
+    }
+
+    function targetSize() {
+        const v = $('outputSize').value;
+        if (v === 'original') return state.reference.w > 0 ? { ...state.reference } : { w: 1024, h: 1024 };
+        return sizeFor(parseInt(v, 10));
+    }
+
+    let processTimer = null;
+    function scheduleProcess() {
+        clearTimeout(processTimer);
+        processTimer = setTimeout(() => {
+            setBusy(true);
+            // Short delay so the "Processing…" badge can paint (no rAF: it stalls in background tabs)
+            setTimeout(() => {
+                try { processNow(); }
+                finally { setBusy(false); }
+            }, 20);
+        }, 40);
+    }
+
+    function processNow() {
+        const { w, h } = targetSize();
+        const n = w * h;
+        const out = new Uint8ClampedArray(n * 4);
+        SLOTS.forEach(k => {
+            const ci = SLOT_INDEX[k];
+            if (k === 'a' && !state.alpha) { for (let i = 0; i < n; i++) out[i * 4 + 3] = 255; return; }
+            const sl = state.slots[k], src = sourceOf(k);
+            if (src) {
+                const p = getPlane(src, w, h);
+                if (sl.invert) { for (let i = 0; i < n; i++) out[i * 4 + ci] = 255 - p[i]; }
+                else { for (let i = 0; i < n; i++) out[i * 4 + ci] = p[i]; }
             } else {
-                originalImageSize = { w: 0, h: 0 };
-                originalSizeOption.text = `Original (Load an image first)`;
-                originalSizeOption.disabled = true;
-                if (outputSize.value === 'original') outputSize.value = "1024";
+                const v = sl.value;
+                for (let i = 0; i < n; i++) out[i * 4 + ci] = v;
             }
-            updateSizeOptionLabels();
+        });
+        state.output = { w, h, data: out };
+        drawPreview();
+        updateFileName();
+        $('outputInfo').textContent = `${w}×${h} · ${state.alpha ? 'RGBA' : 'RGB'} · 8-bit PNG`;
+    }
+
+    function drawPreview() {
+        if (!state.output) return;
+        const { w, h, data } = state.output;
+        const canvas = $('outputCanvas'), ctx = canvas.getContext('2d');
+        canvas.width = w; canvas.height = h;
+        const img = ctx.createImageData(w, h), d = img.data, n = w * h;
+        if (state.view === 'rgb') {
+            for (let j = 0; j < n * 4; j += 4) { d[j] = data[j]; d[j + 1] = data[j + 1]; d[j + 2] = data[j + 2]; d[j + 3] = 255; }
+        } else {
+            const c = SLOT_INDEX[state.view];
+            for (let j = 0; j < n * 4; j += 4) { d[j] = d[j + 1] = d[j + 2] = data[j + c]; d[j + 3] = 255; }
         }
+        ctx.putImageData(img, 0, 0);
+        applyZoom();
+    }
 
-        function handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, width, height, filename) {
+    function applyZoom() {
+        const canvas = $('outputCanvas'), wrap = $('outputCanvasWrapper');
+        const fit = state.zoom === 'fit';
+        $('zoomButton').textContent = fit ? 'Fit' : '100%';
+        wrap.classList.toggle('overflow-hidden', fit);
+        wrap.classList.toggle('overflow-auto', !fit);
+        wrap.classList.toggle('items-center', fit);
+        wrap.classList.toggle('justify-center', fit);
+        wrap.classList.toggle('items-start', !fit);
+        wrap.classList.toggle('justify-start', !fit);
+        if (fit) {
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style.objectFit = 'contain';
+            canvas.style.flexShrink = '1';
+        } else {
+            canvas.style.width = canvas.width + 'px';
+            canvas.style.height = canvas.height + 'px';
+            canvas.style.objectFit = '';
+            canvas.style.flexShrink = '0';
+        }
+        // Pixelated only when the texture is shown at or above its real size
+        const shownW = fit ? wrap.clientWidth : canvas.width;
+        canvas.style.imageRendering = canvas.width <= shownW ? 'pixelated' : 'auto';
+    }
 
-            loadState[stateKey] = true;
-            filenames[stateKey] = filename;
-            channelSizes[stateKey] = { w: width, h: height };
-            recomputeReferenceSize();
+    function autoFileName() {
+        const P = PRESETS[state.preset];
+        let base = '';
+        for (const k of SLOTS) {
+            const s = slotActive(k) ? sourceOf(k) : null;
+            if (s) { base = baseName(s.name); if (base) break; }
+        }
+        const suffix = state.alpha && P.alphaSuffix ? P.alphaSuffix : P.suffix;
+        return `${base || 'Texture'}_${suffix}.png`;
+    }
 
-            // Show filename in status
-            const displayFilename = filename.length > 25 ? filename.substring(0, 22) + '...' : filename;
-            if (statusElement) {
-                statusElement.textContent = displayFilename;
-                statusArea.classList.remove('hidden');
+    function updateFileName() {
+        if (!state.fileNameEdited) $('outputName').value = autoFileName();
+    }
+
+    function outputFileName() {
+        let name = ($('outputName').value || autoFileName()).trim().replace(/[\\/:*?"<>|]+/g, '_');
+        if (!/\.png$/i.test(name)) name += '.png';
+        return name;
+    }
+
+    // ---------------------------------------------------------------------
+    // Splitter
+    // ---------------------------------------------------------------------
+    async function loadSplitter(file, displayName) {
+        if (!file || !file.type.startsWith('image/')) { toast('That file is not an image.'); return; }
+        const name = displayName || file.name;
+        let img;
+        setBusy(true);
+        try { img = await decodeImage(file); }
+        catch { setBusy(false); toast(`Could not read "${name}".`); return; }
+        finally { setBusy(false); }
+        const { w, h, data } = img, n = w * h;
+        const planes = { r: new Uint8Array(n), g: new Uint8Array(n), b: new Uint8Array(n), a: new Uint8Array(n) };
+        let hasAlpha = false;
+        for (let i = 0, j = 0; i < n; i++, j += 4) {
+            planes.r[i] = data[j]; planes.g[i] = data[j + 1]; planes.b[i] = data[j + 2]; planes.a[i] = data[j + 3];
+            if (data[j + 3] !== 255) hasAlpha = true;
+        }
+        state.split = { name, w, h, planes, hasAlpha };
+        $('splitterLoader').value = '';
+        renderSplitter();
+    }
+
+    function drawThumb(k) {
+        const { w, h, planes } = state.split;
+        const plane = planes[k];
+        const tmp = document.createElement('canvas');
+        tmp.width = w; tmp.height = h;
+        const tctx = tmp.getContext('2d');
+        const img = tctx.createImageData(w, h), d = img.data;
+        for (let i = 0, j = 0; i < w * h; i++, j += 4) { d[j] = d[j + 1] = d[j + 2] = plane[i]; d[j + 3] = 255; }
+        tctx.putImageData(img, 0, 0);
+        const c = $('thumbCanvas-' + k), ctx = c.getContext('2d');
+        const size = 128;
+        c.width = w >= h ? size : Math.max(1, Math.round(size * w / h));
+        c.height = h >= w ? size : Math.max(1, Math.round(size * h / w));
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(tmp, 0, 0, c.width, c.height);
+    }
+
+    function renderSplitter() {
+        const sp = state.split;
+        const active = !!sp;
+        $('splitterStatusArea').classList.toggle('hidden', !active);
+        $('splitterLabel').classList.toggle('hidden', active);
+        const showA = active && sp.hasAlpha;
+        $('splitterResults').classList.toggle('grid-cols-3', !showA);
+        $('splitterResults').classList.toggle('grid-cols-4', showA);
+        $('thumb-a').classList.toggle('hidden', !showA);
+        ['sendSplitButton', 'downloadSplitSetButton'].forEach(id => $(id).classList.toggle('opacity-50', !active));
+        ['sendSplitButton', 'downloadSplitSetButton'].forEach(id => $(id).classList.toggle('pointer-events-none', !active));
+        SLOTS.forEach(k => {
+            const t = $('thumb-' + k);
+            t.classList.toggle('opacity-50', !active);
+            t.classList.toggle('pointer-events-none', !active);
+            const c = $('thumbCanvas-' + k);
+            if (active && (k !== 'a' || showA)) drawThumb(k);
+            else c.getContext('2d').clearRect(0, 0, c.width, c.height);
+        });
+        if (active) $('splitterStatus').textContent = `Loaded: ${sp.name} (${sp.w}×${sp.h}${sp.hasAlpha ? ', RGBA' : ''})`;
+    }
+
+    function clearSplitter() {
+        state.split = null;
+        $('splitterLoader').value = '';
+        renderSplitter();
+    }
+
+    function splitSource(fromK) {
+        const sp = state.split;
+        const t = typeOf(fromK);
+        return makeSource({ w: sp.w, h: sp.h, data: sp.planes[fromK], channels: 1 },
+                          `${baseName(sp.name)}_${slotLabel(fromK).replace(/\s+/g, '')}`,
+                          isTyped(t) ? t : null);
+    }
+
+    function useSplitChannel(fromK, toK) {
+        if (!state.split) return;
+        placeSource(toK, splitSource(fromK));
+        renderAll();
+    }
+
+    function sendAllToPacker() {
+        if (!state.split) return;
+        SLOTS.forEach(k => {
+            if (k === 'a' && !state.split.hasAlpha) return;
+            placeSource(k, splitSource(k));
+        });
+        toast('Channels sent to the packer. Change the target to convert to another format.');
+        renderAll();
+    }
+
+    async function downloadSplitZip() {
+        const sp = state.split;
+        if (!sp) return;
+        setBusy(true);
+        try {
+            const base = sp.name.replace(/\.[^.]+$/, '');
+            const files = [];
+            for (const k of SLOTS) {
+                if (k === 'a' && !sp.hasAlpha) continue;
+                const blob = await encodePNG(sp.w, sp.h, sp.planes[k], 0);
+                files.push({ name: `${base}_${STYLE[k].name}_${slotLabel(k).replace(/\s+/g, '')}.png`, bytes: new Uint8Array(await blob.arrayBuffer()) });
             }
-
-            // Set size badge
-            sizeBadge.textContent = `${width} × ${height}`;
-
-            // Hide "Or use a solid value" label and the slider
-            solidLabel.classList.add('hidden');
-            sliderContainer.classList.add('hidden');
-
-            // Update warnings across all channels
-            updateSizeWarnings();
-
-            hiddenCtx.canvas.width = width;
-            hiddenCtx.canvas.height = height;
-            hiddenCtx.drawImage(imageObj, 0, 0, width, height);
-            
-            processImage();
+            triggerDownload(makeZip(files), `${base}_channels.zip`);
+        } catch {
+            toast('Could not create the zip file.');
+        } finally {
+            setBusy(false);
         }
+    }
 
-        function createChannelLoadHandler(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge) {
-            return function(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-                const url = URL.createObjectURL(file);
-                imageObj.onload = () => {
-                    handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, imageObj.width, imageObj.height, file.name);
-                    URL.revokeObjectURL(url);
-                };
-                imageObj.src = url;
-            };
-        }
-        
-        occlusionLoader.addEventListener('change', createChannelLoadHandler(images.r, 'r', hiddenRedCtx, redStatusArea, redStatus, redChannel, redValueInput, redSliderContainer, redSolidLabel, redSizeBadge));
-        imageLoader.addEventListener('change', createChannelLoadHandler(images.g, 'g', hiddenGreenCtx, greenStatusArea, greenStatus, greenChannel, greenValueInput, greenSliderContainer, greenSolidLabel, greenSizeBadge));
-        metallicLoader.addEventListener('change', createChannelLoadHandler(images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueValueInput, blueSliderContainer, blueSolidLabel, blueSizeBadge));
+    // ---------------------------------------------------------------------
+    // Init
+    // ---------------------------------------------------------------------
+    function init() {
+        $('slotGrid').innerHTML = SLOTS.map(cardHTML).join('');
+        $('splitterResults').innerHTML = SLOTS.map(thumbHTML).join('');
+        SLOTS.forEach(setupSlot);
 
-        function setupPackerDragAndDrop(containerId, imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge) {
-            const container = document.getElementById(containerId);
-            const originalBorderColorClass = container.dataset.originalBorderColor; 
-            const channelColor = container.dataset.channelColor; 
-            const highlightColorClass = {
-                'red': 'border-red-400',
-                'green': 'border-emerald-400',
-                'blue': 'border-blue-400',
-                'purple': 'border-purple-400'
-            }[channelColor];
+        // Preset selector
+        const presetSelect = $('presetSelect');
+        presetSelect.innerHTML = Object.entries(PRESETS).map(([id, p]) => `<option value="${id}">${p.label}</option>`).join('');
 
-            container.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                const isExternalFile = e.dataTransfer.items.length > 0 && e.dataTransfer.items[0].kind === 'file';
-                const isSplitChannel = e.dataTransfer.types.includes('application/x-split-channel');
-                if (isExternalFile || isSplitChannel) {
-                    container.classList.remove(originalBorderColorClass); 
-                    container.classList.add('border-dashed', 'border-4', highlightColorClass); 
-                    e.dataTransfer.dropEffect = 'copy';
-                }
-            });
+        // Restore settings
+        const saved = loadSettings();
+        if (saved.preset && PRESETS[saved.preset]) state.preset = saved.preset;
+        if (saved.filter === 'nearest' || saved.filter === 'smooth') state.filter = saved.filter;
+        if (saved.size && saved.size !== 'original' && [...$('outputSize').options].some(o => o.value === saved.size)) $('outputSize').value = saved.size;
+        presetSelect.value = state.preset;
+        $('filterSelect').value = state.filter;
+        applyPreset(state.preset);
 
-            container.addEventListener('dragleave', (e) => {
-                e.preventDefault();
-                container.classList.remove('border-dashed', 'border-4', highlightColorClass); 
-                container.classList.add(originalBorderColorClass); 
-            });
-            
-            container.addEventListener('drop', (e) => {
-                e.preventDefault();
-                container.classList.remove('border-dashed', 'border-4', highlightColorClass); 
-                container.classList.add(originalBorderColorClass);
-                
-                const splitChannelId = e.dataTransfer.getData('text/plain');
-                const isSplitChannelDrop = e.dataTransfer.types.includes('application/x-split-channel');
+        presetSelect.addEventListener('change', () => {
+            applyPreset(presetSelect.value);
+            saveSettings();
+            renderAll();
+        });
+        $('resetAllButton').addEventListener('click', resetAll);
+        $('alphaToggle').addEventListener('change', (e) => { state.alpha = e.target.checked; renderAll(); });
+        $('outputSize').addEventListener('change', () => { saveSettings(); scheduleProcess(); });
+        $('filterSelect').addEventListener('change', (e) => { state.filter = e.target.value; saveSettings(); scheduleProcess(); });
+        $('outputName').addEventListener('input', (e) => { state.fileNameEdited = e.target.value.trim() !== ''; });
+        $('outputName').addEventListener('blur', updateFileName);
 
-                if (isSplitChannelDrop && splitChannelId) {
-                    const splitContainer = document.getElementById(splitChannelId);
-                    const sourceCanvas = splitContainer ? splitContainer.querySelector('canvas') : null;
-                    if (sourceCanvas && sourceCanvas.dataset.fullDataUrl) {
-                        const url = sourceCanvas.dataset.fullDataUrl;
-                        const w = parseInt(sourceCanvas.dataset.originalWidth);
-                        const h = parseInt(sourceCanvas.dataset.originalHeight);
-                        const filename = `SPLIT_${splitContainer.dataset.channelName.toUpperCase()}_${w}.png`;
-                        imageObj.onload = () => {
-                            handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, w, h, filename);
-                        };
-                        imageObj.src = url;
-                        return;
-                    }
-                }
+        document.querySelectorAll('.view-btn').forEach(b => b.addEventListener('click', () => {
+            state.view = b.dataset.view;
+            renderViewButtons();
+            drawPreview();
+        }));
+        $('zoomButton').addEventListener('click', () => { state.zoom = state.zoom === 'fit' ? '1:1' : 'fit'; applyZoom(); });
+        window.addEventListener('resize', () => { if (state.zoom === 'fit') applyZoom(); });
 
-                const file = e.dataTransfer.files[0];
-                if (file && file.type.startsWith('image/')) {
-                    const url = URL.createObjectURL(file);
-                    imageObj.onload = () => {
-                        handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, imageObj.width, imageObj.height, file.name);
-                        URL.revokeObjectURL(url);
-                    };
-                    imageObj.src = url;
-                } else if (!isSplitChannelDrop) { 
-                    if (statusElement) {
-                         statusElement.textContent = `Error: Invalid file.`;
-                         statusArea.classList.remove('hidden'); 
-                         setTimeout(() => statusArea.classList.add('hidden'), 3000); 
-                    }
-                }
-            });
-        }
-        
-        setupPackerDragAndDrop('occlusionContainer', images.r, 'r', hiddenRedCtx, redStatusArea, redStatus, redChannel, redValueInput, redSliderContainer, redSolidLabel, redSizeBadge);
-        setupPackerDragAndDrop('roughnessContainer', images.g, 'g', hiddenGreenCtx, greenStatusArea, greenStatus, greenChannel, greenValueInput, greenSliderContainer, greenSolidLabel, greenSizeBadge);
-        setupPackerDragAndDrop('metallicContainer', images.b, 'b', hiddenBlueCtx, blueStatusArea, blueStatus, blueChannel, blueValueInput, blueSliderContainer, blueSolidLabel, blueSizeBadge);
+        $('downloadButton').addEventListener('click', async () => {
+            if (!state.output) return;
+            setBusy(true);
+            try {
+                const { w, h, data } = state.output;
+                const blob = await encodePNG(w, h, data, state.alpha ? 6 : 2);
+                triggerDownload(blob, outputFileName());
+            } catch {
+                toast('Could not create the PNG. Right-click the preview and choose "Save image as…" instead.');
+            } finally {
+                setBusy(false);
+            }
+        });
 
-        [splitRedContainer, splitGreenContainer, splitBlueContainer].forEach(container => {
-            container.addEventListener('dragstart', (e) => {
-                const canvas = container.querySelector('canvas');
-                if (!canvas.dataset.fullDataUrl) { e.preventDefault(); return; }
-                e.dataTransfer.setData('text/plain', container.id);
-                e.dataTransfer.setData('application/x-split-channel', 'true');
+        // Splitter
+        const area = $('splitterLoadArea');
+        $('splitterLoader').addEventListener('change', (e) => { if (e.target.files[0]) loadSplitter(e.target.files[0]); });
+        $('splitterClearButton').addEventListener('click', clearSplitter);
+        $('sendSplitButton').addEventListener('click', sendAllToPacker);
+        $('downloadSplitSetButton').addEventListener('click', downloadSplitZip);
+        area.addEventListener('dragover', (e) => {
+            if (!hasFiles(e)) return;
+            e.preventDefault(); e.stopPropagation();
+            e.dataTransfer.dropEffect = 'copy';
+            area.classList.add('drop-highlight');
+        });
+        area.addEventListener('dragleave', (e) => { if (!area.contains(e.relatedTarget)) area.classList.remove('drop-highlight'); });
+        area.addEventListener('drop', (e) => {
+            area.classList.remove('drop-highlight');
+            if (!hasFiles(e)) return;
+            e.preventDefault(); e.stopPropagation();
+            loadSplitter(e.dataTransfer.files[0]);
+        });
+        const splitBox = $('splitterMainContainer');
+        splitBox.addEventListener('mouseenter', () => { hoverTarget = 'split'; });
+        splitBox.addEventListener('mouseleave', () => { if (hoverTarget === 'split') hoverTarget = null; });
+        SLOTS.forEach(k => {
+            $('thumb-' + k).addEventListener('dragstart', (e) => {
+                if (!state.split) { e.preventDefault(); return; }
+                e.dataTransfer.setData('application/x-split-channel', k);
+                e.dataTransfer.setData('text/plain', k);
                 e.dataTransfer.effectAllowed = 'copy';
-                if (canvas.width > 0) {
-                    e.dataTransfer.setDragImage(canvas, canvas.width / 2, canvas.height / 2);
-                }
-            });
-            container.addEventListener('dragend', (e) => {
-                const canvas = container.querySelector('canvas');
-                if (!canvas.dataset.fullDataUrl) { e.preventDefault(); }
+                const c = $('thumbCanvas-' + k);
+                e.dataTransfer.setDragImage(c, c.width / 2, c.height / 2);
             });
         });
 
-        function clearChannel(stateKey) {
-            const dataMap = {
-                r: { ctx: hiddenRedCtx, statusArea: redStatusArea, slider: redChannel, numberInput: redValueInput, sliderContainer: redSliderContainer, solidLabel: redSolidLabel, sizeWarning: redSizeWarning, fileInput: occlusionLoader },
-                g: { ctx: hiddenGreenCtx, statusArea: greenStatusArea, slider: greenChannel, numberInput: greenValueInput, sliderContainer: greenSliderContainer, solidLabel: greenSolidLabel, sizeWarning: greenSizeWarning, fileInput: imageLoader },
-                b: { ctx: hiddenBlueCtx, statusArea: blueStatusArea, slider: blueChannel, numberInput: blueValueInput, sliderContainer: blueSliderContainer, solidLabel: blueSolidLabel, sizeWarning: blueSizeWarning, fileInput: metallicLoader }
-            };
+        // Drop anywhere on the page: auto-assign by file name
+        document.addEventListener('dragover', (e) => {
+            if (hasFiles(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }
+        });
+        document.addEventListener('drop', (e) => {
+            if (!hasFiles(e)) return;
+            e.preventDefault();
+            autoAssign(e.dataTransfer.files);
+        });
 
-            const { ctx, statusArea, slider, numberInput, sliderContainer, solidLabel, sizeWarning, fileInput } = dataMap[stateKey];
-            
-            // Reset file input so the same file can be reloaded
-            fileInput.value = '';
-
-            loadState[stateKey] = false;
-            filenames[stateKey] = '';
-            channelSizes[stateKey] = null;
-
-            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            ctx.canvas.width = 1; 
-            ctx.canvas.height = 1;
-
-            // Hide status area, restore solid label and slider
-            statusArea.classList.add('hidden');
-            solidLabel.classList.remove('hidden');
-            sliderContainer.classList.remove('hidden');
-
-            // Re-enable slider and number input
-            slider.disabled = false;
-            numberInput.disabled = false;
-
-            sizeWarning.classList.add('hidden');
-
-            recomputeReferenceSize();
-            updateSizeWarnings();
-            processImage(); 
-        }
-        
-        redClearButton.addEventListener('click', () => clearChannel('r'));
-        greenClearButton.addEventListener('click', () => clearChannel('g'));
-        blueClearButton.addEventListener('click', () => clearChannel('b'));
-
-        const debouncedProcessImage = debounce(processImage, 50);
-
-        function clamp(value) {
-            return Math.min(255, Math.max(0, parseInt(value) || 0));
-        }
-
-        function updateRedValues(value) {
-            const val = clamp(value);
-            redChannel.value = val;
-            redValueInput.value = val;
-            redValueLabelText.textContent = `(${val > 128 ? 'White' : 'Black'})`;
-            debouncedProcessImage();
-        }
-
-        function updateGreenValues(value) {
-            const val = clamp(value);
-            greenChannel.value = val;
-            greenValueInput.value = val;
-            greenValueLabelText.textContent = `(${val > 128 ? 'Matte' : 'Shiny'})`;
-            debouncedProcessImage();
-        }
-
-        function updateBlueValues(value) {
-            const val = clamp(value);
-            blueChannel.value = val;
-            blueValueInput.value = val;
-            blueValueLabelText.textContent = `(${val > 128 ? 'Metallic' : 'Dielectric'})`;
-            debouncedProcessImage();
-        }
-
-        redChannel.addEventListener('input', () => updateRedValues(redChannel.value));
-        greenChannel.addEventListener('input', () => updateGreenValues(greenChannel.value));
-        blueChannel.addEventListener('input', () => updateBlueValues(blueChannel.value));
-
-        redValueInput.addEventListener('input', () => updateRedValues(redValueInput.value));
-        greenValueInput.addEventListener('input', () => updateGreenValues(greenValueInput.value));
-        blueValueInput.addEventListener('input', () => updateBlueValues(blueValueInput.value));
-
-        outputSize.addEventListener('input', debouncedProcessImage);
-
-        // --- Splitter Logic ---
-        const splitterOriginalBorderColorClass = splitterLoadArea.dataset.originalBorderColor;
-        const splitterHighlightColorClass = 'border-purple-400';
-
-        ormSplitterLoader.addEventListener('change', (event) => {
-            const file = event.target.files[0];
+        // Paste (Ctrl+V) into the hovered channel or the splitter
+        document.addEventListener('paste', (e) => {
+            const el = document.activeElement;
+            if (el && el.tagName === 'INPUT' && el.type === 'text') return;
+            const item = [...((e.clipboardData && e.clipboardData.items) || [])].find(i => i.type.startsWith('image/'));
+            if (!item) return;
+            const file = item.getAsFile();
             if (!file) return;
-            const url = URL.createObjectURL(file);
-            splitterImg.onload = () => {
-                handleSplitterLoad(splitterImg, file.name);
-                URL.revokeObjectURL(url);
-            };
-            splitterImg.src = url;
-        });
-
-        splitterLoadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
-            const isExternalFile = e.dataTransfer.items.length > 0 && e.dataTransfer.items[0].kind === 'file';
-            if (isExternalFile) {
-                splitterLoadArea.classList.remove(splitterOriginalBorderColorClass);
-                splitterLoadArea.classList.add('border-dashed', 'border-4', splitterHighlightColorClass); 
-                e.dataTransfer.dropEffect = 'copy';
-            }
+            if (hoverTarget === 'split') loadSplitter(file, 'Pasted image');
+            else if (hoverTarget) loadFileIntoSlot(hoverTarget, file, 'Pasted image');
+            else toast('Hover a channel (or the splitter) and press Ctrl+V to paste an image.');
         });
 
-        splitterLoadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            splitterLoadArea.classList.remove('border-dashed', 'border-4', splitterHighlightColorClass); 
-            splitterLoadArea.classList.add(splitterOriginalBorderColorClass);
-        });
+        renderSplitter();
+        renderAll();
+    }
 
-        splitterLoadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            splitterLoadArea.classList.remove('border-dashed', 'border-4', splitterHighlightColorClass); 
-            splitterLoadArea.classList.add(splitterOriginalBorderColorClass);
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const url = URL.createObjectURL(file);
-                splitterImg.onload = () => {
-                    handleSplitterLoad(splitterImg, file.name);
-                    URL.revokeObjectURL(url);
-                };
-                splitterImg.src = url;
-            }
-        });
-
-        function handleSplitterLoad(img, filename) {
-            loadState.splitter = true;
-            filenames.splitter = filename;
-            const displayFilename = filename.length > 25 ? filename.substring(0, 22) + '...' : filename;
-            splitterStatus.textContent = `Loaded: ${displayFilename}`;
-            splitterStatusArea.classList.remove('hidden');
-            splitterLabel.classList.add('hidden');
-            [splitRedContainer, splitGreenContainer, splitBlueContainer].forEach(container => {
-                container.classList.remove('opacity-50', 'pointer-events-none');
-            });
-            downloadSplitSetButton.style.display = 'block';
-            downloadSplitSetButton.classList.remove('opacity-50', 'pointer-events-none');
-            splitOrmImage(img);
-        }
-
-        splitterClearButton.addEventListener('click', clearSplitter);
-
-        function clearSplitter() {
-            loadState.splitter = false;
-            filenames.splitter = '';
-            hiddenSplitCtx.clearRect(0, 0, hiddenSplitCanvas.width, hiddenSplitCanvas.height);
-            hiddenSplitCanvas.width = 1;
-            hiddenSplitCanvas.height = 1;
-            [splitRedCtx, splitGreenCtx, splitBlueCtx].forEach(ctx => {
-                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            });
-            [splitRedCanvas, splitGreenCanvas, splitBlueCanvas].forEach(canvas => {
-                delete canvas.dataset.fullDataUrl;
-            });
-            splitterStatusArea.classList.add('hidden');
-            splitterLabel.classList.remove('hidden');
-            downloadSplitSetButton.style.display = 'none';
-            downloadSplitSetButton.classList.add('opacity-50', 'pointer-events-none');
-            [splitRedContainer, splitGreenContainer, splitBlueContainer].forEach(container => {
-                container.classList.add('opacity-50', 'pointer-events-none');
-            });
-        }
-
-        function splitOrmImage(img) {
-            const w = img.width;
-            const h = img.height;
-            hiddenSplitCanvas.width = w;
-            hiddenSplitCanvas.height = h;
-            hiddenSplitCtx.drawImage(img, 0, 0);
-            const imageData = hiddenSplitCtx.getImageData(0, 0, w, h);
-            const data = imageData.data;
-            const length = data.length;
-            const redImageData = hiddenSplitCtx.createImageData(w, h);
-            const greenImageData = hiddenSplitCtx.createImageData(w, h);
-            const blueImageData = hiddenSplitCtx.createImageData(w, h);
-            const redData = redImageData.data;
-            const greenData = greenImageData.data;
-            const blueData = blueImageData.data;
-            for (let i = 0; i < length; i += 4) {
-                redData[i] = redData[i+1] = redData[i+2] = data[i]; redData[i+3] = 255;
-                greenData[i] = greenData[i+1] = greenData[i+2] = data[i+1]; greenData[i+3] = 255;
-                blueData[i] = blueData[i+1] = blueData[i+2] = data[i+2]; blueData[i+3] = 255;
-            }
-            const previewSize = 96;
-            [splitRedCanvas, splitGreenCanvas, splitBlueCanvas].forEach(canvas => {
-                canvas.width = previewSize; canvas.height = previewSize;
-            });
-            function drawSplitPreview(sourceImageData, previewCtx) {
-                const tempCanvas = document.createElement('canvas');
-                const tempCtx = tempCanvas.getContext('2d');
-                tempCanvas.width = w; tempCanvas.height = h;
-                tempCtx.putImageData(sourceImageData, 0, 0);
-                previewCtx.imageSmoothingEnabled = false;
-                previewCtx.drawImage(tempCanvas, 0, 0, w, h, 0, 0, previewCtx.canvas.width, previewCtx.canvas.height);
-            }
-            drawSplitPreview(redImageData, splitRedCtx);
-            drawSplitPreview(greenImageData, splitGreenCtx);
-            drawSplitPreview(blueImageData, splitBlueCtx);
-            function getFullResDataUrl(imageData, w, h) {
-                const tempCanvas = document.createElement('canvas');
-                const tempCtx = tempCanvas.getContext('2d');
-                tempCanvas.width = w; tempCanvas.height = h;
-                tempCtx.putImageData(imageData, 0, 0);
-                return tempCanvas.toDataURL('image/png');
-            }
-            splitRedCanvas.dataset.fullDataUrl = getFullResDataUrl(redImageData, w, h);
-            splitGreenCanvas.dataset.fullDataUrl = getFullResDataUrl(greenImageData, w, h);
-            splitBlueCanvas.dataset.fullDataUrl = getFullResDataUrl(blueImageData, w, h);
-            [splitRedCanvas, splitGreenCanvas, splitBlueCanvas].forEach(canvas => {
-                canvas.dataset.originalWidth = w;
-                canvas.dataset.originalHeight = h;
-            });
-        }
-
-        function processImage() {
-            let targetWidth, targetHeight;
-            const sizeValue = outputSize.value;
-            if (sizeValue === 'original' && originalImageSize.w > 0) {
-                targetWidth = originalImageSize.w;
-                targetHeight = originalImageSize.h;
-            } else if (sizeValue === 'original') {
-                targetWidth = 1024; targetHeight = 1024;
-            } else {
-                ({ w: targetWidth, h: targetHeight } = sizeFor(parseInt(sizeValue)));
-            }
-            processingCanvas.width = targetWidth;
-            processingCanvas.height = targetHeight;
-            function redrawScaledChannel(sourceCtx, targetWidth, targetHeight) {
-                const tempCanvas = document.createElement('canvas');
-                const tempCtx = tempCanvas.getContext('2d');
-                tempCanvas.width = targetWidth; tempCanvas.height = targetHeight;
-                if (sourceCtx.canvas.width > 1) {
-                    tempCtx.imageSmoothingEnabled = false;
-                    tempCtx.drawImage(sourceCtx.canvas, 0, 0, sourceCtx.canvas.width, sourceCtx.canvas.height, 0, 0, targetWidth, targetHeight);
-                }
-                return tempCtx.getImageData(0, 0, targetWidth, targetHeight).data;
-            }
-            const redPixels = redrawScaledChannel(hiddenRedCtx, targetWidth, targetHeight);
-            const greenPixels = redrawScaledChannel(hiddenGreenCtx, targetWidth, targetHeight);
-            const bluePixels = redrawScaledChannel(hiddenBlueCtx, targetWidth, targetHeight);
-            const redValue = parseInt(redChannel.value);
-            const greenValue = parseInt(greenChannel.value);
-            const blueValue = parseInt(blueChannel.value);
-            const outputImageData = processingCtx.createImageData(targetWidth, targetHeight);
-            const outputPixels = outputImageData.data;
-            const totalPixels = targetWidth * targetHeight;
-            // Each loaded map is read as luminance (Rec.601 integer weights 77/150/29, sum 256),
-            // so grayscale maps keep their exact values and colored maps behave the same in every channel.
-            for (let i = 0; i < totalPixels * 4; i += 4) {
-                outputPixels[i]   = loadState.r ? (redPixels[i]   * 77 + redPixels[i+1]   * 150 + redPixels[i+2]   * 29) >> 8 : redValue;
-                outputPixels[i+1] = loadState.g ? (greenPixels[i] * 77 + greenPixels[i+1] * 150 + greenPixels[i+2] * 29) >> 8 : greenValue;
-                outputPixels[i+2] = loadState.b ? (bluePixels[i]  * 77 + bluePixels[i+1]  * 150 + bluePixels[i+2]  * 29) >> 8 : blueValue;
-                outputPixels[i+3] = 255;
-            }
-            processingCtx.putImageData(outputImageData, 0, 0);
-            outputCanvas.width = targetWidth;
-            outputCanvas.height = targetHeight;
-            outputCtx.imageSmoothingEnabled = false;
-            outputCtx.drawImage(processingCanvas, 0, 0, targetWidth, targetHeight, 0, 0, targetWidth, targetHeight);
-        }
-        
-        downloadButton.addEventListener('click', () => {
-            outputCanvas.toBlob(blob => {
-                if (!blob) return;
-                const url = URL.createObjectURL(blob);
-                triggerDownload(url, `ORM_Texture.png`);
-                setTimeout(() => URL.revokeObjectURL(url), 2000);
-            }, 'image/png');
-        });
-
-        function triggerDownload(url, filename) {
-            const link = document.createElement('a');
-            link.href = url; link.download = filename;
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        }
-
-        downloadSplitSetButton.addEventListener('click', () => {
-            if (!loadState.splitter) return;
-            const baseName = filenames.splitter.replace(/\.[^/.]+$/, ""); 
-            const splitData = [
-                { canvas: splitRedCanvas, name: 'Occlusion', suffix: 'R' },
-                { canvas: splitGreenCanvas, name: 'Roughness', suffix: 'G' },
-                { canvas: splitBlueCanvas, name: 'Metallic', suffix: 'B' }
-            ];
-            // Staggered so browsers don't drop simultaneous downloads
-            splitData.forEach((item, index) => {
-                const dataURL = item.canvas.dataset.fullDataUrl;
-                if (dataURL) {
-                    setTimeout(() => { triggerDownload(dataURL, `${baseName}_${item.suffix}_${item.name}.png`); }, 100 + index * 400);
-                }
-            });
-        });
-        
-        function spawnWatermark(){
-            const c=document.getElementById("mainContainer");
-            if (!c) return;
-            const w=document.createElement("div");
-            w.className="watermark";
-            w.textContent="Gsoos";
-            const rect=c.getBoundingClientRect();
-            const x=Math.random()*(rect.width-200); 
-            const y=Math.random()*(rect.height-200);
-            w.style.left=x+"px";
-            w.style.top=y+"px";
-            c.appendChild(w);
-            setTimeout(()=>w.remove(),4000);
-        }
-        setInterval(spawnWatermark,1500);
-        spawnWatermark();
-
-        function initializeApp() {
-            updateRedValues(redChannel.value);
-            updateGreenValues(greenChannel.value);
-            updateBlueValues(blueChannel.value);
-            processImage();
-        }
-        
-        initializeApp();
+    init();
+})();
 </script>
 </body>
 </html>

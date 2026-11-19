@@ -4,13 +4,15 @@ Create, combine, and extract ORM textures (Occlusion, Roughness, Metallic) with 
 
 This web tool allows you to:
 
-- ✅ Generate ORM textures by combining channels (R, G, B)
-- ✅ Load individual maps or solid values
-- ✅ Split an existing ORM texture into three separate maps
-- ✅ Drag and drop images between channels
-- ✅ Choose output resolution (up to 4096 × 4096)
-- ✔️ Download the result as an uncompressed PNG
-- ✔️ Modern, responsive, optimized interface
+- ✅ Pack maps for **Unreal / Godot / glTF (ORM)**, **Unity HDRP Mask Map**, **Unity URP/Built-in Metallic-Smoothness** or a custom layout
+- ✅ Use an optional **alpha channel** (Height, Smoothness…) with exact, straight-alpha PNG output
+- ✅ Drop all your maps at once — they are assigned by file name (`_AO`, `_Roughness`, `_Metallic`, `_Gloss`, `_Height`…)
+- ✅ **Invert** any channel (Roughness ↔ Smoothness), automatically when needed
+- ✅ Switch target and loaded maps are re-routed — convert ORM ⇄ Mask Map in seconds
+- ✅ Split any packed texture into grayscale maps (downloaded as one .zip)
+- ✅ Non-square, power-of-two friendly output (size = longest side) with high-quality downscaling
+- ✅ Paste images with Ctrl+V, preview each channel, zoom 1:1
+- ✔️ 100% in-browser — nothing is uploaded
 
 If you like this and want to see development continue consider to
 
@@ -36,50 +38,33 @@ If you like this and want to see development continue consider to
 
 ## 🚀 Main Features
 
-### 🎨 ORM Packer
+### 🎯 Targets (presets)
 
-Load maps for:
+| Target | R | G | B | A |
+|---|---|---|---|---|
+| ORM — Unreal / Godot / glTF / Blender | Occlusion | Roughness | Metallic | optional Height |
+| Unity HDRP — Mask Map | Metallic | Occlusion | Detail Mask | Smoothness |
+| Unity URP / Built-in — Metallic | Metallic | — | — | Smoothness |
+| Custom | any | any | any | any |
 
-- **Occlusion** (Red / R)  
-- **Roughness** (Green / G)  
-- **Metallic** (Blue / B)
+### 🎨 Packer
 
-You can use image files or solid values (0–255).
+- Load a map per channel (button, drag & drop, Ctrl+V) or set a solid value (0–255)
+- Pick which part of the image to read (Gray / R / G / B / A) and invert it
+- Size badge per map and a warning when sizes differ
 
-Includes:
+### 🔧 Splitter
 
-- Synchronized sliders and numeric inputs  
-- Small file-status indicator  
-- Button to clear the channel and restore the solid value  
+- Load any packed RGB/RGBA texture and get one grayscale map per channel
+- Drag a channel into the packer, or **Send all to packer** and change the target to convert formats
+- Download all channels as a single .zip
 
----
+### 📦 Output
 
-### 🔧 Splitter (ORM Texture Deconstructor)
-
-Load a full ORM texture and it will automatically split into:
-
-- **Red Channel → Occlusion**  
-- **Green Channel → Roughness**  
-- **Blue Channel → Metallic**
-
-Features:
-
-- Clear thumbnail previews  
-- Drag separated channels directly into the packer  
-- Reset button to clear the module  
-
----
-
-## 📦 Configurable Output
-
-Available resolutions:
-
-**4096, 2048, 1024, 512, 256, 128, 64 + Original**
-
-Includes:
-
-- Scalable, responsive preview  
-- PNG download with exact color output (no smoothing)  
+- Sizes 64 → 8192 (longest side, aspect ratio kept) or Original
+- Resize filter: Smooth (area average / bilinear) or Nearest
+- Lossless 8-bit PNG written pixel-exact (RGB, or RGBA when alpha is on)
+- Automatic file name, e.g. `T_Rock_ORM.png`, `T_Rock_MaskMap.png`
 
 ---
 
@@ -94,38 +79,20 @@ Built with:
 
 Features:
 
-- Modern fluid design  
-- Automatic dark mode  
-- Custom favicon  
+- Responsive layout (desktop and mobile)  
+- Settings remembered between visits  
+- Built-in guide and FAQ  
 
 ---
 
 ## 🧩 How to Use
 
-### 1️⃣ Pack an ORM Texture
+1. Choose the **Target** for your engine
+2. Drop your maps (or load them one by one / use solid values)
+3. Check the preview (RGB or per channel)
+4. Pick the output size and download
 
-1. Load the R/G/B maps (or use the sliders)  
-2. Select the output resolution  
-3. Check the live preview  
-4. Download the PNG  
-
-### 2️⃣ Split an ORM Texture
-
-1. Go to the **Splitter** section  
-2. Load the full ORM texture  
-3. Inspect the generated thumbnails  
-4. Drag any channel into the corresponding packer slot  
-
----
-
-## ⚠️ Important Note for Firefox Users
-
-Firefox security settings may block the **“Download ORM Image”** button.
-
-**Alternative:**  
-1. Ensure the desired **Output Size** is selected  
-2. Right-click the ORM preview  
-3. Choose **“Save Image As…”** to download it manually  
+**Import tip:** packed masks are linear data — disable sRGB in Unreal/Unity and use *Non-Color* in Blender.
 
 ---
 
