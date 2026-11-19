@@ -98,6 +98,16 @@
         .view-btn[data-view="b"][aria-pressed="true"] { background-color: #1d4ed8; }
         .view-btn[data-view="a"][aria-pressed="true"] { background-color: #6b7280; }
         .view-btn[aria-pressed="true"] { color: #fff !important; }
+        /* 2×2 "side" layout: big tile on the left, controls in a column on the right */
+        #slotGrid.side .slot-body {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            column-gap: 0.5rem;
+            row-gap: 0.375rem;
+            align-content: start;
+        }
+        #slotGrid.side .slot-body > .tile-wrap { grid-row: 1 / span 4; }
+        #slotGrid.side .btn-row { grid-template-columns: minmax(0, 1fr); }
         .lv-pop {
             background: rgba(17, 24, 39, 0.94);
             backdrop-filter: blur(2px);
@@ -229,13 +239,13 @@
 
         <header class="flex-shrink-0 text-center mb-3 px-1">
             <h1 class="text-2xl sm:text-3xl font-bold text-white">ORM Texture Packer <span class="text-gray-400 font-normal">&amp; Splitter</span></h1>
-            <p class="text-sm text-gray-400 mt-0.5">Pack PBR masks for Unreal, Unity, Godot and Blender. Runs in your browser, nothing is uploaded. <a href="#guide" class="text-blue-400 hover:underline whitespace-nowrap">Guide ↓</a></p>
+            <p class="text-sm text-gray-400 mt-0.5">Free online tool to pack and split <strong class="text-gray-300 font-medium">ORM (Occlusion, Roughness, Metallic)</strong> and Unity Mask Map textures for PBR workflows in Unreal Engine, Unity, Godot and Blender. Runs in your browser, nothing is uploaded. <a href="#guide" class="text-blue-400 hover:underline whitespace-nowrap">Guide ↓</a></p>
         </header>
 
         <div class="flex flex-1 flex-col lg:flex-row gap-5 lg:overflow-hidden min-h-0">
 
             <!-- LEFT: inputs -->
-            <div class="flex flex-col gap-3 lg:w-1/2 lg:overflow-y-auto lg:pr-2">
+            <div id="leftCol" class="flex flex-col gap-3 lg:w-1/2 lg:overflow-y-auto lg:pr-2">
 
                 <div class="flex flex-col gap-1">
                     <div class="flex flex-wrap items-center gap-2">
@@ -266,7 +276,7 @@
                     </div>
 
                     <div id="splitterBody" class="hidden mt-3">
-                        <div id="splitterResults" class="grid grid-cols-3 gap-2"></div>
+                        <div id="splitterResults" class="grid grid-cols-4 gap-2"></div>
                         <p class="text-[11px] text-gray-500 mt-2">Drag a thumbnail onto a channel, or send them all and change the target to convert formats.</p>
                         <div class="grid grid-cols-2 gap-2 mt-2">
                             <button id="sendSplitButton" type="button" class="w-full bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white font-semibold py-1.5 px-3 rounded-lg text-xs transition duration-150"
@@ -951,8 +961,8 @@
     <h2 class="text-sm font-semibold text-gray-100 truncate"><span class="slot-badge mr-1">${s.name}</span><span id="type-${k}"></span></h2>
     ${k === 'a' ? `<label class="flex items-center gap-1 text-[11px] text-gray-400 cursor-pointer select-none shrink-0" title="Write an alpha channel (RGBA output)"><input type="checkbox" id="alphaToggle">On</label>` : ''}
   </div>
-  <div id="body-${k}" class="flex flex-col gap-1.5">
-    <div class="relative">
+  <div id="body-${k}" class="slot-body flex flex-col gap-1.5">
+    <div id="tileWrap-${k}" class="tile-wrap relative w-full mx-auto">
     <div id="tile-${k}" role="button" tabindex="0" title="Click or drop a map" class="tile group relative aspect-square rounded-md border border-gray-700 overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
       <canvas id="tileCanvas-${k}" width="1" height="1" class="absolute inset-0 w-full h-full" style="object-fit:contain"></canvas>
       <div id="tileText-${k}" class="absolute inset-0 flex flex-col items-center justify-center font-mono text-center pointer-events-none"></div>
@@ -986,7 +996,7 @@
       <input id="range-${k}" type="range" min="0" max="255" class="flex-1 min-w-0 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer" style="accent-color:${s.accent}" title="Solid value">
       <input id="num-${k}" type="number" min="0" max="255" class="channel-input-number text-gray-200" style="width:3.2rem">
     </div>
-    <div class="grid grid-cols-2 gap-1">
+    <div class="btn-row grid grid-cols-2 gap-1">
       <button id="inv-${k}" type="button" class="tool-btn" aria-pressed="false" title="Invert (255 − value), e.g. Roughness ↔ Smoothness">⇅ Invert</button>
       <button id="lvBtn-${k}" type="button" class="tool-btn" aria-pressed="false" title="Output levels: remap the channel to a min–max range">Levels</button>
     </div>
@@ -1382,6 +1392,50 @@
         ctx.drawImage(tmp, 0, 0, c.width, c.height);
     }
 
+    // Grow the channel tiles into the free height of the left column (desktop only).
+    // Compares 4 cards in a row (controls under the tile, width-limited) with a 2×2
+    // grid whose cards put the controls beside the tile; keeps the bigger square.
+    // Never goes below the 4-in-a-row size, so opening the splitter shrinks them back.
+    const SIDE_COL = 104;   // width of the controls column in the 2×2 layout
+    let fitting = false;
+    function fitTiles() {
+        if (fitting) return;
+        fitting = true;
+        const grid = $('slotGrid'), col = $('leftCol');
+        const wraps = SLOTS.map(k => $('tileWrap-' + k));
+        const reset = () => { grid.style.gridTemplateColumns = ''; grid.classList.remove('side'); wraps.forEach(w => { w.style.width = ''; }); };
+        try {
+            if (window.innerWidth < 1024) { reset(); return; }
+            const gap = parseFloat(getComputedStyle(grid).columnGap) || 8;
+            const colGap = parseFloat(getComputedStyle(col).rowGap) || 12;
+            const kids = [...col.children].filter(el => el.offsetParent !== null);
+            const others = kids.filter(el => el !== grid).reduce((h, el) => h + el.offsetHeight, 0) + colGap * (kids.length - 1);
+            const avail = col.clientHeight - others - 2;
+            const card = $('card-r'), cs = getComputedStyle(card);
+            const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth);
+            const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+            const headH = card.firstElementChild.offsetHeight + (parseFloat(cs.rowGap) || 6);
+            const gridW = grid.clientWidth;
+            // 4 in a row, controls under the tile: limited by card width
+            const size4 = Math.floor((gridW - gap * 3) / 4 - padX);
+            // 2×2, controls beside the tile
+            const byW2 = (gridW - gap) / 2 - padX - SIDE_COL - 8;
+            const byH2 = (avail - gap) / 2 - headH - padY;
+            const size2 = Math.floor(Math.min(byW2, byH2, 360));
+            if (size2 > size4 + 8) {
+                grid.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
+                grid.classList.add('side');
+                wraps.forEach(w => { w.style.width = size2 + 'px'; });
+            } else {
+                grid.style.gridTemplateColumns = 'repeat(4, minmax(0, 1fr))';
+                grid.classList.remove('side');
+                wraps.forEach(w => { w.style.width = ''; });
+            }
+        } finally {
+            fitting = false;
+        }
+    }
+
     function renderSplitter() {
         const sp = state.split;
         const active = !!sp;
@@ -1389,8 +1443,6 @@
         $('splitterLabel').classList.toggle('hidden', active);
         $('splitterBody').classList.toggle('hidden', !active);
         const showA = active && sp.hasAlpha;
-        $('splitterResults').classList.toggle('grid-cols-3', !showA);
-        $('splitterResults').classList.toggle('grid-cols-4', showA);
         $('thumb-a').classList.toggle('hidden', !showA);
         SLOTS.forEach(k => {
             const c = $('thumbCanvas-' + k);
@@ -1499,6 +1551,14 @@
         }));
         $('zoomButton').addEventListener('click', () => { state.zoom = state.zoom === 'fit' ? '1:1' : 'fit'; applyZoom(); });
         window.addEventListener('resize', () => { if (state.zoom === 'fit') applyZoom(); });
+        if (window.ResizeObserver) {
+            const ro = new ResizeObserver(() => fitTiles());
+            ro.observe($('leftCol'));
+            ro.observe($('splitterMainContainer'));
+        } else {
+            window.addEventListener('resize', fitTiles);
+        }
+        fitTiles();
 
         $('downloadButton').addEventListener('click', async () => {
             if (!state.output) return;
