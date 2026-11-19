@@ -74,10 +74,20 @@
         }
         .tile canvas { background: transparent; }
         .slot-card {
-            border-top: 3px solid var(--acc);
-            background-image: linear-gradient(to bottom, var(--acc-soft), transparent 110px);
+            border: 2px solid var(--acc-line);
+            background-color: rgba(17, 24, 39, 0.6);
+            background-image: linear-gradient(to bottom, var(--acc-soft), rgba(17, 24, 39, 0) 75%);
         }
+        .slot-card:hover { border-color: var(--acc); }
         .slot-card .tile { border-color: var(--acc-line); }
+        .slot-badge {
+            background-color: var(--acc);
+            color: #111827;
+            border-radius: 0.25rem;
+            padding: 0 0.3rem;
+            font-family: ui-monospace, monospace;
+            font-weight: 800;
+        }
         .slot-card .tool-btn[aria-pressed="true"] {
             background-color: var(--acc-bg);
             border-color: var(--acc);
@@ -217,9 +227,9 @@
 <main class="lg:h-screen p-2 sm:p-4 flex items-center justify-center">
 <div id="mainContainer" class="bg-gray-800 p-3 rounded-2xl shadow-2xl w-full max-w-7xl lg:h-full flex flex-col relative lg:overflow-hidden">
 
-        <header class="flex-shrink-0 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-3 px-1">
-            <h1 class="text-xl sm:text-2xl font-bold text-white">ORM Texture Packer <span class="text-gray-500 font-normal">&amp; Splitter</span></h1>
-            <p class="text-xs sm:text-sm text-gray-400">Pack PBR masks for Unreal, Unity, Godot and Blender. Runs in your browser, nothing is uploaded. <a href="#guide" class="text-blue-400 hover:underline whitespace-nowrap">Guide ↓</a></p>
+        <header class="flex-shrink-0 text-center mb-3 px-1">
+            <h1 class="text-2xl sm:text-3xl font-bold text-white">ORM Texture Packer <span class="text-gray-400 font-normal">&amp; Splitter</span></h1>
+            <p class="text-sm text-gray-400 mt-0.5">Pack PBR masks for Unreal, Unity, Godot and Blender. Runs in your browser, nothing is uploaded. <a href="#guide" class="text-blue-400 hover:underline whitespace-nowrap">Guide ↓</a></p>
         </header>
 
         <div class="flex flex-1 flex-col lg:flex-row gap-5 lg:overflow-hidden min-h-0">
@@ -936,9 +946,9 @@
     function cardHTML(k) {
         const s = STYLE[k];
         return `
-<div id="card-${k}" data-slot="${k}" class="slot-card flex flex-col gap-1.5 p-2 bg-gray-900/60 rounded-lg border border-gray-700 transition duration-150" style="--acc:${s.accent};--acc-soft:rgba(${s.rgb},.16);--acc-line:rgba(${s.rgb},.35);--acc-bg:rgba(${s.rgb},.35)">
+<div id="card-${k}" data-slot="${k}" class="slot-card flex flex-col gap-1.5 p-2 rounded-lg transition duration-150" style="--acc:${s.accent};--acc-soft:rgba(${s.rgb},.22);--acc-line:rgba(${s.rgb},.7);--acc-bg:rgba(${s.rgb},.45)">
   <div class="flex items-center justify-between gap-1">
-    <h2 class="text-xs font-semibold text-gray-200 truncate"><span class="font-mono font-bold ${s.text} mr-1">${s.name}</span><span id="type-${k}"></span></h2>
+    <h2 class="text-sm font-semibold text-gray-100 truncate"><span class="slot-badge mr-1">${s.name}</span><span id="type-${k}"></span></h2>
     ${k === 'a' ? `<label class="flex items-center gap-1 text-[11px] text-gray-400 cursor-pointer select-none shrink-0" title="Write an alpha channel (RGBA output)"><input type="checkbox" id="alphaToggle">On</label>` : ''}
   </div>
   <div id="body-${k}" class="flex flex-col gap-1.5">
@@ -987,7 +997,7 @@
     function thumbHTML(k) {
         const s = STYLE[k];
         return `
-<div id="thumb-${k}" data-slot="${k}" draggable="true" class="p-1 border border-gray-700 rounded-md text-center cursor-grab bg-gray-900/60 hover:border-gray-500 transition duration-150" title="Drag onto a channel">
+<div id="thumb-${k}" data-slot="${k}" draggable="true" class="p-1 border-2 rounded-md text-center cursor-grab bg-gray-900/60 transition duration-150" style="border-color:rgba(${s.rgb},.6)" title="Drag onto a channel">
   <canvas id="thumbCanvas-${k}" width="96" height="96" class="w-full aspect-square rounded mb-1 object-contain" style="background:#111827"></canvas>
   <span class="text-[11px] text-gray-300"><span class="font-mono font-bold ${s.text}">${s.name}</span> <span id="thumbLabel-${k}"></span></span>
 </div>`;
