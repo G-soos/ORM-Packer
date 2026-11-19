@@ -352,7 +352,7 @@
 
 <div class="mt-auto pt-3 flex items-center gap-6 flex-shrink-0">
     <a href="https://www.buymeacoffee.com/Gsoos" target="_blank" rel="noopener">
-        <img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=Gsoos&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a beer" class="h-10"/>
+        <img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=%E2%98%95&slug=Gsoos&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a coffee" class="h-10"/>
     </a>
     <a href="https://www.paypal.com/donate/?hosted_button_id=MKU4HJ2MHUNGJ" target="_blank" rel="noopener">
         <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" alt="Donate with PayPal" class="w-32 sm:w-40"/>
@@ -372,6 +372,11 @@
     </div>
 </div>
 
+<div id="supportNudge" class="hidden fixed z-50 bg-gray-900 border border-gray-600 rounded-lg shadow-2xl px-3 py-2.5 text-sm text-gray-200 transition-opacity duration-300 opacity-0" role="status" aria-live="polite">
+    <button id="nudgeClose" type="button" class="absolute top-1 right-1 w-6 h-6 rounded text-gray-400 hover:text-white hover:bg-gray-700 leading-none" title="Close" aria-label="Close">✕</button>
+    <p class="pr-6 leading-snug">Saved you some time? <span class="text-gray-400">This tool is free and ad-free, made by one indie dev.</span></p>
+    <a id="nudgeCoffee" href="https://www.buymeacoffee.com/Gsoos" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1.5 bg-[#FFDD00] hover:bg-yellow-300 text-gray-900 font-semibold text-xs rounded-md px-3 py-1.5">☕ Buy me a coffee</a>
+</div>
 <div id="toast"class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-md w-[calc(100%-2rem)] bg-gray-950/95 border border-gray-600 text-gray-100 text-sm rounded-lg px-4 py-3 shadow-2xl whitespace-pre-line"></div>
 
 <!-- ===================== Guide / SEO content ===================== -->
@@ -1482,6 +1487,42 @@
         renderAll();
     }
 
+    // ---------------------------------------------------------------------
+    // Support nudge: small, dismissible card above the Download button after a
+    // successful download. Once per visit; ✕ snoozes it 14 days, clicking the
+    // coffee link snoozes it 90 days. Auto-hides after 15 s.
+    // ---------------------------------------------------------------------
+    const NUDGE_KEY = 'ormPacker.nudgeUntil';
+    let nudgeShown = false, nudgeTimer = 0;
+    const track = (name, params) => { try { if (typeof gtag === 'function') gtag('event', name, params || {}); } catch {} };
+    function snoozeNudge(days) {
+        try { localStorage.setItem(NUDGE_KEY, String(Date.now() + days * 864e5)); } catch {}
+    }
+    function hideNudge() {
+        const n = $('supportNudge');
+        clearTimeout(nudgeTimer);
+        n.classList.add('opacity-0');
+        setTimeout(() => n.classList.add('hidden'), 300);
+        window.removeEventListener('resize', hideNudge);
+        window.removeEventListener('scroll', hideNudge, true);
+    }
+    function maybeShowNudge() {
+        if (nudgeShown) return;
+        try { if (Date.now() < Number(localStorage.getItem(NUDGE_KEY) || 0)) return; } catch {}
+        nudgeShown = true;
+        const n = $('supportNudge'), r = $('downloadButton').getBoundingClientRect();
+        const w = Math.min(340, Math.max(260, r.width));
+        n.style.width = w + 'px';
+        n.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, r.right - w)) + 'px';
+        n.style.bottom = Math.max(8, window.innerHeight - r.top + 8) + 'px';
+        n.classList.remove('hidden');
+        setTimeout(() => n.classList.remove('opacity-0'), 20);
+        nudgeTimer = setTimeout(hideNudge, 15000);
+        window.addEventListener('resize', hideNudge);
+        window.addEventListener('scroll', hideNudge, true);
+        track('support_nudge_shown');
+    }
+
     async function downloadSplitZip() {
         const sp = state.split;
         if (!sp) return;
@@ -1495,6 +1536,8 @@
                 files.push({ name: `${base}_${STYLE[k].name}_${slotLabel(k).replace(/\s+/g, '')}.png`, bytes: new Uint8Array(await blob.arrayBuffer()) });
             }
             triggerDownload(makeZip(files), `${base}_channels.zip`);
+            track('download_split', { size: `${sp.w}x${sp.h}` });
+            setTimeout(maybeShowNudge, 1200);
         } catch {
             toast('Could not create the zip file.');
         } finally {
@@ -1567,6 +1610,8 @@
                 const { w, h, data } = state.output;
                 const blob = await encodePNG(w, h, data, state.alpha ? 6 : 2);
                 triggerDownload(blob, outputFileName());
+                track('download_packed', { preset: state.preset, size: `${w}x${h}`, alpha: state.alpha });
+                setTimeout(maybeShowNudge, 1200);
             } catch {
                 toast('Could not create the PNG. Right-click the preview and choose "Save image as…" instead.');
             } finally {
@@ -1580,6 +1625,8 @@
         $('splitterClearButton').addEventListener('click', clearSplitter);
         $('sendSplitButton').addEventListener('click', sendAllToPacker);
         $('downloadSplitSetButton').addEventListener('click', downloadSplitZip);
+        $('nudgeClose').addEventListener('click', () => { snoozeNudge(14); hideNudge(); track('support_nudge_closed'); });
+        $('nudgeCoffee').addEventListener('click', () => { snoozeNudge(90); hideNudge(); track('support_nudge_click'); });
         area.addEventListener('dragover', (e) => {
             if (!hasFiles(e)) return;
             e.preventDefault(); e.stopPropagation();
