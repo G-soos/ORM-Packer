@@ -256,7 +256,7 @@
                 <hr class="border-gray-700/50">
 
                 <div id="splitterMainContainer" class="bg-gray-700/30 p-4 rounded-lg transition duration-150 border border-gray-700">
-                    <p class="text-xs text-gray-500">Step 2 (optional) — Already have an ORM? Drop it here to extract each channel.</p>
+                    <p class="text-xs text-gray-500">Optional — Already have an ORM? Drop it here to extract each channel.</p>
                     <h2 class="w-full text-left py-1 text-lg font-semibold text-white mb-2">
                         Deconstruct ORM Texture (Splitter)
                     </h2>
@@ -319,7 +319,7 @@
                     <h2 class="text-xl font-semibold text-white">Output Settings (Configurable)</h2>
                     
                     <div>
-                        <label for="outputSize" class="block mb-2 text-sm font-medium text-gray-300">Define Output Size</label>
+                        <label for="outputSize" class="block mb-2 text-sm font-medium text-gray-300">Define Output Size <span class="text-xs text-gray-500">(longest side — keeps the aspect ratio of your maps)</span></label>
                         <select id="outputSize" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                             <option id="originalSizeOption" value="original" disabled>Original (Load an image first)</option>
                             <option value="4096">4096x4096</option>
@@ -481,22 +481,49 @@
             });
         }
 
-        function handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, width, height, filename) {
-            
-            if (!loadState.r && !loadState.g && !loadState.b) {
-                originalImageSize.w = width;
-                originalImageSize.h = height;
-            } else if (width > originalImageSize.w) {
-                originalImageSize.w = width;
-                originalImageSize.h = height;
+        // Output size for a given "longest side" value, keeping the aspect ratio of the reference map
+        function sizeFor(longSide) {
+            const { w, h } = originalImageSize;
+            if (w === 0 || w === h) return { w: longSide, h: longSide };
+            if (w > h) return { w: longSide, h: Math.max(1, Math.round(longSide * h / w)) };
+            return { w: Math.max(1, Math.round(longSide * w / h)), h: longSide };
+        }
+
+        function updateSizeOptionLabels() {
+            Array.from(outputSize.options).forEach(opt => {
+                if (opt.value === 'original') return;
+                const s = parseInt(opt.value);
+                const { w, h } = sizeFor(s);
+                opt.text = `${w}x${h}` + (s === 1024 ? ' (Default)' : '');
+            });
+        }
+
+        // Reference size = largest loaded map (by area). Recomputed on every load/clear.
+        function recomputeReferenceSize() {
+            let best = null;
+            ['r', 'g', 'b'].forEach(k => {
+                const s = channelSizes[k];
+                if (s && (!best || s.w * s.h > best.w * best.h)) best = s;
+            });
+            if (best) {
+                originalImageSize = { w: best.w, h: best.h };
+                originalSizeOption.text = `Original (${best.w}x${best.h}px)`;
+                originalSizeOption.disabled = false;
+            } else {
+                originalImageSize = { w: 0, h: 0 };
+                originalSizeOption.text = `Original (Load an image first)`;
+                originalSizeOption.disabled = true;
+                if (outputSize.value === 'original') outputSize.value = "1024";
             }
-            
-            originalSizeOption.text = `Original (${originalImageSize.w}x${originalImageSize.h}px)`;
-            originalSizeOption.disabled = false;
-            
+            updateSizeOptionLabels();
+        }
+
+        function handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, width, height, filename) {
+
             loadState[stateKey] = true;
             filenames[stateKey] = filename;
             channelSizes[stateKey] = { w: width, h: height };
+            recomputeReferenceSize();
 
             // Show filename in status
             const displayFilename = filename.length > 25 ? filename.substring(0, 22) + '...' : filename;
@@ -527,10 +554,11 @@
                 const file = event.target.files[0];
                 if (!file) return;
                 const url = URL.createObjectURL(file);
-                imageObj.src = url;
                 imageObj.onload = () => {
-                    handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, imageObj.width, imageObj.height, file.name); 
+                    handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, imageObj.width, imageObj.height, file.name);
+                    URL.revokeObjectURL(url);
                 };
+                imageObj.src = url;
             };
         }
         
@@ -582,10 +610,10 @@
                         const w = parseInt(sourceCanvas.dataset.originalWidth);
                         const h = parseInt(sourceCanvas.dataset.originalHeight);
                         const filename = `SPLIT_${splitContainer.dataset.channelName.toUpperCase()}_${w}.png`;
-                        imageObj.src = url;
                         imageObj.onload = () => {
                             handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, w, h, filename);
                         };
+                        imageObj.src = url;
                         return;
                     }
                 }
@@ -593,10 +621,11 @@
                 const file = e.dataTransfer.files[0];
                 if (file && file.type.startsWith('image/')) {
                     const url = URL.createObjectURL(file);
-                    imageObj.src = url;
                     imageObj.onload = () => {
-                        handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, imageObj.width, imageObj.height, file.name); 
+                        handleImageLoad(imageObj, stateKey, hiddenCtx, statusArea, statusElement, sliderInput, numberInput, sliderContainer, solidLabel, sizeBadge, imageObj.width, imageObj.height, file.name);
+                        URL.revokeObjectURL(url);
                     };
+                    imageObj.src = url;
                 } else if (!isSplitChannelDrop) { 
                     if (statusElement) {
                          statusElement.textContent = `Error: Invalid file.`;
@@ -659,14 +688,7 @@
 
             sizeWarning.classList.add('hidden');
 
-            const anyImageLoaded = loadState.r || loadState.g || loadState.b;
-            if (!anyImageLoaded) {
-                 originalImageSize = { w: 0, h: 0 };
-                 originalSizeOption.text = `Original (Load an image first)`;
-                 originalSizeOption.disabled = true;
-                 outputSize.value = "1024";
-            }
-
+            recomputeReferenceSize();
             updateSizeWarnings();
             processImage(); 
         }
@@ -723,11 +745,11 @@
             const file = event.target.files[0];
             if (!file) return;
             const url = URL.createObjectURL(file);
-            splitterImg.src = url;
             splitterImg.onload = () => {
                 handleSplitterLoad(splitterImg, file.name);
-                URL.revokeObjectURL(url); 
+                URL.revokeObjectURL(url);
             };
+            splitterImg.src = url;
         });
 
         splitterLoadArea.addEventListener('dragover', (e) => {
@@ -753,11 +775,11 @@
             const file = e.dataTransfer.files[0];
             if (file && file.type.startsWith('image/')) {
                 const url = URL.createObjectURL(file);
-                splitterImg.src = url;
                 splitterImg.onload = () => {
                     handleSplitterLoad(splitterImg, file.name);
-                    URL.revokeObjectURL(url); 
+                    URL.revokeObjectURL(url);
                 };
+                splitterImg.src = url;
             }
         });
 
@@ -856,11 +878,10 @@
             if (sizeValue === 'original' && originalImageSize.w > 0) {
                 targetWidth = originalImageSize.w;
                 targetHeight = originalImageSize.h;
-            } else if (sizeValue === 'original' && originalImageSize.w === 0) {
+            } else if (sizeValue === 'original') {
                 targetWidth = 1024; targetHeight = 1024;
             } else {
-                targetWidth = parseInt(sizeValue);
-                targetHeight = parseInt(sizeValue);
+                ({ w: targetWidth, h: targetHeight } = sizeFor(parseInt(sizeValue)));
             }
             processingCanvas.width = targetWidth;
             processingCanvas.height = targetHeight;
@@ -883,10 +904,12 @@
             const outputImageData = processingCtx.createImageData(targetWidth, targetHeight);
             const outputPixels = outputImageData.data;
             const totalPixels = targetWidth * targetHeight;
+            // Each loaded map is read as luminance (Rec.601 integer weights 77/150/29, sum 256),
+            // so grayscale maps keep their exact values and colored maps behave the same in every channel.
             for (let i = 0; i < totalPixels * 4; i += 4) {
-                outputPixels[i]   = loadState.r ? redPixels[i]   : redValue;
-                outputPixels[i+1] = loadState.g ? greenPixels[i] : greenValue;
-                outputPixels[i+2] = loadState.b ? bluePixels[i+2]: blueValue;
+                outputPixels[i]   = loadState.r ? (redPixels[i]   * 77 + redPixels[i+1]   * 150 + redPixels[i+2]   * 29) >> 8 : redValue;
+                outputPixels[i+1] = loadState.g ? (greenPixels[i] * 77 + greenPixels[i+1] * 150 + greenPixels[i+2] * 29) >> 8 : greenValue;
+                outputPixels[i+2] = loadState.b ? (bluePixels[i]  * 77 + bluePixels[i+1]  * 150 + bluePixels[i+2]  * 29) >> 8 : blueValue;
                 outputPixels[i+3] = 255;
             }
             processingCtx.putImageData(outputImageData, 0, 0);
@@ -896,11 +919,13 @@
             outputCtx.drawImage(processingCanvas, 0, 0, targetWidth, targetHeight, 0, 0, targetWidth, targetHeight);
         }
         
-        window.addEventListener('resize', debouncedProcessImage);
-
         downloadButton.addEventListener('click', () => {
-            const dataURL = outputCanvas.toDataURL('image/png');
-            triggerDownload(dataURL, `ORM_Texture.png`);
+            outputCanvas.toBlob(blob => {
+                if (!blob) return;
+                const url = URL.createObjectURL(blob);
+                triggerDownload(url, `ORM_Texture.png`);
+                setTimeout(() => URL.revokeObjectURL(url), 2000);
+            }, 'image/png');
         });
 
         function triggerDownload(url, filename) {
@@ -917,10 +942,11 @@
                 { canvas: splitGreenCanvas, name: 'Roughness', suffix: 'G' },
                 { canvas: splitBlueCanvas, name: 'Metallic', suffix: 'B' }
             ];
-            splitData.forEach(item => {
-                const dataURL = item.canvas.dataset.fullDataUrl; 
+            // Staggered so browsers don't drop simultaneous downloads
+            splitData.forEach((item, index) => {
+                const dataURL = item.canvas.dataset.fullDataUrl;
                 if (dataURL) {
-                    setTimeout(() => { triggerDownload(dataURL, `${baseName}_${item.suffix}_${item.name}.png`); }, 100); 
+                    setTimeout(() => { triggerDownload(dataURL, `${baseName}_${item.suffix}_${item.name}.png`); }, 100 + index * 400);
                 }
             });
         });
