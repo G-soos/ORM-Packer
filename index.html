@@ -73,6 +73,16 @@
             background-position: 0 0, 0 6px, 6px -6px, -6px 0;
         }
         .tile canvas { background: transparent; }
+        canvas.checker {
+            background-color: #9ca3af;
+            background-image:
+                linear-gradient(45deg, #d1d5db 25%, transparent 25%),
+                linear-gradient(-45deg, #d1d5db 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #d1d5db 75%),
+                linear-gradient(-45deg, transparent 75%, #d1d5db 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+        }
         .slot-card {
             border: 2px solid var(--acc-line);
             background-color: rgba(17, 24, 39, 0.6);
@@ -230,6 +240,8 @@
       "acceptedAnswer": { "@type": "Answer", "text": "Packed masks contain linear data, not color. Disable sRGB in Unreal and Unity import settings and set the Color Space to Non-Color in Blender." } },
     { "@type": "Question", "name": "How do I use an ORM texture in Blender?",
       "acceptedAnswer": { "@type": "Answer", "text": "Load it in an Image Texture node with Color Space set to Non-Color, add a Separate Color node, and connect Green to Roughness and Blue to Metallic of the Principled BSDF. Red (ambient occlusion) is not an input of the Principled BSDF; connect it to the Occlusion input of the glTF Material Output node if you export to glTF." } },
+    { "@type": "Question", "name": "How do I remove or add the alpha channel of a texture?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Drop the color texture on the page (or on a channel and click Use as color). Turn Alpha off to save it as RGB without transparency, or drop a grayscale opacity mask on the A channel to add or replace it. The RGBA preview shows the transparency over a checkerboard." } },
     { "@type": "Question", "name": "Can I pack textures without Photoshop or Substance?",
       "acceptedAnswer": { "@type": "Answer", "text": "Yes. This free online texture channel packer combines grayscale maps into the R, G, B and A channels of one PNG directly in the browser, and can also split a packed texture back into separate maps." } }
   ]
@@ -326,6 +338,7 @@
                         <div class="flex items-center gap-1">
                             <div class="flex rounded-lg overflow-hidden border border-gray-600 text-xs font-mono" role="group" aria-label="Preview channel">
                                 <button type="button" class="view-btn px-2 py-1 bg-gray-700 hover:bg-gray-600" data-view="rgb">RGB</button>
+                                <button type="button" class="view-btn px-2 py-1 bg-gray-700 hover:bg-gray-600" data-view="rgba" title="Color with transparency (needs Alpha on)">RGBA</button>
                                 <button type="button" class="view-btn px-2 py-1 bg-gray-700 hover:bg-gray-600 text-red-300" data-view="r">R</button>
                                 <button type="button" class="view-btn px-2 py-1 bg-gray-700 hover:bg-gray-600 text-emerald-300" data-view="g">G</button>
                                 <button type="button" class="view-btn px-2 py-1 bg-gray-700 hover:bg-gray-600 text-blue-300" data-view="b">B</button>
@@ -464,6 +477,15 @@
     </ol>
     <p>Have separate AO, Roughness and Metallic maps from a texture site? Drop them on this page to get the ORM texture for Unreal or glTF. Have an ORM texture and need separate maps? Load it in the <strong>Splitter</strong>.</p>
 
+    <h2 id="transparency">Add or remove transparency (alpha) from an albedo / diffuse texture</h2>
+    <p>The packer also works with color images, for example to <strong>remove the alpha channel</strong> from a Base Color texture, or to <strong>add an opacity mask</strong> to it:</p>
+    <ol>
+        <li>Drop the color texture on the page. Files named <code>_Albedo</code>, <code>_BaseColor</code>, <code>_Diffuse</code> or <code>_Color</code> go straight into R, G and B with their own colors, and their transparency into A. For any other name, drop it on a channel and click <em>Use as color (RGB)</em> on the square.</li>
+        <li><strong>Remove transparency:</strong> turn <em>Alpha</em> off. The PNG is saved as RGB, keeping the colors that were hidden under transparent pixels.</li>
+        <li><strong>Add or replace transparency:</strong> drop a grayscale opacity mask on the A channel (white = opaque, black = transparent). Use <em>Invert</em> or <em>Levels</em> on A to adjust it.</li>
+        <li>Check the result with the <strong>RGBA</strong> preview, which shows transparency over a checkerboard, and download.</li>
+    </ol>
+
     <h2>FAQ</h2>
     <details>
         <summary>What is an ORM texture?</summary>
@@ -484,6 +506,10 @@
     <details>
         <summary>How do I use an ORM texture in Blender?</summary>
         <p>Load it in an Image Texture node with Color Space set to Non-Color, add a Separate Color node, and connect Green to Roughness and Blue to Metallic of the Principled BSDF. Red (ambient occlusion) is not an input of the Principled BSDF; connect it to the Occlusion input of the glTF Material Output node if you export to glTF.</p>
+    </details>
+    <details>
+        <summary>How do I remove or add the alpha channel of a texture?</summary>
+        <p>Drop the color texture on the page (or on a channel and click <em>Use as color</em>). Turn Alpha off to save it as RGB without transparency, or drop a grayscale opacity mask on the A channel to add or replace it. The RGBA preview shows the transparency over a checkerboard.</p>
     </details>
     <details>
         <summary>Can I pack textures without Photoshop or Substance?</summary>
@@ -527,6 +553,7 @@
         smoothness: { label: 'Smoothness',  def: 128, lo: 'Matte',      hi: 'Shiny',        keys: ['smoothness', 'smooth', 'glossiness', 'gloss'] },
         height:     { label: 'Height',      def: 128, lo: 'Low',        hi: 'High',         keys: ['height', 'heightmap', 'displacement', 'disp'] },
         detail:     { label: 'Detail Mask', def: 255, lo: 'No detail',  hi: 'Full detail',  keys: ['detailmask', 'detail'] },
+        color:      { label: 'Color',       def: 255, lo: '',           hi: '',             keys: ['basecolor', 'albedo', 'diffuse', 'diff', 'color', 'colour'] },
         unused:     { label: 'Unused',      def: 0,   lo: '',           hi: '',             keys: [] },
         custom:     { label: 'Custom',      def: 255, lo: '',           hi: '',             keys: [] }
     };
@@ -899,6 +926,60 @@
         return src;
     }
 
+    // Is this image really color (R≠G≠B somewhere) / does it have any transparency? Cached per source.
+    function analyse(src) {
+        if (src.isColor !== undefined) return src;
+        const d = src.data, n = src.w * src.h;
+        let color = false, alpha = false;
+        if (src.channels === 1) { src.isColor = false; src.hasAlpha = false; return src; }
+        for (let i = 0, j = 0; i < n; i++, j += 4) {
+            if (!color && (d[j] !== d[j + 1] || d[j + 1] !== d[j + 2])) color = true;
+            if (!alpha && d[j + 3] !== 255) alpha = true;
+            if (color && alpha) break;
+        }
+        src.isColor = color; src.hasAlpha = alpha;
+        return src;
+    }
+    let nextGroup = 1;
+    // Names of PBR masks / packed textures: never offered as a color image
+    const PACKED_TOKENS = ['orm', 'arm', 'mra', 'rma', 'maskmap', 'mask', 'packed', 'metallicsmoothness'];
+    function isMaskName(name) {
+        const det = detectType(name);
+        if (det && det !== 'color') return true;
+        return tokens(name).some(t => PACKED_TOKENS.includes(t));
+    }
+
+    // Put a color image into R, G, B (its own channels) and its transparency into A.
+    // Switches to Custom so the channels are free; maps already loaded elsewhere stay in the library.
+    function useAsColor(base) {
+        analyse(base);
+        if (state.preset !== 'custom') {
+            state.preset = 'custom';
+            $('presetSelect').value = 'custom';
+            applyPreset('custom');
+        }
+        const group = nextGroup++;
+        const img = { w: base.w, h: base.h, data: base.data, channels: base.channels };
+        ['r', 'g', 'b'].concat(base.hasAlpha ? ['a'] : []).forEach(k => {
+            const src = makeSource(img, base.name, null);
+            src.component = k; src.group = group; src.isColor = base.isColor; src.hasAlpha = base.hasAlpha;
+            placeSource(k, src);
+            Object.assign(state.slots[k], { invert: false, lo: 0, hi: 255 });
+        });
+        if (base.hasAlpha) {
+            state.alpha = true;
+            state.view = 'rgba';
+        } else {
+            if (state.slots.a.sourceId) { state.library.delete(state.slots.a.sourceId); state.slots.a.sourceId = null; }
+            state.alpha = false;
+            state.view = 'rgb';
+        }
+        if (state.library.has(base.id) && !SLOTS.some(k => state.slots[k].sourceId === base.id)) state.library.delete(base.id);
+        state.fileNameEdited = false;
+        toast(`${base.name} → RGB (color)` + (base.hasAlpha ? ', transparency → A. Turn Alpha off to remove it.' : '. No transparency: drop a mask on A to add it.'), 6000);
+        renderAll();
+    }
+
     function placeSource(k, src) {
         const sl = state.slots[k];
         if (sl.sourceId && sl.sourceId !== src.id) state.library.delete(sl.sourceId);
@@ -934,10 +1015,20 @@
     async function autoAssign(fileList) {
         const files = [...fileList].filter(f => f.type.startsWith('image/'));
         if (!files.length) { toast('No images found in what you dropped.'); return; }
-        const used = new Set(), placed = [], kept = [], unknown = [];
+        const used = new Set(), placed = [], kept = [], unknown = [], colorKept = [];
+        // A single color texture (Albedo / BaseColor / Diffuse…) dropped on the page goes to RGB(+A)
+        const colorFiles = files.filter(f => detectType(f.name) === 'color');
+        if (colorFiles.length === 1 && files.length === 1) {
+            setBusy(true);
+            let img;
+            try { img = await decodeImage(files[0]); } catch { setBusy(false); toast(`Could not read "${files[0].name}".`); return; }
+            useAsColor(makeSource(img, files[0].name, 'color'));
+            return;
+        }
         setBusy(true);
         for (const f of files) {
             const det = detectType(f.name);
+            if (det === 'color') { colorKept.push(f.name); continue; }
             if (!det) { unknown.push(f.name); continue; }
             let img;
             try { img = await decodeImage(f); } catch { unknown.push(f.name); continue; }
@@ -957,6 +1048,7 @@
         if (placed.length) lines.push(...placed);
         if (kept.length) lines.push(`Kept for other targets: ${kept.join(', ')}`);
         if (unknown.length) lines.push(`Not recognised (drop onto a channel instead): ${unknown.join(', ')}`);
+        if (colorKept.length) lines.push(`Color texture skipped, drop it on its own to use it as RGB: ${colorKept.join(', ')}`);
         toast(lines.join('\n'), 6000);
         renderAll();
     }
@@ -1035,6 +1127,7 @@
         <span class="text-[10px] bg-black/70 text-gray-200 px-1.5 py-0.5 rounded">Click or drop a map</span>
       </div>
       <span id="size-${k}" class="hidden absolute top-1 left-1 text-[10px] font-mono bg-black/70 text-gray-200 px-1 py-0.5 rounded"></span>
+      <button id="asColor-${k}" type="button" class="hidden absolute bottom-1 left-1 right-1 text-[10px] font-semibold bg-black/75 hover:bg-blue-700 text-gray-100 rounded px-1 py-0.5 truncate" title="Use this image's own colors in R, G, B (and its transparency in A)">🎨 Use as color (RGB)</button>
       <button id="clear-${k}" type="button" class="hidden absolute top-1 right-1 w-5 h-5 rounded bg-black/70 hover:bg-red-700 text-gray-200 text-[11px] leading-none" title="Remove map">✕</button>
     </div>
     <div id="levels-${k}" class="lv-pop hidden absolute inset-x-0 top-0 min-h-full z-10 rounded-md p-1.5 flex flex-col gap-1 text-[11px] text-gray-300 shadow-lg" role="dialog" aria-label="Levels">
@@ -1088,6 +1181,7 @@
         tile.addEventListener('click', (e) => { if (!e.target.closest('button')) $('file-' + k).click(); });
         tile.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('file-' + k).click(); } });
         $('clear-' + k).addEventListener('click', (e) => { e.stopPropagation(); clearSlot(k); });
+        $('asColor-' + k).addEventListener('click', (e) => { e.stopPropagation(); const src = sourceOf(k); if (src) useAsColor(src); });
         $('comp-' + k).addEventListener('change', (e) => {
             const src = sourceOf(k);
             if (src) { src.component = e.target.value; src.cache = null; drawTile(k); scheduleProcess(); }
@@ -1221,6 +1315,8 @@
         $('solidRow-' + k).classList.toggle('hidden', !!src);
         $('size-' + k).classList.toggle('hidden', !src);
         $('clear-' + k).classList.toggle('hidden', !src);
+        const canColor = !!src && !src.group && !isMaskName(src.name) && (analyse(src).isColor || src.hasAlpha);
+        $('asColor-' + k).classList.toggle('hidden', !canColor);
         $('tile-' + k).title = src ? `${src.name} — click to replace` : 'Click or drop a map';
         if (src) {
             $('name-' + k).textContent = src.name;
@@ -1286,10 +1382,10 @@
     }
 
     function renderViewButtons() {
-        if (!state.alpha && state.view === 'a') state.view = 'rgb';
+        if (!state.alpha && (state.view === 'a' || state.view === 'rgba')) state.view = 'rgb';
         document.querySelectorAll('.view-btn').forEach(b => {
             b.setAttribute('aria-pressed', String(b.dataset.view === state.view));
-            if (b.dataset.view === 'a') b.disabled = !state.alpha;
+            if (b.dataset.view === 'a' || b.dataset.view === 'rgba') b.disabled = !state.alpha;
         });
     }
 
@@ -1359,7 +1455,10 @@
         const canvas = $('outputCanvas'), ctx = canvas.getContext('2d');
         canvas.width = w; canvas.height = h;
         const img = ctx.createImageData(w, h), d = img.data, n = w * h;
-        if (state.view === 'rgb') {
+        canvas.classList.toggle('checker', state.view === 'rgba');
+        if (state.view === 'rgba') {
+            d.set(data);
+        } else if (state.view === 'rgb') {
             for (let j = 0; j < n * 4; j += 4) { d[j] = data[j]; d[j + 1] = data[j + 1]; d[j + 2] = data[j + 2]; d[j + 3] = 255; }
         } else {
             const c = SLOT_INDEX[state.view];
@@ -1397,6 +1496,10 @@
 
     function autoFileName() {
         const P = PRESETS[state.preset];
+        const rs = sourceOf('r');
+        if (rs && rs.group && ['g', 'b'].every(k => sourceOf(k) && sourceOf(k).group === rs.group)) {
+            return `${rs.name.replace(/\.[^.]+$/, '')}_${state.alpha ? 'RGBA' : 'RGB'}.png`;
+        }
         let base = '';
         for (const k of SLOTS) {
             const s = slotActive(k) ? sourceOf(k) : null;

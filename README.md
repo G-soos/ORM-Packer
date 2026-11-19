@@ -11,6 +11,7 @@
 - ✅ **Invert** and **Levels** on every channel (Roughness ↔ Smoothness is inverted automatically)
 - ✅ Convert between formats (ORM ⇄ Mask Map) by switching the target
 - ✅ Split any packed texture back into grayscale maps
+- ✅ Add or remove transparency (alpha) from albedo / diffuse textures, with an RGBA preview
 - ✅ Lossless, pixel-exact PNG output, with optional alpha channel
 - ✔️ 100% in-browser: your images are never uploaded
 
@@ -52,6 +53,12 @@ Switching the target re-routes the maps you already loaded, so a Roughness map m
 - Choose which part of the source image to read: Gray / R / G / B / A
 - **Invert** and **Levels** (output min/max) on every channel
 - Size badge per map, with a warning when sizes differ
+
+### 🖼️ Color images & transparency
+- Files named `_Albedo`, `_BaseColor`, `_Diffuse`, `_Color` go straight to R, G, B (and their transparency to A)
+- Any other color image: drop it on a channel and click **Use as color (RGB)**
+- Turn Alpha off to remove transparency, or drop an opacity mask on A to add it
+- **RGBA** preview over a checkerboard
 
 ### 🔧 Splitter
 - Load any packed RGB/RGBA texture and get one grayscale map per channel
