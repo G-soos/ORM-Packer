@@ -47,6 +47,32 @@
             outline: 3px dashed rgba(255, 255, 255, 0.7);
             outline-offset: 2px;
         }
+        .tool-btn {
+            font-size: 11px;
+            line-height: 1;
+            padding: 0.3rem 0.4rem;
+            border-radius: 0.375rem;
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            color: #d1d5db;
+        }
+        .tool-btn:hover { background-color: #374151; }
+        .tool-btn[aria-pressed="true"] {
+            background-color: #1e3a8a;
+            border-color: #3b82f6;
+            color: #fff;
+        }
+        .tile {
+            background-color: #111827;
+            background-image:
+                linear-gradient(45deg, #1f2937 25%, transparent 25%),
+                linear-gradient(-45deg, #1f2937 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #1f2937 75%),
+                linear-gradient(-45deg, transparent 75%, #1f2937 75%);
+            background-size: 12px 12px;
+            background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+        }
+        .tile canvas { background: transparent; }
         .promo-panel {
             position: fixed;
             bottom: 16px;
@@ -81,8 +107,9 @@
         /* Slot reservado para publicidad paga futura: oculto hasta activarlo.
            Cuando tengas el anunciante, borra o comenta esta regla (o cambia a display:block). */
         .promo-panel-future { display: none !important; }
-        /* Solo se muestran cuando hay espacio libre real a los costados del contenedor (max-w-7xl = 80rem) */
-        @media (min-width: 1400px) {
+        /* Solo se muestran cuando hay espacio libre real a los costados del contenedor
+           (max-w-7xl = 1280px + 2 x (220px panel + 2 x 16px margen) ≈ 1780px) */
+        @media (min-width: 1780px) {
             .promo-panel { display: block; }
         }
         .guide h2 { font-size: 1.5rem; font-weight: 700; color: #fff; margin: 2.5rem 0 0.75rem; }
@@ -169,13 +196,12 @@
 <main class="lg:h-screen p-2 sm:p-4 flex items-center justify-center">
 <div id="mainContainer" class="bg-gray-800 p-3 rounded-2xl shadow-2xl w-full max-w-7xl lg:h-full flex flex-col relative lg:overflow-hidden">
 
-        <div class="flex-shrink-0">
-            <h1 class="text-2xl sm:text-3xl font-bold text-center text-white mb-1">ORM Texture Packer Workshop <span class="text-xs font-normal text-gray-500 align-middle">by Gsoos</span></h1>
-            <p class="text-center text-sm sm:text-base text-gray-400 mb-4">Free online tool to pack PBR masks (Occlusion, Roughness, Metallic, Smoothness, Height) for Unreal, Unity, Godot and Blender.
-                Everything runs in your browser — nothing is uploaded. <a href="#guide" class="text-blue-400 hover:underline whitespace-nowrap">How to use ↓</a></p>
-        </div>
+        <header class="flex-shrink-0 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-3 px-1">
+            <h1 class="text-xl sm:text-2xl font-bold text-white">ORM Texture Packer <span class="text-gray-500 font-normal">&amp; Splitter</span></h1>
+            <p class="text-xs sm:text-sm text-gray-400">Pack PBR masks for Unreal, Unity, Godot and Blender. Runs in your browser, nothing is uploaded. <a href="#guide" class="text-blue-400 hover:underline whitespace-nowrap">Guide ↓</a></p>
+        </header>
 
-        <div class="flex flex-1 flex-col lg:flex-row gap-6 lg:overflow-hidden min-h-0">
+        <div class="flex flex-1 flex-col lg:flex-row gap-5 lg:overflow-hidden min-h-0">
 
             <!-- LEFT: inputs -->
             <div class="flex flex-col gap-3 lg:w-1/2 lg:overflow-y-auto lg:pr-2">
@@ -184,54 +210,51 @@
                     <div class="flex flex-wrap items-center gap-2">
                         <label for="presetSelect" class="text-sm font-semibold text-white">Target</label>
                         <select id="presetSelect" class="flex-1 min-w-[12rem] bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2"></select>
-                        <button id="resetAllButton" type="button" class="text-xs text-gray-400 hover:text-white bg-gray-700 hover:bg-gray-600 rounded-lg px-2 py-2" title="Remove all loaded maps and reset values">Reset all</button>
+                        <button id="resetAllButton" type="button" class="text-xs text-gray-300 hover:text-white bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded-lg px-2 py-2" title="Remove all loaded maps and reset values">Reset</button>
                     </div>
-                    <p id="presetInfo" class="text-xs text-gray-400 font-mono"></p>
+                    <p class="text-[11px] text-gray-500">Click or drop a map on a channel. Drop several at once to assign them by name. <kbd class="text-gray-400">Ctrl+V</kbd> pastes into the channel under the cursor.</p>
                 </div>
 
-                <p class="text-xs text-gray-500">Step 1 — Load a map into each channel, or set a solid value. <span class="text-gray-400">Tip: drop all your maps at once anywhere on the page (e.g. <code class="text-gray-300">Rock_AO.png</code>, <code class="text-gray-300">Rock_Roughness.png</code>) and they are assigned by name. Hover a channel and press <kbd class="text-gray-300">Ctrl+V</kbd> to paste.</span></p>
+                <div id="slotGrid" class="grid grid-cols-2 xl:grid-cols-4 gap-2"></div>
 
-                <div id="slotGrid" class="grid grid-cols-2 xl:grid-cols-4 gap-3"></div>
+                <section id="splitterMainContainer" class="rounded-lg border border-gray-700 bg-gray-900/40 p-3">
+                    <div class="flex items-baseline justify-between gap-2 mb-2">
+                        <h2 class="text-sm font-semibold text-white">Splitter</h2>
+                        <span class="text-[11px] text-gray-500">Extract the channels of a packed texture</span>
+                    </div>
 
-                <hr class="border-gray-700/50">
-
-                <div id="splitterMainContainer" class="bg-gray-700/30 p-4 rounded-lg border border-gray-700">
-                    <p class="text-xs text-gray-500">Optional — Already have a packed texture? Drop it here to extract each channel.</p>
-                    <h2 class="w-full text-left py-1 text-lg font-semibold text-white mb-2">Deconstruct Packed Texture (Splitter)</h2>
-
-                    <div id="splitterLoadArea" class="space-y-3 mb-4 p-3 bg-gray-900 rounded-lg border-2 border-purple-500/50 transition duration-150">
-                        <label for="splitterLoader" id="splitterLabel" class="block w-full cursor-pointer bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-center transition duration-200 text-sm">
-                            Load/Drag Packed Texture (RGB/RGBA)
+                    <div id="splitterLoadArea" class="rounded-lg transition duration-150">
+                        <label for="splitterLoader" id="splitterLabel" class="block w-full cursor-pointer border border-dashed border-gray-600 hover:border-gray-400 hover:bg-gray-800 text-gray-400 hover:text-gray-200 py-2.5 px-4 rounded-lg text-center transition duration-150 text-xs">
+                            Click or drop a packed texture (RGB / RGBA)
                         </label>
                         <input type="file" id="splitterLoader" class="hidden" accept="image/*">
-                        <div id="splitterStatusArea" class="hidden flex items-center justify-between p-1 bg-purple-900/30 rounded">
-                            <div id="splitterStatus" class="text-purple-300 font-mono text-xs truncate"></div>
-                            <button id="splitterClearButton" type="button" class="text-purple-300 hover:text-white bg-purple-700/50 hover:bg-purple-700 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs transition duration-150 ml-1" title="Remove loaded texture">✕</button>
+                        <div id="splitterStatusArea" class="hidden flex items-center justify-between gap-2 px-2 py-1.5 bg-gray-800 border border-gray-700 rounded-lg">
+                            <div id="splitterStatus" class="text-gray-300 font-mono text-xs truncate"></div>
+                            <button id="splitterClearButton" type="button" class="tool-btn" title="Remove loaded texture">✕</button>
                         </div>
                     </div>
 
-                    <p class="text-sm text-gray-400 mb-3">Drag a thumbnail onto any packing channel, or send them all at once. Channel names follow the selected target.</p>
-
-                    <div id="splitterResults" class="grid grid-cols-3 gap-2"></div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
-                        <button id="sendSplitButton" type="button" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg text-sm transition duration-200 shadow-md opacity-50 pointer-events-none"
-                            title="Put every extracted channel into the same packing channel. Then switch the target to convert between formats.">
-                            Send all to packer
-                        </button>
-                        <button id="downloadSplitSetButton" type="button" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition duration-200 shadow-md opacity-50 pointer-events-none"
-                            title="Download every channel as a grayscale PNG, bundled in one .zip">
-                            Download channels (.zip)
-                        </button>
+                    <div id="splitterBody" class="hidden mt-3">
+                        <div id="splitterResults" class="grid grid-cols-3 gap-2"></div>
+                        <p class="text-[11px] text-gray-500 mt-2">Drag a thumbnail onto a channel, or send them all and change the target to convert formats.</p>
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <button id="sendSplitButton" type="button" class="w-full bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white font-semibold py-1.5 px-3 rounded-lg text-xs transition duration-150"
+                                title="Put every extracted channel into the same packing channel">
+                                Send all to packer
+                            </button>
+                            <button id="downloadSplitSetButton" type="button" class="w-full bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white font-semibold py-1.5 px-3 rounded-lg text-xs transition duration-150"
+                                title="Download every channel as a grayscale PNG, bundled in one .zip">
+                                Download channels (.zip)
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </section>
             </div>
 
             <!-- RIGHT: output -->
             <div class="flex flex-col gap-4 lg:w-1/2 min-h-0">
 
                 <div class="flex-1 min-h-0 flex flex-col">
-                    <p class="text-xs text-gray-500 text-center flex-shrink-0">Step 2 — Check the result, pick a size and download.</p>
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-2 flex-shrink-0">
                         <h3 class="text-lg font-semibold text-white">Output <span id="outputInfo" class="text-xs font-mono font-normal text-gray-400"></span></h3>
                         <div class="flex items-center gap-1">
@@ -301,7 +324,14 @@
 </div>
 </main>
 
-<div id="toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-md w-[calc(100%-2rem)] bg-gray-950/95 border border-gray-600 text-gray-100 text-sm rounded-lg px-4 py-3 shadow-2xl whitespace-pre-line"></div>
+<div id="dropOverlay" class="hidden fixed inset-0 z-40 pointer-events-none items-center justify-center bg-blue-950/30 border-4 border-dashed border-blue-400/60">
+    <div class="bg-gray-950/95 border border-gray-600 rounded-xl px-6 py-4 text-center shadow-2xl">
+        <p class="text-white font-semibold">Drop your maps</p>
+        <p class="text-gray-400 text-sm mt-1">Anywhere: assigned by name (_AO, _Roughness, _Metallic…)<br>On a channel: goes into that channel</p>
+    </div>
+</div>
+
+<div id="toast"class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-md w-[calc(100%-2rem)] bg-gray-950/95 border border-gray-600 text-gray-100 text-sm rounded-lg px-4 py-3 shadow-2xl whitespace-pre-line"></div>
 
 <!-- ===================== Guide / SEO content ===================== -->
 <article id="guide" class="guide max-w-4xl mx-auto px-4 pb-16 pt-4">
@@ -377,10 +407,10 @@
     // Configuration
     // ---------------------------------------------------------------------
     const STYLE = {
-        r: { name: 'R', border: 'border-red-700',     text: 'text-red-400',     soft: 'text-red-300',     btn: 'bg-red-600 hover:bg-red-700',         status: 'bg-red-900/30',     badge: 'bg-red-900/60 text-red-300',         accent: '#f87171', thumb: 'border-red-500' },
-        g: { name: 'G', border: 'border-emerald-700', text: 'text-emerald-400', soft: 'text-emerald-300', btn: 'bg-emerald-600 hover:bg-emerald-700', status: 'bg-emerald-900/30', badge: 'bg-emerald-900/60 text-emerald-300', accent: '#34d399', thumb: 'border-emerald-500' },
-        b: { name: 'B', border: 'border-blue-700',    text: 'text-blue-400',    soft: 'text-blue-300',    btn: 'bg-blue-600 hover:bg-blue-700',       status: 'bg-blue-900/30',    badge: 'bg-blue-900/60 text-blue-300',       accent: '#60a5fa', thumb: 'border-blue-500' },
-        a: { name: 'A', border: 'border-gray-500',    text: 'text-gray-200',    soft: 'text-gray-300',    btn: 'bg-gray-600 hover:bg-gray-500',       status: 'bg-gray-700/40',    badge: 'bg-gray-700 text-gray-200',          accent: '#e5e7eb', thumb: 'border-gray-400' }
+        r: { name: 'R', text: 'text-red-400',     accent: '#f87171' },
+        g: { name: 'G', text: 'text-emerald-400', accent: '#34d399' },
+        b: { name: 'B', text: 'text-blue-400',    accent: '#60a5fa' },
+        a: { name: 'A', text: 'text-gray-200',    accent: '#e5e7eb' }
     };
 
     // Map types: default solid value, value hints, and file-name keywords used for auto-detection
@@ -425,7 +455,8 @@
         output: null,              // { w, h, data: RGBA Uint8ClampedArray }
         split: null                // { name, w, h, planes: {r,g,b,a}, hasAlpha }
     };
-    SLOTS.forEach(k => state.slots[k] = { sourceId: null, invert: false, value: 255 });
+    // value = solid value; invert + lo/hi (output levels) apply to map or solid value alike
+    SLOTS.forEach(k => state.slots[k] = { sourceId: null, invert: false, value: 255, lo: 0, hi: 255, levelsOpen: false });
     let nextSourceId = 1;
     let hoverTarget = null;
 
@@ -435,6 +466,17 @@
     const sourceOf = (k) => state.slots[k].sourceId ? state.library.get(state.slots[k].sourceId) : null;
     const slotActive = (k) => k !== 'a' || state.alpha;
     const clamp255 = (v) => Math.min(255, Math.max(0, parseInt(v, 10) || 0));
+    const levelsDefault = (sl) => sl.lo === 0 && sl.hi === 255;
+
+    // 256-entry table: invert first, then remap 0..255 to lo..hi
+    function slotLUT(k) {
+        const sl = state.slots[k], lut = new Uint8Array(256);
+        for (let v = 0; v < 256; v++) {
+            const x = sl.invert ? 255 - v : v;
+            lut[v] = Math.round(sl.lo + x * (sl.hi - sl.lo) / 255);
+        }
+        return lut;
+    }
 
     // ---------------------------------------------------------------------
     // Small helpers
@@ -601,6 +643,15 @@
             for (let i = 0, j = off; i < n; i++, j += 4) p[i] = d[j];
         }
         return p;
+    }
+
+    // Small preview plane for the channel tile (longest side 160px, area-averaged)
+    function getThumb(src) {
+        if (src.thumb && src.thumb.key === src.component) return src.thumb;
+        const s = Math.min(1, 160 / Math.max(src.w, src.h));
+        const w = Math.max(1, Math.round(src.w * s)), h = Math.max(1, Math.round(src.h * s));
+        src.thumb = { key: src.component, w, h, plane: resample(extractPlane(src), src.w, src.h, w, h, 'smooth') };
+        return src.thumb;
     }
 
     function getPlane(src, w, h) {
@@ -833,6 +884,8 @@
             sl.sourceId = null;
             sl.invert = false;
             sl.value = typeInfo(P.slots[k]).def;
+            sl.lo = 0;
+            sl.hi = 255;
         });
 
         const sources = [...state.library.values()];
@@ -862,35 +915,39 @@
     function cardHTML(k) {
         const s = STYLE[k];
         return `
-<div id="card-${k}" data-slot="${k}" class="slot-card flex flex-col gap-2 p-2 bg-gray-900/50 rounded-lg border-2 ${s.border} transition duration-150">
-  <div class="flex items-center justify-between gap-1 min-h-[1.5rem]">
-    <h2 class="text-sm font-semibold ${s.text} truncate"><span class="font-mono">${s.name}</span> · <span id="type-${k}"></span></h2>
-    ${k === 'a' ? `<label class="flex items-center gap-1 text-[11px] text-gray-400 cursor-pointer select-none" title="Write an alpha channel (RGBA output)"><input type="checkbox" id="alphaToggle">On</label>` : ''}
+<div id="card-${k}" data-slot="${k}" class="slot-card flex flex-col gap-1.5 p-2 bg-gray-900/60 rounded-lg border border-gray-700 transition duration-150">
+  <div class="flex items-center justify-between gap-1">
+    <h2 class="text-xs font-semibold text-gray-200 truncate"><span class="font-mono font-bold ${s.text} mr-1">${s.name}</span><span id="type-${k}"></span></h2>
+    ${k === 'a' ? `<label class="flex items-center gap-1 text-[11px] text-gray-400 cursor-pointer select-none shrink-0" title="Write an alpha channel (RGBA output)"><input type="checkbox" id="alphaToggle">On</label>` : ''}
   </div>
-  <div id="body-${k}" class="flex flex-col gap-2">
-    <label for="file-${k}" class="block w-full cursor-pointer ${s.btn} text-white font-bold py-1 px-2 rounded-lg text-center transition duration-200 text-xs">Load Map</label>
-    <input type="file" id="file-${k}" class="hidden" accept="image/*">
-    <div id="status-${k}" class="hidden flex flex-col gap-1 p-1.5 ${s.status} rounded">
-      <div class="flex items-center justify-between gap-1">
-        <div id="name-${k}" class="${s.soft} font-mono text-[11px] truncate"></div>
-        <button id="clear-${k}" type="button" class="${s.soft} hover:text-white bg-black/30 hover:bg-black/60 w-5 h-5 shrink-0 rounded-full flex items-center justify-center font-bold text-xs" title="Remove texture">✕</button>
+  <div id="body-${k}" class="flex flex-col gap-1.5">
+    <div id="tile-${k}" role="button" tabindex="0" title="Click or drop a map" class="tile group relative aspect-square rounded-md border border-gray-700 overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <canvas id="tileCanvas-${k}" width="1" height="1" class="absolute inset-0 w-full h-full" style="object-fit:contain"></canvas>
+      <div id="tileText-${k}" class="absolute inset-0 flex flex-col items-center justify-center font-mono text-center pointer-events-none"></div>
+      <div class="absolute inset-0 flex items-end justify-center pb-1.5 opacity-0 group-hover:opacity-100 transition pointer-events-none">
+        <span class="text-[10px] bg-black/70 text-gray-200 px-1.5 py-0.5 rounded">Click or drop a map</span>
       </div>
-      <div class="flex items-center justify-between"><span class="text-[11px] text-gray-500">Size</span><span id="size-${k}" class="text-[11px] font-mono font-semibold ${s.badge} px-1.5 py-0.5 rounded"></span></div>
-      <div id="warn-${k}" class="hidden text-yellow-400 text-[11px]">⚠ Size differs from other maps</div>
-      <div class="flex items-center justify-between gap-1">
-        <select id="comp-${k}" class="bg-gray-800 border border-gray-600 text-[11px] rounded px-1 py-0.5" title="Which part of the loaded image to use">
-          <option value="lum">Gray</option><option value="r">R</option><option value="g">G</option><option value="b">B</option><option value="a">A</option>
-        </select>
-        <label class="flex items-center gap-1 text-[11px] text-gray-300 cursor-pointer select-none" title="255 − value (e.g. Roughness ↔ Smoothness)"><input type="checkbox" id="inv-${k}">Invert</label>
-      </div>
+      <span id="size-${k}" class="hidden absolute top-1 left-1 text-[10px] font-mono bg-black/70 text-gray-200 px-1 py-0.5 rounded"></span>
+      <button id="clear-${k}" type="button" class="hidden absolute top-1 right-1 w-5 h-5 rounded bg-black/70 hover:bg-red-700 text-gray-200 text-[11px] leading-none" title="Remove map">✕</button>
     </div>
-    <div id="solid-${k}">
-      <p class="text-[11px] text-gray-500 text-center mb-1">Or a solid value:</p>
-      <input id="range-${k}" type="range" min="0" max="255" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer" style="accent-color:${s.accent}">
-      <div class="flex justify-center items-center gap-2 mt-1">
-        <input id="num-${k}" type="number" min="0" max="255" class="channel-input-number ${s.soft}">
-      </div>
-      <div id="hint-${k}" class="${s.soft} font-mono text-[11px] text-center mt-1 min-h-[1rem]"></div>
+    <input type="file" id="file-${k}" class="hidden" accept="image/*">
+    <div id="mapRow-${k}" class="hidden flex items-center gap-1 min-h-[1.5rem]">
+      <select id="comp-${k}" class="bg-gray-800 border border-gray-700 text-[11px] rounded px-0.5 py-0.5 shrink-0" title="Which part of the loaded image to use">
+        <option value="lum">Gray</option><option value="r">R</option><option value="g">G</option><option value="b">B</option><option value="a">A</option>
+      </select>
+      <div id="name-${k}" class="text-gray-400 font-mono text-[10px] truncate"></div>
+    </div>
+    <div id="solidRow-${k}" class="flex items-center gap-1 min-h-[1.5rem]">
+      <input id="range-${k}" type="range" min="0" max="255" class="flex-1 min-w-0 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer" style="accent-color:${s.accent}" title="Solid value">
+      <input id="num-${k}" type="number" min="0" max="255" class="channel-input-number text-gray-200" style="width:3.2rem">
+    </div>
+    <div class="grid grid-cols-2 gap-1">
+      <button id="inv-${k}" type="button" class="tool-btn" aria-pressed="false" title="Invert (255 − value), e.g. Roughness ↔ Smoothness">⇅ Invert</button>
+      <button id="lvBtn-${k}" type="button" class="tool-btn" aria-pressed="false" title="Output levels: remap the channel to a min–max range">Levels</button>
+    </div>
+    <div id="levels-${k}" class="hidden flex items-center justify-between gap-1 text-[10px] text-gray-400">
+      <label class="flex items-center gap-1">Min<input id="lo-${k}" type="number" min="0" max="255" class="channel-input-number text-gray-200" style="width:2.9rem"></label>
+      <label class="flex items-center gap-1">Max<input id="hi-${k}" type="number" min="0" max="255" class="channel-input-number text-gray-200" style="width:2.9rem"></label>
     </div>
   </div>
 </div>`;
@@ -899,9 +956,9 @@
     function thumbHTML(k) {
         const s = STYLE[k];
         return `
-<div id="thumb-${k}" data-slot="${k}" draggable="true" class="p-1 border ${s.thumb} rounded-lg text-center cursor-grab bg-gray-900/50 hover:bg-gray-700 transition duration-150 shadow-md opacity-50 pointer-events-none">
-  <canvas id="thumbCanvas-${k}" width="96" height="96" class="w-full aspect-square rounded mb-1 border border-gray-600 object-contain"></canvas>
-  <span id="thumbLabel-${k}" class="${s.soft} text-xs font-bold"></span>
+<div id="thumb-${k}" data-slot="${k}" draggable="true" class="p-1 border border-gray-700 rounded-md text-center cursor-grab bg-gray-900/60 hover:border-gray-500 transition duration-150" title="Drag onto a channel">
+  <canvas id="thumbCanvas-${k}" width="96" height="96" class="w-full aspect-square rounded mb-1 object-contain" style="background:#111827"></canvas>
+  <span class="text-[11px] text-gray-300"><span class="font-mono font-bold ${s.text}">${s.name}</span> <span id="thumbLabel-${k}"></span></span>
 </div>`;
     }
 
@@ -911,24 +968,47 @@
     function setupSlot(k) {
         const card = $('card-' + k);
         $('file-' + k).addEventListener('change', (e) => { if (e.target.files[0]) loadFileIntoSlot(k, e.target.files[0]); });
-        $('clear-' + k).addEventListener('click', () => clearSlot(k));
+        const tile = $('tile-' + k);
+        tile.addEventListener('click', (e) => { if (!e.target.closest('button')) $('file-' + k).click(); });
+        tile.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('file-' + k).click(); } });
+        $('clear-' + k).addEventListener('click', (e) => { e.stopPropagation(); clearSlot(k); });
         $('comp-' + k).addEventListener('change', (e) => {
             const src = sourceOf(k);
-            if (src) { src.component = e.target.value; src.cache = null; scheduleProcess(); }
+            if (src) { src.component = e.target.value; src.cache = null; drawTile(k); scheduleProcess(); }
         });
-        $('inv-' + k).addEventListener('change', (e) => { state.slots[k].invert = e.target.checked; scheduleProcess(); });
+        $('inv-' + k).addEventListener('click', () => {
+            state.slots[k].invert = !state.slots[k].invert;
+            renderSlot(k);
+            scheduleProcess();
+        });
+        $('lvBtn-' + k).addEventListener('click', () => {
+            state.slots[k].levelsOpen = !state.slots[k].levelsOpen;
+            renderSlot(k);
+        });
 
         const onValue = (v) => {
             const val = clamp255(v);
             state.slots[k].value = val;
             $('range-' + k).value = val;
             if (document.activeElement !== $('num-' + k)) $('num-' + k).value = val;
-            renderHint(k);
+            drawTile(k);
             scheduleProcess();
         };
         $('range-' + k).addEventListener('input', (e) => onValue(e.target.value));
         $('num-' + k).addEventListener('input', (e) => onValue(e.target.value));
         $('num-' + k).addEventListener('blur', () => { $('num-' + k).value = state.slots[k].value; });
+
+        const onLevel = (which, v) => {
+            state.slots[k][which] = clamp255(v);
+            renderLevelButton(k);
+            drawTile(k);
+            scheduleProcess();
+        };
+        ['lo', 'hi'].forEach(which => {
+            const el = $(which + '-' + k);
+            el.addEventListener('input', (e) => onLevel(which, e.target.value));
+            el.addEventListener('blur', () => { el.value = state.slots[k][which]; });
+        });
 
         card.addEventListener('mouseenter', () => { hoverTarget = k; });
         card.addEventListener('mouseleave', () => { if (hoverTarget === k) hoverTarget = null; });
@@ -962,31 +1042,60 @@
     // ---------------------------------------------------------------------
     // Rendering
     // ---------------------------------------------------------------------
-    function renderHint(k) {
-        const t = typeOf(k), info = typeInfo(t), v = state.slots[k].value;
-        let hint = '';
-        if (t === 'unused') hint = 'Not used by this target';
-        else if (info.lo) hint = `(${v >= 128 ? info.hi : info.lo})`;
-        $('hint-' + k).textContent = hint;
+    // Tile = what this channel will contain (map or solid value, after invert + levels)
+    function drawTile(k) {
+        const sl = state.slots[k], src = sourceOf(k), lut = slotLUT(k);
+        const c = $('tileCanvas-' + k), ctx = c.getContext('2d');
+        const text = $('tileText-' + k);
+        if (src) {
+            const t = getThumb(src);
+            c.width = t.w; c.height = t.h;
+            const img = ctx.createImageData(t.w, t.h), d = img.data;
+            for (let i = 0, j = 0; i < t.w * t.h; i++, j += 4) { d[j] = d[j + 1] = d[j + 2] = lut[t.plane[i]]; d[j + 3] = 255; }
+            ctx.putImageData(img, 0, 0);
+            text.innerHTML = '';
+        } else {
+            const v = lut[sl.value];
+            c.width = 1; c.height = 1;
+            ctx.fillStyle = `rgb(${v},${v},${v})`;
+            ctx.fillRect(0, 0, 1, 1);
+            const t = typeOf(k), info = typeInfo(t);
+            const hint = t === 'unused' ? 'Unused' : (info.lo ? (v >= 128 ? info.hi : info.lo) : '');
+            const color = v >= 140 ? 'text-gray-900' : 'text-gray-200';
+            text.innerHTML = `<span class="text-xl font-bold ${color}">${v}</span>` + (hint ? `<span class="text-[10px] ${color} opacity-80">${hint}</span>` : '');
+        }
+    }
+
+    function renderLevelButton(k) {
+        const sl = state.slots[k];
+        $('lvBtn-' + k).setAttribute('aria-pressed', String(sl.levelsOpen || !levelsDefault(sl)));
+        $('lvBtn-' + k).textContent = levelsDefault(sl) ? 'Levels' : `${sl.lo}–${sl.hi}`;
     }
 
     function renderSlot(k) {
         const sl = state.slots[k];
         const src = sourceOf(k);
         $('type-' + k).textContent = slotLabel(k);
-        $('status-' + k).classList.toggle('hidden', !src);
-        $('solid-' + k).classList.toggle('hidden', !!src);
+        $('mapRow-' + k).classList.toggle('hidden', !src);
+        $('solidRow-' + k).classList.toggle('hidden', !!src);
+        $('size-' + k).classList.toggle('hidden', !src);
+        $('clear-' + k).classList.toggle('hidden', !src);
+        $('tile-' + k).title = src ? `${src.name} — click to replace` : 'Click or drop a map';
         if (src) {
             $('name-' + k).textContent = src.name;
             $('name-' + k).title = src.name;
-            $('size-' + k).textContent = `${src.w} × ${src.h}`;
+            $('size-' + k).textContent = `${src.w}×${src.h}`;
             $('comp-' + k).value = src.component;
-            $('comp-' + k).classList.toggle('invisible', src.channels === 1);
-            $('inv-' + k).checked = sl.invert;
+            $('comp-' + k).classList.toggle('hidden', src.channels === 1);
         }
         $('range-' + k).value = sl.value;
         $('num-' + k).value = sl.value;
-        renderHint(k);
+        $('inv-' + k).setAttribute('aria-pressed', String(sl.invert));
+        $('levels-' + k).classList.toggle('hidden', !sl.levelsOpen);
+        $('lo-' + k).value = sl.lo;
+        $('hi-' + k).value = sl.hi;
+        renderLevelButton(k);
+        drawTile(k);
         if (k === 'a') {
             $('alphaToggle').checked = state.alpha;
             $('body-a').classList.toggle('disabled-container', !state.alpha);
@@ -1001,7 +1110,11 @@
                 const s = sourceOf(o);
                 return o !== k && (s.w !== src.w || s.h !== src.h);
             });
-            $('warn-' + k).classList.toggle('hidden', !mismatch);
+            const badge = $('size-' + k);
+            badge.classList.toggle('text-yellow-300', mismatch);
+            badge.classList.toggle('text-gray-200', !mismatch);
+            if (src) badge.textContent = `${mismatch ? '⚠ ' : ''}${src.w}×${src.h}`;
+            badge.title = mismatch ? 'Size differs from the other maps (they are resized to the output size)' : '';
         });
     }
 
@@ -1030,16 +1143,8 @@
         });
     }
 
-    function renderPresetInfo() {
-        const P = PRESETS[state.preset];
-        $('presetInfo').textContent = SLOTS.map(k => {
-            const label = slotLabel(k);
-            return k === 'a' && !P.alphaOn ? `A = ${label} (optional)` : `${STYLE[k].name} = ${label}`;
-        }).join(' · ');
-    }
-
     function renderSplitLabels() {
-        SLOTS.forEach(k => { $('thumbLabel-' + k).textContent = `${STYLE[k].name} · ${slotLabel(k)}`; });
+        SLOTS.forEach(k => { $('thumbLabel-' + k).textContent = slotLabel(k); });
     }
 
     function renderViewButtons() {
@@ -1054,7 +1159,6 @@
         SLOTS.forEach(renderSlot);
         renderWarnings();
         renderReference();
-        renderPresetInfo();
         renderSplitLabels();
         renderViewButtons();
         scheduleProcess();
@@ -1096,13 +1200,12 @@
         SLOTS.forEach(k => {
             const ci = SLOT_INDEX[k];
             if (k === 'a' && !state.alpha) { for (let i = 0; i < n; i++) out[i * 4 + 3] = 255; return; }
-            const sl = state.slots[k], src = sourceOf(k);
+            const sl = state.slots[k], src = sourceOf(k), lut = slotLUT(k);
             if (src) {
                 const p = getPlane(src, w, h);
-                if (sl.invert) { for (let i = 0; i < n; i++) out[i * 4 + ci] = 255 - p[i]; }
-                else { for (let i = 0; i < n; i++) out[i * 4 + ci] = p[i]; }
+                for (let i = 0; i < n; i++) out[i * 4 + ci] = lut[p[i]];
             } else {
-                const v = sl.value;
+                const v = lut[sl.value];
                 for (let i = 0; i < n; i++) out[i * 4 + ci] = v;
             }
         });
@@ -1221,16 +1324,12 @@
         const active = !!sp;
         $('splitterStatusArea').classList.toggle('hidden', !active);
         $('splitterLabel').classList.toggle('hidden', active);
+        $('splitterBody').classList.toggle('hidden', !active);
         const showA = active && sp.hasAlpha;
         $('splitterResults').classList.toggle('grid-cols-3', !showA);
         $('splitterResults').classList.toggle('grid-cols-4', showA);
         $('thumb-a').classList.toggle('hidden', !showA);
-        ['sendSplitButton', 'downloadSplitSetButton'].forEach(id => $(id).classList.toggle('opacity-50', !active));
-        ['sendSplitButton', 'downloadSplitSetButton'].forEach(id => $(id).classList.toggle('pointer-events-none', !active));
         SLOTS.forEach(k => {
-            const t = $('thumb-' + k);
-            t.classList.toggle('opacity-50', !active);
-            t.classList.toggle('pointer-events-none', !active);
             const c = $('thumbCanvas-' + k);
             if (active && (k !== 'a' || showA)) drawThumb(k);
             else c.getContext('2d').clearRect(0, 0, c.width, c.height);
@@ -1375,6 +1474,23 @@
                 e.dataTransfer.setDragImage(c, c.width / 2, c.height / 2);
             });
         });
+
+        // Overlay while files are dragged over the page
+        const overlay = $('dropOverlay');
+        let dragDepth = 0;
+        const hideOverlay = () => { dragDepth = 0; overlay.classList.add('hidden'); overlay.classList.remove('flex'); };
+        document.addEventListener('dragenter', (e) => {
+            if (!hasFiles(e)) return;
+            dragDepth++;
+            overlay.classList.remove('hidden'); overlay.classList.add('flex');
+        });
+        document.addEventListener('dragleave', (e) => {
+            if (!hasFiles(e)) return;
+            dragDepth = Math.max(0, dragDepth - 1);
+            if (!dragDepth) hideOverlay();
+        });
+        window.addEventListener('drop', hideOverlay, true);
+        window.addEventListener('dragend', hideOverlay, true);
 
         // Drop anywhere on the page: auto-assign by file name
         document.addEventListener('dragover', (e) => {
