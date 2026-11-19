@@ -157,6 +157,7 @@
         .guide h3 { font-size: 1.1rem; font-weight: 600; color: #e5e7eb; margin: 1.5rem 0 0.5rem; }
         .guide p, .guide li { color: #9ca3af; line-height: 1.65; }
         .guide ul, .guide ol { padding-left: 1.25rem; margin: 0.5rem 0; }
+        .guide p + p { margin-top: 0.75rem; }
         .guide ul { list-style: disc; }
         .guide ol { list-style: decimal; }
         .guide code { background: #1f2937; color: #e5e7eb; padding: 0.1rem 0.35rem; border-radius: 0.25rem; font-size: 0.85em; }
@@ -178,7 +179,7 @@
 <meta name="twitter:title" content="ORM Texture Packer & Splitter - Free Online Tool">
 <meta name="twitter:description" content="Pack and split ORM textures (Occlusion, Roughness, Metallic) and Unity Mask Maps directly in your browser. Free, no install, no Photoshop needed. Compatible with Blender, Unreal Engine, Unity and Godot.">
 <meta name="twitter:image" content="https://g-soos.github.io/ORM-Packer/preview.png">
-<meta name="description" content="Free online ORM texture packer and splitter. Combine or extract Occlusion, Roughness, Metallic, Smoothness and Height channels into a single PBR texture: Unreal ORM, Unity HDRP Mask Map, Unity Metallic-Smoothness. Runs in your browser, no upload, no install.">
+<meta name="description" content="An ORM texture packs Ambient Occlusion (R), Roughness (G) and Metallic (B) into one image. Free online ORM texture packer and splitter for Unreal, Unity Mask Map, Godot and Blender. Runs in your browser, no upload.">
 <meta name="keywords" content="ORM texture packer, ORM splitter, PBR texture tool, Occlusion Roughness Metallic, channel packer, Unity mask map, HDRP mask map, smoothness from roughness, free texture tool, Blender PBR, Unreal Engine ORM, Godot ORM, online texture packer">
 <link rel="sitemap" type="application/xml" title="Sitemap" href="sitemap.xml" />
 
@@ -207,7 +208,11 @@
     { "@type": "Question", "name": "Are my textures uploaded to a server?",
       "acceptedAnswer": { "@type": "Answer", "text": "No. All processing happens locally in your browser. Your images never leave your computer." } },
     { "@type": "Question", "name": "Why does my packed texture look wrong in the engine?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Packed masks contain linear data, not color. Disable sRGB in Unreal and Unity import settings and set the Color Space to Non-Color in Blender." } }
+      "acceptedAnswer": { "@type": "Answer", "text": "Packed masks contain linear data, not color. Disable sRGB in Unreal and Unity import settings and set the Color Space to Non-Color in Blender." } },
+    { "@type": "Question", "name": "How do I use an ORM texture in Blender?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Load it in an Image Texture node with Color Space set to Non-Color, add a Separate Color node, and connect Green to Roughness and Blue to Metallic of the Principled BSDF. Red (ambient occlusion) is not an input of the Principled BSDF; connect it to the Occlusion input of the glTF Material Output node if you export to glTF." } },
+    { "@type": "Question", "name": "Can I pack textures without Photoshop or Substance?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. This free online texture channel packer combines grayscale maps into the R, G, B and A channels of one PNG directly in the browser, and can also split a packed texture back into separate maps." } }
   ]
 }
 </script>
@@ -382,12 +387,23 @@
 <!-- ===================== Guide / SEO content ===================== -->
 <article id="guide" class="guide max-w-4xl mx-auto px-4 pb-16 pt-4">
 
+    <h2>What is an ORM texture?</h2>
+    <p>An <strong>ORM texture</strong> (also called an <em>ORM map</em> or <em>OcclusionRoughnessMetallic</em> texture) is a single image that stores three grayscale PBR maps, one in each color channel:</p>
+    <ul>
+        <li><strong class="text-red-400">R &mdash; Ambient Occlusion (O):</strong> how much ambient light reaches each point. White = fully lit, dark = occluded crevices.</li>
+        <li><strong class="text-emerald-400">G &mdash; Roughness (R):</strong> how rough or glossy the surface is. Black = mirror-like, white = matte.</li>
+        <li><strong class="text-blue-400">B &mdash; Metallic (M):</strong> whether the surface is metal. White = metal, black = non-metal (dielectric).</li>
+    </ul>
+    <p>Because each of these maps only needs one channel, packing them together uses <strong>one texture instead of three</strong>: less memory, fewer texture samplers and fewer files to manage. That is why the ORM layout is the standard in <strong>Unreal Engine</strong>, <strong>Godot</strong> and the <strong>glTF</strong> format used by Blender, Sketchfab and the web. Substance Painter exports it as <code>OcclusionRoughnessMetallic</code>. An ORM texture looks oddly colored when you open it in an image viewer: that is normal, it is data, not a picture.</p>
+    <p>Unity uses different packed layouts (the HDRP <em>Mask Map</em> and the URP <em>Metallic-Smoothness</em> map), which this tool can also create, or convert from an ORM texture.</p>
+
     <h2>How to use the ORM Packer</h2>
     <ol>
         <li><strong>Choose a target</strong> — Unreal/Godot/glTF ORM, Unity HDRP Mask Map, Unity URP/Built-in Metallic, or Custom. The channels relabel themselves.</li>
-        <li><strong>Load your maps</strong> — drop all of them at once anywhere on the page; they are matched by file name suffix (<code>_AO</code>, <code>_Occlusion</code>, <code>_Roughness</code>, <code>_Metallic</code>, <code>_Smoothness</code>, <code>_Gloss</code>, <code>_Height</code>, <code>_Detail</code>…). You can also click <em>Load Map</em>, drag a file onto a channel, or hover a channel and paste with <kbd>Ctrl+V</kbd>.</li>
+        <li><strong>Load your maps</strong> — drop all of them at once anywhere on the page; they are matched by file name suffix (<code>_AO</code>, <code>_Occlusion</code>, <code>_Roughness</code>, <code>_Metallic</code>, <code>_Smoothness</code>, <code>_Gloss</code>, <code>_Height</code>, <code>_Detail</code>…). You can also click a channel square, drag a file onto it, or hover a channel and paste with <kbd>Ctrl+V</kbd>.</li>
         <li><strong>Missing a map?</strong> Use a solid value instead (e.g. Metallic = 0 for non-metals, Occlusion = 255 for no occlusion).</li>
         <li><strong>Roughness ↔ Smoothness</strong> — enable <em>Invert</em>. It is switched on automatically when a Roughness file lands in a Smoothness channel (and vice versa).</li>
+        <li><strong>Adjust a channel</strong> &mdash; every channel has <em>Invert</em> and <em>Levels</em> (output min/max), e.g. to make a roughness map less glossy by raising its minimum. The square shows the result.</li>
         <li><strong>Pick the output size</strong> (longest side — non-square textures keep their aspect ratio) and download. The PNG is written losslessly, pixel-exact, including the alpha channel.</li>
     </ol>
     <p>Switching the target re-routes the maps you already loaded. To <strong>convert</strong> a texture between formats (e.g. Unreal ORM → Unity Mask Map), load it in the Splitter, press <em>Send all to packer</em>, then change the target.</p>
@@ -410,7 +426,16 @@
     <h3>Godot</h3>
     <p>Use an <code>ORMMaterial3D</code> and assign the texture to its ORM slot.</p>
     <h3>Blender</h3>
-    <p>In the Image Texture node set Color Space to <strong>Non-Color</strong>, add a <em>Separate Color</em> node and connect G → Roughness and B → Metallic. R (occlusion) is used by the glTF exporter through the <em>glTF Material Output</em> group.</p>
+    <p>See <a href="#blender" class="text-blue-400 hover:underline">How to use ORM textures in Blender</a> below.</p>
+
+    <h2 id="blender">How to use ORM textures in Blender</h2>
+    <ol>
+        <li>Add an <strong>Image Texture</strong> node with your ORM texture and set its <strong>Color Space to Non-Color</strong>. With sRGB the roughness and metallic values come out wrong.</li>
+        <li>Add a <strong>Separate Color</strong> node (mode RGB; called <em>Separate RGB</em> in Blender 3.2 and older) and connect the image Color output to it.</li>
+        <li>Connect <strong>Green &rarr; Roughness</strong> and <strong>Blue &rarr; Metallic</strong> of the Principled BSDF.</li>
+        <li><strong>Red (ambient occlusion)</strong> has no input on the Principled BSDF: Cycles and EEVEE compute occlusion themselves. If you export to <strong>glTF / GLB</strong>, connect Red to the <em>Occlusion</em> input of a <em>glTF Material Output</em> node so the exporter keeps it.</li>
+    </ol>
+    <p>Have separate AO, Roughness and Metallic maps from a texture site? Drop them on this page to get the ORM texture for Unreal or glTF. Have an ORM texture and need separate maps? Load it in the <strong>Splitter</strong>.</p>
 
     <h2>FAQ</h2>
     <details>
@@ -428,6 +453,14 @@
     <details>
         <summary>Why does my packed texture look wrong in the engine?</summary>
         <p>Packed masks contain linear data, not color. Disable sRGB in Unreal and Unity import settings and set the Color Space to Non-Color in Blender.</p>
+    </details>
+    <details>
+        <summary>How do I use an ORM texture in Blender?</summary>
+        <p>Load it in an Image Texture node with Color Space set to Non-Color, add a Separate Color node, and connect Green to Roughness and Blue to Metallic of the Principled BSDF. Red (ambient occlusion) is not an input of the Principled BSDF; connect it to the Occlusion input of the glTF Material Output node if you export to glTF.</p>
+    </details>
+    <details>
+        <summary>Can I pack textures without Photoshop or Substance?</summary>
+        <p>Yes. This free online texture channel packer combines grayscale maps into the R, G, B and A channels of one PNG directly in the browser, and can also split a packed texture back into separate maps.</p>
     </details>
     <details>
         <summary>Which resize filter should I use?</summary>
